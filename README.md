@@ -14,7 +14,7 @@ Since there will be a 'requirements.txt' file, holding all the packages required
 - ```pip install -r requirements.txt``` to install all the packages with the specified version from the file itself
   - If you ever want to update the packages required, type ```pip freeze > requirements.txt```
  
->### For lazy people:
+### For lazy people:
 >1. ```Ctrl + ` ``` Open terminal
 >2. ```python.exe -m pip install --upgrade pip``` Upgrade pip installer
 >3. ```python -m venv venv``` Create virtual environment
