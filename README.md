@@ -1,4 +1,4 @@
-## Steps to setup a virtual environment (VS Code)
+## Setting up a virtual environment (VS Code)
 1. Open Terminal by pressing ```Ctrl + ` ```
 2. (Optional) Upgrade pip by typing ```python.exe -m pip install --upgrade pip```
 2. Create virtual environment by typing ```python -m venv venv``` (You can name your virtual environment wtv you want by replacing the 2nd 'venv')
