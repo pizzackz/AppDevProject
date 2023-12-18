@@ -21,7 +21,7 @@ Since there will be a 'requirements.txt' file, holding all the packages required
   - ```python -u __init__.py``` (recommended)
   - ```flask run``` while the current folder is the main directory containing all the folders and files
  
-### For lazy people:
+## Commands for lazy people:
 1. ```Ctrl + ` ``` Open terminal
 2. ```python.exe -m pip install --upgrade pip``` Upgrade pip installer
 3. ```python -m venv venv``` Create virtual environment
