@@ -15,11 +15,11 @@ Since there will be a 'requirements.txt' file, holding all the packages required
   - If you ever want to update the packages required, type ```pip freeze > requirements.txt```
  
 ### For lazy people:
->1. ```Ctrl + ` ``` Open terminal
->2. ```python.exe -m pip install --upgrade pip``` Upgrade pip installer
->3. ```python -m venv venv``` Create virtual environment
->4. ```venv/Scripts/activate``` or ```venv/bin/activate``` Activate virtual environment
->5. ```deactivate``` Deactivate virtual environment
->6. ```pip list``` Check installed packages & versions
->7. ```pip install -r requirements.txt``` Install all packages with correct versions
->8. ```pip freeze > requirements.txt``` Update packages if installed others that are not stated
+1. ```Ctrl + ` ``` Open terminal
+2. ```python.exe -m pip install --upgrade pip``` Upgrade pip installer
+3. ```python -m venv venv``` Create virtual environment
+4. ```venv/Scripts/activate``` or ```venv/bin/activate``` Activate virtual environment
+5. ```deactivate``` Deactivate virtual environment
+6. ```pip list``` Check installed packages & versions
+7. ```pip install -r requirements.txt``` Install all packages with correct versions
+8. ```pip freeze > requirements.txt``` Update packages if installed others that are not stated
