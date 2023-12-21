@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+    <div class="container-fluid">
+        <!-- Replace this element with logo of our business -->
+        <a class="navbar-brand" href="{{ url_for('admin_home', id=id) }}">Tastefully Logo</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar"><span class="navbar-toggler-icon"></span></button>
+
+        <div class="collapse navbar-collapse" id="collapsibleNavbar">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin_home', id=id) }}">Home</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Manage Databases</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('customer_database', id=id) }}">Customer Database</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('recipe_database', id=id) }}">Recipe Database</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('menu_database', id=id) }}">Menu Database</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('articles_database', id=id) }}">Articles Database</a></li>
+                     </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('customer_feedback', id=id) }}">Customer Feedback</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <!-- Replace this element with admin's chosen (if any) or default image -->
+                    <!-- Replace id with display_name attribute of admin -->
+                    <a class="nav-link" href="{{ url_for('edit_admin_profile', id=id) }}">Image {{ id }}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

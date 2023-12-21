@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block title %}Customer Home{% endblock %}
+
+{% block navbar %}
+{% include "includes/_customer_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+
+<!-- Replace id with display_name of customer -->
+<h1>Welcome {{ id }}!</h1>
+
+<!-- Buttons to navigate to other places **Replace url paths accordingly** -->
+<div class="buttons">
+    <a href="{{ url_for('order', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Place Order</button></a>
+    <a href="{{ url_for('recipe_creator', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Recipe Creator</button></a>
+    <a href="{{ url_for('favourites', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Favourites</button></a>
+    <a href="{{ url_for('customer_articles', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Articles</button></a>
+    <a href="{{ url_for('current_delivery', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Current Delivery</button></a>
+    <a href="{{ url_for('feedback', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Feedback</button></a>
+    <a href="{{ url_for('order_history', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Order History</button></a>
+</div>
+
+{% endblock %}

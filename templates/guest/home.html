@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block navbar %}
+{% include "includes/_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+
+<h1>Tastefully Logo</h1>
+<p>Redefining Meals, Promoting Sustainability</p>
+
+<!-- Add code to flash message when redirected to login page -->
+<div class="buttons">
+    <a href="{{ url_for('login') }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Order</button></a>
+    <a href="{{ url_for('login') }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Recipe Creator</button></a>
+</div>
+
+<p>Login / Signup to order</p>
+
+{% endblock %}

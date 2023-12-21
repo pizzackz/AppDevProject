@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+{% from "includes/_form_helper.html" import render_field %}
+
+<h1 class="display-4">Sign Up</h1>
+
+<form method="POST" action="">
+    <div class="form-group">
+        {{ render_field(form.first_name, class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ render_field(form.last_name, class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ render_field(form.email, class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ render_field(form.username, class="form-control") }}
+    </div>
+    
+    <p>We'll send you a verification code to verify your email before letting you set your password</p>
+
+    <input type="submit" value="SEND" class="btn btn-primary" />
+    <!-- Create password fields -->
+    <a href="/">Forgot Password</a>
+    
+    <hr>
+
+    <p>Already have an account? Log in <a href="{{ url_for('login') }}">here</a></p>
+    <p>Just browsing? Our menu is <a href="{{ url_for('menu') }}">here</a></p>
+</form>
+
+{% endblock %}
