@@ -2,19 +2,19 @@
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
     <div class="container-fluid">
         <!-- Replace this element with logo of our business -->
-        <a class="navbar-brand" href="{{ url_for('customer_home', id=id) }}">Tastefully Logo</a>
+        <a class="navbar-brand" href="{{ url_for('customer.customer_home', id=id) }}">Tastefully Logo</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar"><span class="navbar-toggler-icon"></span></button>
 
         <div class="collapse navbar-collapse" id="collapsibleNavbar">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('customer_home', id=id) }}">Home</a>
+                    <a class="nav-link" href="{{ url_for('customer.customer_home', id=id) }}">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('order', id=id) }}">Order</a>
+                    <a class="nav-link" href="{{ url_for('customer.order', id=id) }}">Order</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('recipe_creator', id=id) }}">Recipe Creator</a>
+                    <a class="nav-link" href="{{ url_for('customer.recipe_creator', id=id) }}">Recipe Creator</a>
                 </li>
             </ul>
 
@@ -22,7 +22,7 @@
                 <li class="nav-item">
                     <!-- Replace this element with customer's chosen (if any) or default image -->
                     <!-- Replace id with display_name attribute of customer -->
-                    <a class="nav-link" {% if edit_profile %}active{% endif %} href="{{ url_for('edit_cust_profile', id=id) }}">Image {{ id }}</a>
+                    <a class="nav-link" {% if edit_profile %}active{% endif %} href="{{ url_for('customer.edit_cust_profile', id=id) }}">Image {{ id }}</a>
                 </li>
             </ul>
         </div>

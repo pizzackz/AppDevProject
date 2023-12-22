@@ -13,11 +13,11 @@
 
 <!-- Buttons to navigate to other places **Replace url paths accordingly** -->
 <div class="buttons">
-    <a href="{{ url_for('articles_database', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Articles Database</button></a>
-    <a href="{{ url_for('recipe_database', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Recipe Database</button></a>
-    <a href="{{ url_for('customer_feedback', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Customer Feedback</button></a>
-    <a href="{{ url_for('customer_database', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Customer Database</button></a>
-    <a href="{{ url_for('menu_database', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Menu Database</button></a>
+    <a href="{{ url_for('admin.articles_database', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Articles Database</button></a>
+    <a href="{{ url_for('admin.recipe_database', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Recipe Database</button></a>
+    <a href="{{ url_for('admin.customer_feedback', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Customer Feedback</button></a>
+    <a href="{{ url_for('admin.customer_database', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Customer Database</button></a>
+    <a href="{{ url_for('admin.menu_database', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Menu Database</button></a>
 </div>
 
 {% endblock %}

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{% block title %}Page Not Found{% endblock %}
+
+{% block head %}
+{{ super() }}
+	<!-- Google font -->
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,900" rel="stylesheet">
+
+	<!-- Custom stlylesheet -->
+	<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/error_404.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div id="notfound">
+    <div class="notfound">
+        <div class="notfound-404">
+            <h1>Oops!</h1>
+        </div>
+        <h2>404 - Page not found</h2>
+        <p>The page you are looking for might have been removed, had its name changed or is temporarily unavailable.</p>
+        <!-- Might want to change home page according to type of user -->
+        <a href="{{ url_for('guest.home') }}">Go To Homepage</a>
+    </div>
+</div>
+
+{% endblock %}
