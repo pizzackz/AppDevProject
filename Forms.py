@@ -32,7 +32,7 @@ def unique_username(form, field):
 
     # Retrieve data in shelve db
     try:
-        db = shelve.open("customer.db", "r")
+        db = shelve.open("customer.db", "c")
 
         try:
             customers_dict = db["Customers"]
