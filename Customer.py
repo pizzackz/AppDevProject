@@ -2,11 +2,11 @@ from User import User
 
 class Customer(User):
     # Constructor
-    def __init__(self, user_id, first_name, last_name, username, email, password, is_locked, last_online):
+    def __init__(self, user_id, first_name, last_name, username, email, password):
         super().__init__(user_id, first_name, last_name, username, email, password)
         self.__display_name = username
-        self.__is_locked = is_locked
-        self.__last_online = last_online
+        self.__is_locked = False
+        self.__last_online = ""
 
     # Setters
     def set_display_name(self, display_name):
