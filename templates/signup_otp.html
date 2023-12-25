@@ -3,7 +3,6 @@
 
 {% block form %}
 {% from "includes/_form_helper.html" import render_field %}
-
 <form method="POST" action="" id="verify-email-form">
     <a href="{{ url_for('signup', back=True) }}">Back to Signup</a>
 
@@ -13,5 +12,6 @@
 
     <p>Please check your inbox and enter the code above</p>
     <input type="submit" value="VERIFY" class="btn btn-primary disabled" />
+    <a href="{{ url_for('signup', resend_pin=True, form=form) }}">Resend PIN</a>
 </form>
 {% endblock %}

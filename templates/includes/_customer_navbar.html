@@ -21,8 +21,7 @@
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <!-- Replace this element with customer's chosen (if any) or default image -->
-                    <!-- Replace id with display_name attribute of customer -->
-                    <a class="nav-link" {% if edit_profile %}active{% endif %} href="{{ url_for('customer.edit_cust_profile', id=id) }}">Image {{ id }}</a>
+                    <a class="nav-link" {% if edit_profile %}active{% endif %} href="{{ url_for('customer.edit_cust_profile', id=id) }}">Image {{ display_name }}</a>
                 </li>
             </ul>
         </div>

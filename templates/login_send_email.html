@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+{% extends "login/login_base" %}
+
+{% block form %}
+{% from "includes/_form_helper.html" import render_field %}
+<form method="POST" action="">
+    <a href="{{ url_for('login', back=True) }}">Back to Login</a>
+    <div class="form-group">
+        {{ render_field(form.email, class="form-control") }}
+    </div>
+
+    <p>We'll send an email to the given email address to reset your password</p>
+    <input type="submit" value="SEND" class="btn btn-primary" />
+</form>
+{% endblock %}

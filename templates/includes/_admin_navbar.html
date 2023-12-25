@@ -27,8 +27,7 @@
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <!-- Replace this element with admin's chosen (if any) or default image -->
-                    <!-- Replace id with display_name attribute of admin -->
-                    <a class="nav-link" href="{{ url_for('admin.edit_admin_profile', id=id) }}">Image {{ id }}</a>
+                    <a class="nav-link" href="{{ url_for('admin.edit_admin_profile', id=id) }}">Image {{ display_name }}</a>
                 </li>
             </ul>
         </div>

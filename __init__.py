@@ -1,3 +1,4 @@
+import string
 # IMPLEMENT LOGOUTS FOR CUSTOMERS & ADMINS!!!
 
 from flask import Flask, session, render_template, request, redirect, url_for, flash
@@ -6,12 +7,13 @@ import hashlib
 import shelve
 import random
 
-from config import Config
+from Config import Config
+from Forms import BaseSignUpForm, OTPForm, PasswordForm, LoginForm, EmailForm, ResetPasswordForm
 from blueprints.guest_bp import guest_bp
 from blueprints.customer_bp import customer_bp
 from blueprints.admin_bp import admin_bp
-from Forms import BaseSignUpForm, OTPForm, PasswordForm, LoginForm
-from Customer import Customer
+from cust_acc_functions import create_customer
+from validators import is_correct_otp
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -20,36 +22,165 @@ app.register_blueprint(guest_bp)
 app.register_blueprint(customer_bp)
 app.register_blueprint(admin_bp)
 
+mail = Mail(app)
+
 
 # Functions
 # Generate otp
 def generate_otp(length):
-    digits = "0123456789"
-    otp = ""
+    digits = string.digits
+    otp = ''.join(random.choices(digits, k=length))
 
-    for i in range(length):
-        otp += random.choice(digits)
+    print("otp = " + otp)
 
     return otp
 
 
-# Verifying otp after validated form
-def is_valid_otp(otp):
-    entered_otp = otp
-    stored_otp = session.get("create_customer", None).get("otp")
+# Send email
+def send_mail(subject, sender, recipients, body):
+    try:
+        if not isinstance(recipients, list):
+            recipients = [recipients]
 
-    if entered_otp == stored_otp:
+        msg = Message(subject, sender=sender, recipients=recipients)
+        msg.body = body
+        mail.send(msg)
         return True
-    else:
-        flash("Invalid OTP! Please try again")
+    except Exception as e:
+        print(f"Error occurred while sending email: {str(e)}")
         return False
 
 
+# Get user (customer/ admin) object from username, returns False when no such account found
+def get_user_object(username):
+    customers_dict = {}
+    admins_dict = {}
+    db = shelve.open("user_accounts.db", "c")
+
+    if "Customers" in db:
+        customers_dict = db["Customers"]
+    else:
+        db["Customers"] = customers_dict
+
+    if "Admins" in db:
+        admins_dict = db["Admins"]
+    else:
+        db["Admins"] = admins_dict
+
+    db.close()
+
+    for customer in customers_dict.values():
+        if username == customer.get_username():
+            return customer
+
+    for admin in admins_dict.values():
+        if username == admin.get_username():
+            return admin
+
+    return False
+
+
+# Compare passwords
+def compare_passwords(account_type, user_id, password):
+    actual_password = ""
+    # Hash given password
+    hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+    # Retrieve stored hashed password
+    db = shelve.open("user_accounts.db", "c")
+    if account_type == "customer":
+        actual_password = db["Customers"][user_id].get_password()
+    elif account_type == "admin":
+        actual_password = db["Admins"][user_id].get_password()
+    
+    return hashed_password == actual_password
+        
+
+# Routes
 # Login page
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
+    # session.clear()
+    # Remove session data from signing up if redirected to login
+    session.pop("create_customer", None)
+    session.pop("signup_stage", None)
+
+    action = session.get("action", "login")
+
+    # Reset action in session if user clicked 'Back to Login'
+    if request.args.get("back"):
+        session["action"] = "login"
+        return redirect(url_for("login"))
+
+    # Update action in session if user clicked 'Forgot Password'
+    if request.args.get("reset_password"):
+        session["action"] = "send_email"
+        return redirect(url_for("login"))
+
     form = LoginForm(request.form)
-    return render_template("login.html", form=form)
+    # Render appropriate template based on current action for POST requests
+    if request.method == "POST":
+        if action == "login":
+            form = LoginForm(request.form)
+            if form.validate():
+                # Identify type of account / Check whether account exists
+                user_object = get_user_object(form.username.data)
+                user_id = ""
+                account_type = ""
+
+                if user_object == False:
+                    # Display invalid username or password msg
+                    flash("Wrong Username or Password!", "error")
+                    print("Wrong Username")
+
+                    return render_template("login_base.html", form=form)
+                else:
+                    user_id = user_object.get_user_id()
+                    if int(user_id[0:3]) in range(100, 500):
+                        account_type = "customer"
+                    elif int(user_id[0:3]) in range(501, 999):
+                        account_type = "admin"
+
+                # Handle password checking
+                if not compare_passwords(account_type, user_id, form.password.data):
+                    # Display invalid otp msg
+                    flash("Wrong Username or Password!", "error")
+                    print("Wrong Password")
+
+                    return render_template("login_base.html", form=form)
+                else:
+                    # Remove action in session, Create account type in session
+                    session.pop("action", None)
+                    if account_type == "customer":
+                        session[account_type] = user_object.get_cust_data()
+                    elif account_type == "admin":
+                        session[account_type] = user_object.get_admin_data()
+
+                    # Redirect users to appropriate home pages
+                    print("account_type = " + account_type + ", user_id[0:11] = " + user_id[0:11])
+
+                    if account_type == "customer":
+                        return redirect(url_for("customer.customer_home", id=user_id[0:11]))
+                    elif account_type == "admin":
+                        return redirect(url_for("admin.admin_home", id=user_id[0:11]))
+            else:
+                return render_template("login_base.html", form=form)
+        elif action == "send_email":
+            pass
+        elif action == "reset_password":
+            pass
+
+    # Render appropriate template based on current action for GET requests
+    if request.method == "GET":
+        if action == "login":
+            form = LoginForm()
+            return render_template("login_base.html", form=form)
+        elif action == "send_email":
+            form = EmailForm()
+            return render_template("login_send_email.html", form=form)
+        elif action == "reset_password":
+            form = ResetPasswordForm()
+            return render_template("login_reset_pass.html", form=form)
 
 
 # Signup page
@@ -64,6 +195,20 @@ def signup():
         session.pop("create_customer", None)
         session["signup_stage"] = "base"
         return redirect(url_for("signup"))
+    
+    # Resend otp if user clicked 'Resend PIN'
+    if request.args.get("resend_pin"):
+        # Generate and send otp
+        otp = generate_otp(6)
+        send_mail("Your Verification Code", "itastefully@gmail.com", [session.get("create_customer").get("email")], f"Your verification code is {otp}")
+
+        # Display otp sent msg
+        flash("An OTP has been resent to your email!", "info")
+
+        # Update otp in create_customer in session
+        session["create_customer"]["otp"] = otp
+
+        return redirect(url_for("signup"))
 
     # Redirect to appropriate template based on current stage for POST requests
     if request.method == "POST":
@@ -72,17 +217,7 @@ def signup():
             if form.validate():
                 # Generate and send OTP
                 otp = generate_otp(6)
-                print("otp = " + otp)
-                mail = Mail(app)
-
-                msg = Message(
-                    "Your Verification Code",
-                    sender="itastefully@gmail.com",
-                    recipients=[form.email.data],
-                )
-                # Can try to style the body later on
-                msg.body = f"Your verification code is: {otp}"
-                mail.send(msg)
+                send_mail("Your Verification Code", "itastefully@gmail.com", [form.email.data], f"Your verification code is {otp}")
 
                 # Display otp sent msg
                 flash("An OTP has been sent to your email!", "info")
@@ -104,7 +239,7 @@ def signup():
             form = OTPForm(request.form)
             if form.validate():
                 # Check correct otp
-                if not is_valid_otp(form.otp.data):
+                if not is_correct_otp(form.otp.data):
                     # Display invalid otp msg
                     flash("Invalid OTP!", "error")
                     return render_template("signup_otp.html", form=form)
@@ -116,7 +251,7 @@ def signup():
                 return render_template("signup_otp.html", form=form)
         elif stage == "set_password":
             form = PasswordForm(request.form)
-            # Handle password checking
+            # Check whether passwords match
             if form.validate():
                 if form.password.data != form.confirm_password.data:
                     flash("Passwords do not match!", "error")
@@ -127,35 +262,7 @@ def signup():
                 hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
 
                 # Store ALL customer data in shelve db
-                customers_dict = {}
-
-                try:
-                    db = shelve.open("customer.db", "c")
-
-                    if "Customers" in db:
-                        customers_dict = db["Customers"]
-                    else:
-                        db["Customers"] = customers_dict
-                except:
-                    # Display database error message
-                    flash("Error in connecting to database", "error")
-                    return render_template("signup_password.html", form=form)
-                else:
-                    customer = Customer(
-                        # Change how user_id is set when we have thought of a way to do so
-                        session["create_customer"]["username"],
-                        session["create_customer"]["first_name"],
-                        session["create_customer"]["last_name"],
-                        session["create_customer"]["username"],
-                        session["create_customer"]["email"],
-                        hashed_password
-                    )
-
-                    customers_dict[customer.get_user_id()] = customer
-                    db["Customers"] = customers_dict
-                finally:
-                    if db:
-                        db.close()
+                create_customer(session["create_customer"], hashed_password, form)
 
                 # Display successful account creation msg
                 flash("Account created, login now!", "success")
@@ -166,7 +273,6 @@ def signup():
 
                 return redirect(url_for("login"))
             else:
-                print("Password not validated")
                 return render_template("signup_password.html", form=form)
 
     # Render appropriate template based on current stage for GET requests

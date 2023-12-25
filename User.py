@@ -5,20 +5,25 @@ class User:
         self.__user_id = user_id
         self.__first_name = first_name
         self.__last_name = last_name
+        self.__display_name = username
         self.__username = username
         self.__email = email
         self.__password = password
 
+
     # Setters
     def set_user_id(self, user_id):
         self.__user_id = user_id
-    
+
     def set_first_name(self, first_name):
         self.__first_name = first_name
-    
+
     def set_last_name(self, last_name):
         self.__last_name = last_name
     
+    def set_display_name(self, display_name):
+        self.__display_name = display_name
+
     def set_username(self, username):
         self.__username = username
     
@@ -27,8 +32,8 @@ class User:
     
     def set_password(self, password):
         self.__password = password
-        
     
+
     # Getters
     def get_user_id(self):
         return self.__user_id
@@ -38,6 +43,9 @@ class User:
 
     def get_last_name(self):
         return self.__last_name
+
+    def get_display_name(self):
+        return self.__display_name
     
     def get_username(self):
         return self.__username
@@ -47,3 +55,17 @@ class User:
     
     def get_password(self):
         return self.__password
+
+
+    # Methods
+    def is_unique_data(self, provided_data, attribute_name):
+        value_to_compare = ""
+
+        if attribute_name == "username":
+            value_to_compare = self.__username
+        elif attribute_name == "email":
+            value_to_compare = self.__email
+
+        if value_to_compare == provided_data:
+            return False
+        return True
