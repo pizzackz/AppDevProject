@@ -158,11 +158,12 @@ def login():
 
                     # Redirect users to appropriate home pages
                     print("account_type = " + account_type + ", user_id[0:11] = " + user_id[0:11])
+                    display_name = user_object.get_display_name()
 
                     if account_type == "customer":
-                        return redirect(url_for("customer.customer_home", id=user_id[0:11]))
+                        return redirect(url_for("customer.customer_home", id=user_id[0:11], display_name=display_name))
                     elif account_type == "admin":
-                        return redirect(url_for("admin.admin_home", id=user_id[0:11]))
+                        return redirect(url_for("admin.admin_home", id=user_id[0:11], display_name=display_name))
             else:
                 return render_template("login_base.html", form=form)
         elif action == "send_email":
@@ -234,6 +235,7 @@ def signup():
 
                 return redirect(url_for("signup"))
             else:
+                print(form.errors)
                 return render_template("signup_base.html", form=form)
         elif stage == "verify_email":
             form = OTPForm(request.form)

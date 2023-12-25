@@ -7,7 +7,7 @@ from validators import unique_data, password_complexity, data_exist
 class BaseSignUpForm(Form):
     first_name = StringField("First Name", validators=[DataRequired()], render_kw={"placeholder": "First Name"})
     last_name = StringField("Last Name", validators=[DataRequired()], render_kw={"placeholder": "Last Name"})
-    username = StringField("Username", validators=[DataRequired(), Length(min=4, message="Username must be at least 4 characters long"), unique_data], render_kw={"placeholder": "Username"})
+    username = StringField("Username", validators=[DataRequired(), unique_data], render_kw={"placeholder": "Username"})
     email = StringField("Email", validators=[DataRequired(), Email(granular_message=True, check_deliverability=True), unique_data], render_kw={"placeholder": "Email"})
 
 

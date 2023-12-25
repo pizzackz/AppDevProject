@@ -16,7 +16,7 @@
     {% block navbar %}{% endblock %}
 
     {% block flash_messages %}
-    <!-- Flash messages -->
+        <!-- Flash messages from __init__.py -->
         {% for message in get_flashed_messages(category_filter=["info"]) %}
             <div class="alert alert-info" role="alert">{{ message }}</div>
         {% endfor %}
@@ -29,7 +29,7 @@
             <div class="alert alert-success" role="alert">{{ message }}</div>
         {% endfor %}
     {% endblock %}
-    <!-- Flash messages from __init__.py -->
+
 
 
     {% block content %}
