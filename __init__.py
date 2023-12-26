@@ -7,7 +7,7 @@ import hashlib
 import shelve
 import random
 
-from Config import Config
+from config import Config
 from Forms import BaseSignUpForm, OTPForm, PasswordForm, LoginForm, EmailForm, ResetPasswordForm
 from blueprints.guest_bp import guest_bp
 from blueprints.customer_bp import customer_bp
