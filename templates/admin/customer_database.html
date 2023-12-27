@@ -3,5 +3,5 @@
 {% block title %}Customer Database{% endblock %}
 
 {% block content %}
-<h1>Customer Database page for Admin {{ display_name }}</h1>
+<h1>Customer Database page for Admin {{ session.get("admin").get("display_name") }}</h1>
 {% endblock %}

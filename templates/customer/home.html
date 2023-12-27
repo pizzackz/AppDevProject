@@ -9,17 +9,17 @@
 
 {% block content %}
 
-<h1>Welcome {{ display_name }}!</h1>
+<h1>Welcome {{ session.get("customer").get("display_name") }}!</h1>
 
 <!-- Buttons to navigate to other places **Replace url paths accordingly** -->
 <div class="buttons">
-    <a href="{{ url_for('customer.order', id=id, display_name=display_name) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Place Order</button></a>
-    <a href="{{ url_for('customer.recipe_creator', id=id, display_name=display_name) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Recipe Creator</button></a>
-    <a href="{{ url_for('customer.favourites', id=id, display_name=display_name) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Favourites</button></a>
-    <a href="{{ url_for('customer.customer_articles', id=id, display_name=display_name) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Articles</button></a>
-    <a href="{{ url_for('customer.current_delivery', id=id, display_name=display_name) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Current Delivery</button></a>
-    <a href="{{ url_for('customer.feedback', id=id, display_name=display_name) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Feedback</button></a>
-    <a href="{{ url_for('customer.order_history', id=id, display_name=display_name) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Order History</button></a>
+    <a href="{{ url_for('customer.order', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Place Order</button></a>
+    <a href="{{ url_for('customer.recipe_creator', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Recipe Creator</button></a>
+    <a href="{{ url_for('customer.favourites', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Favourites</button></a>
+    <a href="{{ url_for('customer.customer_articles', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Articles</button></a>
+    <a href="{{ url_for('customer.current_delivery', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Current Delivery</button></a>
+    <a href="{{ url_for('customer.feedback', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Feedback</button></a>
+    <a href="{{ url_for('customer.order_history', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Order History</button></a>
 </div>
 
 {% endblock %}

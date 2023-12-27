@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-<h1>Welcome {{ display_name }}!</h1>
+<h1>Welcome {{ session.get("admin").get("display_name") }}!</h1>
 
 <!-- Buttons to navigate to other places **Replace url paths accordingly** -->
 <div class="buttons">

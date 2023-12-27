@@ -1,4 +1,4 @@
-function checkFields(formId = "base-signup-form") {
+function checkFields(formId) {
     const form = document.getElementById(formId);
     const fields = form.querySelectorAll("input, textarea");
     const submitButton = form.querySelector("input[type='submit']");

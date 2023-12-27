@@ -3,5 +3,5 @@
 {% block title %}Edit Profile{% endblock %}
 
 {% block content %}
-<h1>Edit Profile page for Admin {{ display_name }}</h1>
+<h1>Edit Profile page for Admin {{ session.get("admin").get("display_name") }}</h1>
 {% endblock %}

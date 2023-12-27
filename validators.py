@@ -1,4 +1,5 @@
 import shelve
+import hashlib
 from flask import session, flash
 from wtforms import ValidationError
 
@@ -57,6 +58,11 @@ def data_exist(form, field):
     data_exist = False
     data = field.data
     field_name = field.name
+
+    # Hash given data if field is password
+    if "password" in field_name:
+        data = hashlib.sha256(data.encode("utf-8")).hexdigest()
+
     customers_dict = {}
     admins_dict = {}
 
@@ -86,4 +92,3 @@ def data_exist(form, field):
 
     if not data_exist:
         raise ValidationError(f"No account exists with this {field_name.capitalize()}")
-

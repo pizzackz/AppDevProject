@@ -9,7 +9,7 @@
 
 {% block form %}
 {% from "includes/_form_helper.html" import render_field %}
-<form method="POST" action="">
+<form method="POST" action="" id="login-base">
     <div class="form-group">
         {{ render_field(form.username, class="form-control") }}
     </div>

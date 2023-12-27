@@ -3,7 +3,7 @@ import hashlib
 import random
 from flask import session
 from Admin import Admin
-from __init__ import get_user_object
+from functions import get_user_object
 
 
 # Create Admin
@@ -43,6 +43,22 @@ def create_admin(first_name, last_name, username, email, password):
     db.close()
 
 
+# Update Admin password data
+def update_admin_password(user_id, hashed_password):
+    # Access database to update customer password
+    db = shelve.open("user_accounts.db", "c")
+    admins_dict = db["Admins"]
+
+    admin = admins_dict.get(user_id)
+    admin.set_password(hashed_password)
+
+    db["Customers"] = admins_dict
+
+    print(f"Admin account f{user_id:10s}'s password updated")
+
+    db.close()
+
+
 # Update Admin
 def update_admin(first_name, last_name, username, email, password):
     pass
@@ -74,4 +90,3 @@ def delete_admin(username):
 
     db["Admins"] = admins_dict
     db.close()
-

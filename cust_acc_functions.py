@@ -6,7 +6,7 @@ from Customer import Customer
 
 
 # Create Customer
-def create_customer(session_data, hashed_password, form):
+def create_customer(session_data, hashed_password):
     # Get all account details
     first_name = session_data["first_name"]
     last_name = session_data["last_name"]
@@ -36,6 +36,17 @@ def create_customer(session_data, hashed_password, form):
     db.close()
 
 
-# Update Customer data
-def update_customer(session_data, form):
-    pass
+# Update Customer password
+def update_customer_password(user_id, hashed_password):
+    # Access database to update customer password
+    db = shelve.open("user_accounts.db", "c")
+    customers_dict = db["Customers"]
+
+    customer = customers_dict.get(user_id)
+    customer.set_password(hashed_password)
+
+    db["Customers"] = customers_dict
+
+    print(f"Customer account f{user_id:10s}'s password updated")
+
+    db.close()

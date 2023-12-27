@@ -27,7 +27,7 @@
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <!-- Replace this element with admin's chosen (if any) or default image -->
-                    <a class="nav-link" href="{{ url_for('admin.edit_admin_profile', id=id) }}">Image {{ display_name }}</a>
+                    <a class="nav-link" href="{{ url_for('admin.edit_admin_profile', id=id) }}">Image {{ session.get("admin").get("display_name") }}</a>
                 </li>
             </ul>
         </div>

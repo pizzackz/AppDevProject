@@ -3,7 +3,8 @@
 
 {% block form %}
 {% from "includes/_form_helper.html" import render_field %}
-<form method="POST" action="">
+<form method="POST" action="" id="login-reset-pass">
+    <a href="{{ url_for('login', back=True) }}">Back to Login</a>
     <div class="form-group">
         {{ render_field(form.password, class="form-control") }}
     </div>
@@ -12,6 +13,6 @@
     </div>
 
     <p>Reset your password</p>
-    <input type="submit" value="SEND" class="btn btn-primary" />
+    <input type="submit" value="RESET" class="btn btn-primary" />
 </form>
 {% endblock %}
