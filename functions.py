@@ -3,6 +3,7 @@ import random
 import shelve
 import hashlib
 import uuid
+from flask import session, flash
 from flask_mail import Message
 
 from Customer import Customer

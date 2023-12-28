@@ -13,7 +13,6 @@ from blueprints.admin_bp import admin_bp
 from functions import generate_otp, send_email, get_user_object, get_account_type, compare_passwords, generate_unique_token
 from cust_acc_functions import create_customer, update_customer_password
 from admin_acc_functions import update_admin_password
-from validators import is_correct_otp
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -33,27 +32,27 @@ def login():
     session.pop("create_customer", None)
     session.pop("signup_stage", None)
 
-    action = session.get("action", "login")
+    login_action = session.get("login_action", "login")
 
-    print("action = " + action + ", session keys = " + str(session.keys()))
+    print("login_action = " + login_action + ", session keys = " + str(session.keys()))
 
-    # Reset action in session, clear other login-related session data if user clicked 'Back to Login'
+    # Reset login_action in session, clear other login-related session data if user clicked 'Back to Login'
     if request.args.get("back"):
-        session["action"] = "login"
+        session["login_action"] = "login"
         session.pop("customer", None)
         session.pop("admin", None)
         session.pop("reset_pass_token", None)
         return redirect(url_for("login"))
 
-    # Update action in session if user clicked 'Forgot Password'
+    # Update login_action in session if user clicked 'Forgot Password'
     if request.args.get("reset_password"):
-        session["action"] = "send_email"
+        session["login_action"] = "send_email"
         return redirect(url_for("login"))
 
     form = LoginForm(request.form)
-    # Render appropriate template based on current action for POST requests
+    # Render appropriate template based on current login_action for POST requests
     if request.method == "POST":
-        if action == "login":
+        if login_action == "login":
             form = LoginForm(request.form)
 
             if form.validate():
@@ -80,8 +79,8 @@ def login():
 
                     return render_template("login_base.html", form=form)
                 else:
-                    # Remove action in session, Create account type in session
-                    session.pop("action", None)
+                    # Remove login_action in session, Create account type in session
+                    session.pop("login_action", None)
                     if account_type == "customer":
                         session[account_type] = user_object.get_cust_data()
                     elif account_type == "admin":
@@ -96,7 +95,7 @@ def login():
                         return redirect(url_for("admin.admin_home", id=user_id[0:11]))
             else:
                 return render_template("login_base.html", form=form)
-        elif action == "send_email":
+        elif login_action == "send_email":
             form = EmailForm(request.form)
 
             if form.validate():
@@ -116,13 +115,13 @@ def login():
                 # Generate unique token
                 token = generate_unique_token(user_id)
 
-                # Store token in session, Store user data in session, Update action in session to reset password
+                # Store token in session, Store user data in session, Update login_action in session to reset password
                 session["reset_pass_token"] = token
                 if get_account_type(user_object=user_object) == "customer":
                     session["customer"] = user_object.get_cust_data()
                 elif get_account_type(user_object=user_object) == "admin":
                     session["admin"] = user_object.get_admin_data()
-                session["action"] = "reset_password"
+                session["login_action"] = "reset_password"
 
                 # Create url with the and send email using it
                 url = url_for("login", token=token, _external=True)
@@ -130,12 +129,12 @@ def login():
 
                 # Display reset password link sent msg
                 flash("The reset password link has been sent to your email!", "info")
-                print("action = " + session["action"] + ", reset pass token = " + session["reset_pass_token"])
+                print("login_action = " + session["login_action"] + ", reset pass token = " + session["reset_pass_token"])
 
                 return redirect(url_for("login"))
             else:
                 return render_template("login_send_email.html", form=form)
-        elif action == "reset_password":
+        elif login_action == "reset_password":
             # Render appropriate template once customer is sent reset password link
             if session["reset_pass_token"] == request.args.get("token"):
                 form = ResetPasswordForm(request.form)
@@ -172,8 +171,8 @@ def login():
                     # Display successful password reset msg
                     flash("Password has been resetted!", "success")
 
-                    # Reset action in session, Clear reset pass token in session
-                    session["action"] = "login"
+                    # Reset login_action in session, Clear reset pass token in session
+                    session["login_action"] = "login"
                     session.pop("reset_pass_token", None)
 
                     # Set form
@@ -186,15 +185,15 @@ def login():
                 form = EmailForm(request.form)
                 return render_template("login_send_email.html", form=form)
 
-    # Render appropriate template based on current action for GET requests
+    # Render appropriate template based on current login_action for GET requests
     if request.method == "GET":
-        if action == "login":
+        if login_action == "login":
             form = LoginForm()
             return render_template("login_base.html", form=form)
-        elif action == "send_email":
+        elif login_action == "send_email":
             form = EmailForm()
             return render_template("login_send_email.html", form=form)
-        elif action == "reset_password":
+        elif login_action == "reset_password":
             if session["reset_pass_token"] == request.args.get("token"):
                 form = ResetPasswordForm()
                 return render_template("login_reset_pass.html", form=form)
@@ -209,7 +208,7 @@ def signup():
     # session.clear()
 
     # Remove session data from logging in if redirected to signup
-    session.pop("action", None)
+    session.pop("login_action", None)
     session.pop("reset_pass_token", None)
 
     stage = session.get("signup_stage", "base")
@@ -265,9 +264,9 @@ def signup():
             form = OTPForm(request.form)
             if form.validate():
                 # Check correct otp
-                if not is_correct_otp(form.otp.data):
+                if form.otp.data != session.get("create_customer").get(otp):
                     # Display invalid otp msg
-                    flash("Invalid OTP!", "error")
+                    flash("Invalid OTP, please try again!", "error")
                     return render_template("signup_otp.html", form=form)
 
                 # Update signup stage in session

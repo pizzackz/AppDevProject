@@ -9,6 +9,7 @@ class User:
         self.__username = username
         self.__email = email
         self.__password = password
+        self.__profile_pic_path = ""
 
 
     # Setters
@@ -33,6 +34,9 @@ class User:
     def set_password(self, password):
         self.__password = password
     
+    def set_profile_pic_path(self, profile_pic_path):
+        self.__profile_pic_path = profile_pic_path
+    
 
     # Getters
     def get_user_id(self):
@@ -55,6 +59,9 @@ class User:
     
     def get_password(self):
         return self.__password
+    
+    def get_profile_pic_path(self):
+        return self.__profile_pic_path
 
 
     # Methods

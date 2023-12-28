@@ -4,17 +4,6 @@ from flask import session, flash
 from wtforms import ValidationError
 
 
-# Check whether otp is correct
-def is_correct_otp(otp):
-    stored_otp = session.get("create_customer", None).get("otp")
-
-    if otp == stored_otp:
-        return True
-    else:
-        flash("Invalid OTP! Please try again")
-        return False
-
-
 # Custom validator functions for Forms.py
 # Password complexity validator
 def password_complexity(form, field):
