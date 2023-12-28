@@ -141,7 +141,7 @@ def login():
                 form = ResetPasswordForm(request.form)
 
                 # Clear reset pass token in session
-                session.pop("token", None)
+                session.pop("reset_pass_token", None)
 
                 if form.validate():
                     # Hash password
@@ -172,7 +172,7 @@ def login():
                     # Display successful password reset msg
                     flash("Password has been resetted!", "success")
 
-                    # Reset action in session, Clear token in session
+                    # Reset action in session, Clear reset pass token in session
                     session["action"] = "login"
                     session.pop("reset_pass_token", None)
 
