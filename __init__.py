@@ -11,8 +11,8 @@ from blueprints.guest_bp import guest_bp
 from blueprints.customer_bp import customer_bp
 from blueprints.admin_bp import admin_bp
 from functions import generate_otp, send_email, get_user_object, get_account_type, compare_passwords, generate_unique_token
-from cust_acc_functions import create_customer, update_customer_password
-from admin_acc_functions import update_admin_password
+from cust_acc_functions import create_customer, update_cust_details
+from admin_acc_functions import update_admin_details
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -49,7 +49,6 @@ def login():
         session["login_action"] = "send_email"
         return redirect(url_for("login"))
 
-    form = LoginForm(request.form)
     # Render appropriate template based on current login_action for POST requests
     if request.method == "POST":
         if login_action == "login":
@@ -161,11 +160,11 @@ def login():
                     # Update user password data in shelve db
                     if "customer" in session:
                         user_data = session.get("customer")
-                        update_customer_password(user_data.get("user_id"), hashed_password)
+                        update_cust_details(user_data.get("user_id"), password=hashed_password)
                         session.pop("customer")
                     elif "admin" in session:
                         user_data = session.get("admin")
-                        update_admin_password(user_data.get("user_id"), hashed_password)
+                        update_admin_details(user_data.get("user_id"), password=hashed_password)
                         session.pop("admin")
 
                     # Display successful password reset msg
@@ -206,7 +205,6 @@ def login():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     # session.clear()
-
     # Remove session data from logging in if redirected to signup
     session.pop("login_action", None)
     session.pop("reset_pass_token", None)
@@ -224,7 +222,7 @@ def signup():
     if request.args.get("resend_pin"):
         # Generate and send otp
         otp = generate_otp(6)
-        send_email(mail, "Your Verification Code", "itastefully@gmail.com", [session.get("create_customer").get("email")], f"Your verification code is {otp}")
+        send_email(mail, "Your Verification Code", "itastefully@gmail.com", [session.get("create_customer").get("email")], body=f"Your verification code is {otp}")
 
         # Display otp sent msg
         flash("An OTP has been resent to your email!", "info")
@@ -241,7 +239,7 @@ def signup():
             if form.validate():
                 # Generate and send OTP
                 otp = generate_otp(6)
-                send_email(mail, "Your Verification Code", "itastefully@gmail.com", [form.email.data], f"Your verification code is {otp}")
+                send_email(mail, "Your Verification Code", "itastefully@gmail.com", [form.email.data], body=f"Your verification code is {otp}")
 
                 # Display otp sent msg
                 flash("An OTP has been sent to your email!", "info")
@@ -264,7 +262,7 @@ def signup():
             form = OTPForm(request.form)
             if form.validate():
                 # Check correct otp
-                if form.otp.data != session.get("create_customer").get(otp):
+                if form.otp.data != session.get("create_customer").get("otp"):
                     # Display invalid otp msg
                     flash("Invalid OTP, please try again!", "error")
                     return render_template("signup_otp.html", form=form)

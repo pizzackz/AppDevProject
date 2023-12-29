@@ -1,10 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import current_app, Blueprint, render_template, request, redirect, url_for, session, flash
 import shelve
-from Forms import AccountDetailsForm, ChangeEmailForm, OTPForm, ResetPasswordForm2
-
+from Forms import AccountDetailsForm, OTPForm2, ResetPasswordForm2
+from functions import generate_otp, send_email
+from cust_acc_functions import retrieve_cust_details, update_cust_details
 
 customer_bp = Blueprint("customer", __name__)
-
 
 # Home page (Customer)
 @customer_bp.route("/<string:id>/home")
@@ -30,111 +30,211 @@ def recipe_creator(id):
 # Edit Profile page (Customer)
 @customer_bp.route("/<string:id>/edit_customer_profile", methods=["GET", "POST"])
 def edit_cust_profile(id):
-    # session.clear()
+    # session.pop("new_data", None)
+    # session.pop("new_email_otp", None)
 
-    action = session.get("action", "display_data")
-    
-    print("action = " + action + ", session keys = " + str(session.keys()))
-
-    # Update action in session if customer clicked 'Change email...'
-    if request.args.get("change_email"):
-        session["action"] = "change_email"
-        return redirect((url_for("customer.edit_cust_profile", id=id)))
-    
-    # Update action in session if customer clicked 'Reset your password...'
-    if request.args.get("reset_password"):
-        session["action"] = "reset_password"
-        return redirect(url_for("customer.edit_cust_profile", id=id))
+    print("customer data = " + str(session.get("customer")))
+    print("new data = " + str(session.get("new_data", {})))
 
     # Render appropriate templates based on request methods
     if request.method == "POST":
-        if action == "display_data":
-            form = AccountDetailsForm(request.form)
+        form = AccountDetailsForm(request.form)
 
-            print(request.form.get("button"))
-            print("customer in session = " + str(session["customer"]))
+        print(request.form.get("button"))
+        print("customer in session = " + str(session["customer"]))
 
-            if form.validate():
-                if request.form.get("button") == "save":
-                    # Handle saving of data into db
-                    # Check whether data differ from current session data
-                    cust_data = session.get("customer")
-                    has_change = False
+        if form.validate():
+            if request.form.get("button") == "save":
+                cust_data = session.get("customer")
 
-                    # Update db with newly changed data
-                    db = shelve.open("user_accounts.db", "c")
-                    customers_dict = db["Customers"]
-                    user_id = cust_data.get("user_id")
-                    customer = customers_dict.get(user_id)
+                # Store new data in temporary new data in session for when redirecting to verify email page
+                session["new_data"] = {}
 
-                    # Update first name
-                    if form.first_name.data != cust_data.get("first_name"):
-                        print("first name changed to " + form.first_name.data)
-                        customer.set_first_name(form.first_name.data)
-                        has_change = True
+                # Store first name
+                if form.first_name.data != cust_data.get("first_name"):
+                    session["new_data"]["first_name"] = form.first_name.data
 
-                    # Update last name
-                    if form.last_name.data != cust_data.get("last_name"):
-                        print("last name changed to " + form.last_name.data)
-                        customer.set_last_name(form.last_name.data)
-                        has_change = True
+                # Store last name
+                if form.last_name.data != cust_data.get("last_name"):
+                    session["new_data"]["last_name"] = form.last_name.data
 
-                    # Update display name
-                    if form.display_name.data != cust_data.get("display_name"):
-                        print("display name changed to " + form.display_name.data)
-                        customer.set_display_name(form.display_name.data)
-                        has_change = True
+                # Store display name
+                if form.display_name.data != cust_data.get("display_name"):
+                    session["new_data"]["display_name"] = form.display_name.data
 
-                    db["Customers"] = customers_dict
-                    db.close()
+                # Redirect to another route when email changes
+                if form.email.data != cust_data.get("email"):
+                    # Generate and send OTP
+                    with current_app.app_context():
+                        mail = current_app.extensions.get("mail")
+
+                        otp = generate_otp(6)
+                        send_email(mail, "Your Verification Code", "itastefully@gmail.com", [form.email.data], body=f"Your verification code is {otp}")
+
+                    # Display otp sent msg
+                    flash("An OTP has been sent to your email!", "info")
+
+                    # Store otp in session, email in new_data in session
+                    session["new_email_otp"] = otp
+                    session["new_data"]["email"] = form.email.data
+
+                    return redirect(url_for("customer.verify_new_email", id=id))
+                # Immediately save the changed data when no changes to email
+                else:
+                    print("saving new data")
+                    new_data = session.get("new_data")
+                    user_id = session.get("customer").get("user_id")
+
+                    # Update customer data
+                    update_cust_details(
+                        user_id=user_id,
+                        first_name=new_data.get("first_name", None),
+                        last_name=new_data.get("last_name", None),
+                        display_name=new_data.get("display_name", None)
+                        )
 
                     # Flash details saved msg
-                    if has_change:
-                        flash("Details saved!", "success")
+                    flash("Details saved!", "success")
 
-                    # Update customer in session
-                    session["customer"] = customer.get_cust_data()
+                    # Update customer in session, Clear new_data in session
+                    session["customer"] = retrieve_cust_details(user_id)
+                    session.pop("new_data")
 
-                    print("new customer details in session = " + str(session["customer"]))
+                    print("new customer in session = " + str(session.get("customer")))
 
-                elif request.form.get("button") == "revert":
-                    # Force reload by using redirect to clear all previously made changes
-                    return redirect(url_for("customer.edit_cust_profile", id=id))
+                    return redirect((url_for("customer.edit_cust_profile", id=id)))
+            elif request.form.get("button") == "revert":
+                # Clear possible session data
+                session.pop("new_data", None)
+                session.pop("new_email_otp", None)
 
-                elif request.form.get("button") == "edit_profile_pic":
-                    print("Edit profile picture!")
+                # Force reload by using redirect to clear all previously made changes
+                return redirect(url_for("customer.edit_cust_profile", id=id))
+            elif request.form.get("button") == "edit_profile_pic":
+                print("Edit profile picture!")
 
                 return redirect(url_for("customer.edit_cust_profile", id=id))
-            else:
-                print("Form data is invalidated")
-                return render_template("customer/edit_profile.html", id=id, form=form)
-        
-        elif action == "change_email":
-            pass
-        elif action == "verify_email":
-            pass
-        elif action == "reset_password":
-            pass
+        else:
+            print("Form data is invalidated")
+            return render_template("customer/edit_profile.html", id=id, form=form)
 
+    # Save new data to db when redirected from verify_new_email
+    if "new_data" in session:
+        print("saving new data 2")
+        new_data = session.get("new_data")
+        user_id = session.get("customer").get("user_id")
+
+        # Update customer data
+        update_cust_details(
+            user_id=user_id,
+            first_name=new_data.get("first_name", None),
+            last_name=new_data.get("last_name", None),
+            display_name=new_data.get("display_name", None),
+            email=new_data.get("email", None)
+            )
+
+        # Flash details saved msg
+        flash("Details saved!", "success")
+
+        # Update customer in session, Clear new_data in session
+        session["customer"] = retrieve_cust_details(user_id)
+        session.pop("new_data", None)
 
     if request.method == "GET":
         form = AccountDetailsForm()
 
-        # Display customer account details from customer in session (Include profile image later)
-        form.first_name.data = session.get("customer").get("first_name")
+        # Display customer account details from new_data in session, else from customer in session (Include profile image later)
+        form.first_name.data =  session.get("customer").get("first_name")
         form.last_name.data = session.get("customer").get("last_name")
         form.display_name.data = session.get("customer").get("display_name")
         form.email.data = session.get("customer").get("email")
 
-        # Display appropriate template based on action in session
-        if action == "display_data":
-            return render_template("customer/edit_profile.html", id=id, form=form)
-        elif action == "change_email":
-            pass
-        elif action == "verify_email":
-            pass
-        elif action == "reset_password":
-            pass
+        if "new_data" in session:
+            if "first_name" in session.get("new_data"):
+                form.first_name.data = session.get("new_data").get("first_name")
+            if "last_name" in session.get("new_data"):
+                form.last_name.data = session.get("new_data").get("last_name")
+            if "display_name" in session.get("new_data"):
+                form.display_name.data = session.get("new_data").get("display_name")
+            if "email" in session.get("new_data"):
+                form.email.data = session.get("new_data").get("email")
+
+        return render_template("customer/edit_profile.html", id=id, form=form)
+
+
+# Edit Profile page - Verify Email Popup (Customer)
+@customer_bp.route("/<string:id>/edit_customer_profile/verify_email", methods=["GET", "POST"])
+def verify_new_email(id):
+
+    print("session keys = " + str(session.keys()))
+
+    # Clear new_email_otp in session, clear email in new_data in session if user clicked on close symbol
+    if request.form.get("button") == "close_otp":
+        session.pop("new_email_otp", None)
+        if "new_data" in session:
+            session.get("new_data").pop("email")
+
+        return redirect(url_for("customer.edit_cust_profile", id=id))
+    
+    # Resend otp if user clicked 'Resend PIN'
+    if request.args.get("resend_pin"):
+        # Generate and send OTP
+        with current_app.app_context():
+            mail = current_app.extensions.get("mail")
+
+            otp = generate_otp(6)
+            send_email(mail, "Your Verification Code", "itastefully@gmail.com", [session.get("new_data").get("email")], body=f"Your verification code is {otp}")
+
+        # Store otp in session
+        session["new_email_otp"] = otp
+
+        # Display otp sent msg
+        flash("An OTP has been resent to your email!", "info")
+
+        return redirect(url_for("customer.verify_new_email", id=id))
+
+    if request.method == "POST":
+        otp_form = OTPForm2(request.form)
+        form = AccountDetailsForm(request.form)
+
+        if otp_form.validate():
+            # Check correct otp
+            if otp_form.otp.data != session.get("new_email_otp"):
+                # Display invalid otp msg
+                flash("Invalid OTP, please try again!", "error")
+                return redirect(url_for("customer.verify_new_email", id=id))
+            else:
+                # Display email verified msg
+                flash("Email Verified!")
+
+                # Clear new_email_otp in session
+                session.pop("new_email_otp")
+
+                return redirect(url_for("customer.edit_cust_profile", id=id))
+        else:
+            return render_template("customer/edit_profile_otp.html", form=form, otp_form=otp_form)
+
+    if request.method == "GET":
+        form = AccountDetailsForm()
+        otp_form = OTPForm2()
+
+        # Display customer account details from new_data in session, else from customer in session (Include profile image later)
+        form.first_name.data =  session.get("customer").get("first_name")
+        form.last_name.data = session.get("customer").get("last_name")
+        form.display_name.data = session.get("customer").get("display_name")
+        form.email.data = session.get("customer").get("email")
+
+        if "new_data" in session:
+            if "first_name" in session.get("new_data"):
+                form.first_name.data = session.get("new_data").get("first_name")
+            if "last_name" in session.get("new_data"):
+                form.last_name.data = session.get("new_data").get("last_name")
+            if "display_name" in session.get("new_data"):
+                form.display_name.data = session.get("new_data").get("display_name")
+            if "email" in session.get("new_data"):
+                form.email.data = session.get("new_data").get("email")
+
+        return render_template("customer/edit_profile_otp.html", id=id, form=form, otp_form=otp_form)
 
 
 # Favourites page (Customer)

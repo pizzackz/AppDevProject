@@ -65,6 +65,7 @@ class User:
 
 
     # Methods
+    # Checks whether data for given username and email are not same as current
     def is_unique_data(self, provided_data, attribute_name):
         value_to_compare = ""
 
@@ -76,3 +77,4 @@ class User:
         if value_to_compare == provided_data:
             return False
         return True
+

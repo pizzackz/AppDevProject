@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+{% extends "customer/edit_profile.html" %}
+
+{% block title %}Edit Profile - Verify Email{% endblock %}
+
+{% block css %}
+    {{ super() }}
+    <style>
+        .modal-backdrop.fade.show {
+            opacity: 0.5;
+            background-color: black;
+        }
+
+        .modal-backdrop.fade {
+            transition: opacity 0.15s linear;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+{% from "includes/_form_helper.html" import render_field %}
+
+    <form method="POST" action="" id="customer_details">
+        <h1>Account Details</h1>
+        <button type="submit" name="button" value="revert" class="btn btn-primary" disabled>REVERT</button>
+
+        <!-- Display profile image -->
+        <p>Display Profile Image</p>
+        <button type="submit" name="button" value="edit_profile_pic" class="btn btn-primary" disabled>Edit Profile
+            Picture</button>
+
+        <div class="form-group">
+            {{ render_field(form.first_name, class="form-control", disabled=True) }}
+            {{ render_field(form.last_name, class="form-control", disabled=True) }}
+        </div>
+        <div class="form-group">
+            {{ render_field(form.display_name, class="form-control", disabled=True) }}
+            {{ render_field(form.email, class="form-control", disabled=True) }}
+        </div>
+
+        <button type="submit" name="button" value="save" class="btn btn-primary" disabled>SAVE</button>
+    </form>
+
+<div class="modal-backdrop fade show"></div>
+
+<!-- The Modal -->
+<form method="POST" action="{{ url_for('customer.verify_new_email', id=id) }}" id="otp_form">
+    <div class="modal" id="myModal">
+        <div class="modal-dialog">
+            {% block flash_messages %}
+                {{ super() }}
+            {% endblock %}
+
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Verify Email</h4>
+                    <button type="submit" name="button" value="close_otp" class="btn-close"></button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    {{ render_field(otp_form.otp, class="form-control") }}
+
+                    <p>Verify the pin sent to your email address</p>
+                    <input type="submit" value="VERIFY" class="btn btn-primary" />
+                    <a href="{{ url_for('customer.verify_new_email', id=id, resend_pin=True) }}">Resend PIN</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        var myModal = new bootstrap.Modal(document.getElementById('myModal'), {})
+        myModal.show()
+    </script>
+{% endblock %}

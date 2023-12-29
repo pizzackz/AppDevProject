@@ -23,10 +23,15 @@
     </div>
 
     <!-- Change customer_home to reset_password -->
-    <p>Reset your password <a href="{{ url_for('customer.edit_cust_profile', id=id, reset_password=True) }}">here</a></p>
-    <p>Change and verify your email <a href="{{ url_for('customer.edit_cust_profile', id=id, change_email=True) }}">here</a></p>
+    <p>Reset your password <a href="{{ url_for('customer.customer_home', id=id, reset_password=True) }}">here</a></p>
+    <p>If you entered a different email address, we'll send you a verification code before letting you save your details</p>
 
     <button type="submit" name="button" value="save" class="btn btn-primary">SAVE</button>
 </form>
 
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/disable_enable_submit.js') }}"></script>
 {% endblock %}

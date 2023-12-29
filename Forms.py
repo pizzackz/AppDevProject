@@ -1,6 +1,6 @@
 from wtforms import Form, StringField, PasswordField, FileField
 from wtforms.validators import DataRequired, Email
-from validators import unique_data, password_complexity, data_exist
+from validators import unique_data, password_complexity, data_exist, otp_validator
 
 # Signup Form (Base stage)
 class BaseSignUpForm(Form):
@@ -12,7 +12,7 @@ class BaseSignUpForm(Form):
 
 # OTP Form
 class OTPForm(Form):
-    otp = StringField("One Time Pin", validators=[DataRequired()], render_kw={"placeholder": "OTP"})
+    otp = StringField("One Time Pin", validators=[DataRequired(), otp_validator], render_kw={"placeholder": "OTP"})
 
 
 # Password Form (For Signup only - Set Password stage)
@@ -43,13 +43,13 @@ class AccountDetailsForm(Form):
     first_name = StringField("First Name", validators=[DataRequired()])
     last_name = StringField("Last Name", validators=[DataRequired()])
     display_name = StringField("Display Name", validators=[DataRequired()])
-    email = StringField("Email Address", render_kw={"disabled": True})
+    email = StringField("Email Address", validators=[DataRequired(), Email(granular_message=True, check_deliverability=True)])
     # profile_picture = FileField('Profile Picture', validators=[])
 
 
-# Change Email Form (to allow customer to change email address)
-class ChangeEmailForm(Form):
-    email = StringField("New Email", validators=[DataRequired(), Email(granular_message=True, check_deliverability=True)], render_kw={"placeholder": "New Email Address"})
+# OTP Form to verify email after trying to change email address
+class OTPForm2(Form):
+    otp = StringField("One Time Pin", validators=[otp_validator], render_kw={"placeholder": "OTP"})
 
 
 # Reset Password Form (Edit cust profile - Reset Password action)

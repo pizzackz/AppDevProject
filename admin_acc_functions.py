@@ -1,7 +1,6 @@
 import shelve
 import hashlib
 import random
-from flask import session
 from Admin import Admin
 from functions import get_user_object
 
@@ -43,25 +42,41 @@ def create_admin(first_name, last_name, username, email, password):
     db.close()
 
 
-# Update Admin password data
-def update_admin_password(user_id, hashed_password):
-    # Access database to update customer password
+# Update Admin Details
+def update_admin_details(user_id, first_name=None, last_name=None, display_name=None, email=None, password=None):
+    # Open db to store data
     db = shelve.open("user_accounts.db", "c")
     admins_dict = db["Admins"]
-
     admin = admins_dict.get(user_id)
-    admin.set_password(hashed_password)
 
-    db["Customers"] = admins_dict
+    # Update first_name of customer
+    if first_name:
+        admin.set_first_name(first_name)
+        print(f"Admin account f{user_id:10s}'s first name updated")
+    
+    # Update last_name of customer
+    if last_name:
+        admin.set_display_name(last_name)
+        print(f"Admin account f{user_id:10s}'s last name updated")
+        
+    # Update display_name of customer
+    if display_name:
+        admin.set_display_name(display_name)
+        print(f"Admin account f{user_id:10s}'s display name updated")
 
-    print(f"Admin account f{user_id:10s}'s password updated")
+    # Update email of customer
+    if email:
+        admin.set_email(email)
+        print(f"Admin account f{user_id:10s}'s email updated")
+    
+    # Update password of customer
+    if password:
+        admin.set_password(password)
+        print(f"Admin account f{user_id:10s}'s password updated")
+
+    db["Admins"] = admins_dict
 
     db.close()
-
-
-# Update Admin
-def update_admin(first_name, last_name, username, email, password):
-    pass
 
 
 # Delete Admin

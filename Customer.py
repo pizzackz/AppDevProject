@@ -1,4 +1,5 @@
 from User import User
+import shelve
 
 class Customer(User):
     # Constructor

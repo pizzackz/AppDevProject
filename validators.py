@@ -81,3 +81,20 @@ def data_exist(form, field):
 
     if not data_exist:
         raise ValidationError(f"No account exists with this {field_name.capitalize()}")
+
+
+# 6 digit OTP specific validator
+def otp_validator(form, field):
+    otp = field.data
+    error_list = []
+
+    if len(otp) != 6:
+        error_list.append("One time pin must be exactly 6 digits")
+
+    try:
+        otp = int(otp)
+    except ValueError:
+        error_list.append("One time pin must only contain numbers with no decimal places")
+
+    if error_list:
+        raise ValidationError("; ".join(error_list))
