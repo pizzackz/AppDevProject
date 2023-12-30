@@ -27,6 +27,7 @@ class Customer(User):
     def get_last_online(self):
         return self.__last_online
 
+    # Methods
     def get_cust_data(self):
         cust_dict = {
             "user_id": self.get_user_id(),

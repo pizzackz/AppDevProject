@@ -1,21 +1,5 @@
 <!DOCTYPE html>
-{% extends "customer/edit_profile.html" %}
-
-{% block title %}Edit Profile - Verify Email{% endblock %}
-
-{% block css %}
-    {{ super() }}
-    <style>
-        .modal-backdrop.fade.show {
-            opacity: 0.5;
-            background-color: black;
-        }
-
-        .modal-backdrop.fade {
-            transition: opacity 0.15s linear;
-        }
-    </style>
-{% endblock %}
+{% extends "customer/edit_profile_otp.html" %}
 
 {% block content %}
 {% from "includes/_form_helper.html" import render_field %}
@@ -55,9 +39,9 @@
 
 <div class="modal-backdrop fade show"></div>
 
-<!-- OTP popup -->
-<form method="POST" action="/{{ id }}/edit_profile/verify_new_email" id="otp_form">
-    <div class="modal fade show" id="myModal" data-bs-backdrop="false" data-bs-keyboard="false">
+<!-- Reset password popup -->
+<form method="POST" action="/{{ id }}/edit_profile/reset_password" id="otp_form">
+    <div class="modal fade show" id="myModal" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
             {% block flash_messages %}
                 {{ super() }}
@@ -67,33 +51,21 @@
 
                 <!-- Modal Header -->
                 <div class="modal-header">
-                    <h4 class="modal-title">Verify Email</h4>
-                    <button type="submit" name="button" value="close_otp" class="btn-close"></button>
+                    <h4 class="modal-title">Reset Password</h4>
+                    <button type="submit" name="button" value="close_popup" class="btn-close"></button>
                 </div>
 
                 <!-- Modal Body -->
                 <div class="modal-body">
-                    {{ render_field(otp_form.otp, class="form-control") }}
+                    {{ render_field(password_form.password, class="form-control") }}
+                    {{ render_field(password_form.confirm_password, class="form-control") }}
 
-                    <p>Verify the pin sent to your email address</p>
-                    <input type="submit" value="VERIFY" class="btn btn-primary" />
-                    <a href="{{ url_for('customer.verify_new_email', id=id, resend_pin=True) }}">Resend PIN</a>
+                    <p>Set your new password</p>
+                    <input type="submit" value="RESET" class="btn btn-primary" />
                 </div>
             </div>
         </div>
     </div>
 </form>
 
-{% endblock %}
-
-{% block scripts %}
-    {{ super() }}
-    <script>
-        // Get the modal element first, Create the Bootstrap modal instance using the element
-        const myModalElement = document.getElementById("myModal");
-        const myModalInstance = new bootstrap.Modal(myModalElement, {});
-
-        // Show the modal
-        myModalInstance.show();
-    </script>
 {% endblock %}

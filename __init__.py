@@ -42,12 +42,12 @@ def login():
         session.pop("customer", None)
         session.pop("admin", None)
         session.pop("reset_pass_token", None)
-        return redirect(url_for("login"))
+        return redirect("/login")
 
     # Update login_action in session if user clicked 'Forgot Password'
     if request.args.get("reset_password"):
         session["login_action"] = "send_email"
-        return redirect(url_for("login"))
+        return redirect("/login")
 
     # Render appropriate template based on current login_action for POST requests
     if request.method == "POST":
@@ -89,9 +89,9 @@ def login():
                     print("account_type = " + account_type + ", user_id[0:11] = " + user_id[0:11])
 
                     if account_type == "customer":
-                        return redirect(url_for("customer.customer_home", id=user_id[0:11]))
+                        return redirect(f"{user_id[0:11]}/home")
                     elif account_type == "admin":
-                        return redirect(url_for("admin.admin_home", id=user_id[0:11]))
+                        return redirect(f"admin/{user_id[0:11]}")
             else:
                 return render_template("login_base.html", form=form)
         elif login_action == "send_email":
@@ -130,7 +130,7 @@ def login():
                 flash("The reset password link has been sent to your email!", "info")
                 print("login_action = " + session["login_action"] + ", reset pass token = " + session["reset_pass_token"])
 
-                return redirect(url_for("login"))
+                return redirect("/login")
             else:
                 return render_template("login_send_email.html", form=form)
         elif login_action == "reset_password":
@@ -174,10 +174,7 @@ def login():
                     session["login_action"] = "login"
                     session.pop("reset_pass_token", None)
 
-                    # Set form
-                    form = LoginForm()
-
-                    return redirect(url_for("login"))
+                    return redirect("/login")
                 else:
                     return render_template("login_send_email.html", form=form)
             else:
@@ -186,6 +183,7 @@ def login():
 
     # Render appropriate template based on current login_action for GET requests
     if request.method == "GET":
+        print("login action = " + login_action)
         if login_action == "login":
             form = LoginForm()
             return render_template("login_base.html", form=form)
@@ -216,7 +214,7 @@ def signup():
     if request.args.get("back"):
         session.pop("create_customer", None)
         session["signup_stage"] = "base"
-        return redirect(url_for("signup"))
+        return redirect("/signup")
     
     # Resend otp if user clicked 'Resend PIN'
     if request.args.get("resend_pin"):
@@ -230,7 +228,7 @@ def signup():
         # Update otp in create_customer in session
         session["create_customer"]["otp"] = otp
 
-        return redirect(url_for("signup"))
+        return redirect("/signup")
 
     # Redirect to appropriate template based on current stage for POST requests
     if request.method == "POST":
@@ -254,7 +252,7 @@ def signup():
                 }
                 session["signup_stage"] = "verify_email"
 
-                return redirect(url_for("signup"))
+                return redirect("/signup")
             else:
                 print(form.errors)
                 return render_template("signup_base.html", form=form)
@@ -269,7 +267,7 @@ def signup():
 
                 # Update signup stage in session
                 session["signup_stage"] = "set_password"
-                return redirect(url_for("signup"))
+                return redirect("/signup")
             else:
                 return render_template("signup_otp.html", form=form)
         elif stage == "set_password":
@@ -294,7 +292,7 @@ def signup():
                 session.pop("signup_stage", None)
                 session.pop("create_customer", None)
 
-                return redirect(url_for("login"))
+                return redirect("/login")
             else:
                 return render_template("signup_password.html", form=form)
 

@@ -1,5 +1,5 @@
 from flask import current_app, Blueprint, render_template, request, redirect, url_for, session, flash
-import shelve
+import hashlib
 from Forms import AccountDetailsForm, OTPForm2, ResetPasswordForm2
 from functions import generate_otp, send_email
 from cust_acc_functions import retrieve_cust_details, update_cust_details
@@ -28,13 +28,19 @@ def recipe_creator(id):
 
 
 # Edit Profile page (Customer)
-@customer_bp.route("/<string:id>/edit_customer_profile", methods=["GET", "POST"])
+@customer_bp.route("/<string:id>/edit_profile", methods=["GET", "POST"])
 def edit_cust_profile(id):
     # session.pop("new_data", None)
     # session.pop("new_email_otp", None)
 
+    print("session keys = " + str(session.keys()))
     print("customer data = " + str(session.get("customer")))
     print("new data = " + str(session.get("new_data", {})))
+
+    # Clear new_data in session, redirect to reset password if user clicked 'Forgot Password'
+    if request.args.get("reset_password"):
+        session.pop("new_data", None)
+        return redirect(f"/{id}/edit_profile/reset_password")
 
     # Render appropriate templates based on request methods
     if request.method == "POST":
@@ -78,7 +84,7 @@ def edit_cust_profile(id):
                     session["new_email_otp"] = otp
                     session["new_data"]["email"] = form.email.data
 
-                    return redirect(url_for("customer.verify_new_email", id=id))
+                    return redirect(f"/{id}/edit_profile/verify_new_email")
                 # Immediately save the changed data when no changes to email
                 else:
                     print("saving new data")
@@ -102,24 +108,29 @@ def edit_cust_profile(id):
 
                     print("new customer in session = " + str(session.get("customer")))
 
-                    return redirect((url_for("customer.edit_cust_profile", id=id)))
+                    return redirect(f"/{id}/edit_profile")
             elif request.form.get("button") == "revert":
                 # Clear possible session data
                 session.pop("new_data", None)
                 session.pop("new_email_otp", None)
 
                 # Force reload by using redirect to clear all previously made changes
-                return redirect(url_for("customer.edit_cust_profile", id=id))
+                return redirect(f"/{id}/edit_profile")
             elif request.form.get("button") == "edit_profile_pic":
                 print("Edit profile picture!")
 
-                return redirect(url_for("customer.edit_cust_profile", id=id))
+                return redirect(f"/{id}/edit_profile")
         else:
             print("Form data is invalidated")
             return render_template("customer/edit_profile.html", id=id, form=form)
 
+    # Clear "new_data" in sessionn if no actual new data is needed to be saved
+    if "new_data" in session and session.get("new_data", None) == {}:
+        session.pop("new_data", None)
+        return redirect(f"/{id}/edit_profile")
+
     # Save new data to db when redirected from verify_new_email
-    if "new_data" in session:
+    elif "new_data" in session and session.get("new_data", None) != {}:
         print("saving new data 2")
         new_data = session.get("new_data")
         user_id = session.get("customer").get("user_id")
@@ -163,10 +174,29 @@ def edit_cust_profile(id):
 
 
 # Edit Profile page - Verify Email Popup (Customer)
-@customer_bp.route("/<string:id>/edit_customer_profile/verify_email", methods=["GET", "POST"])
+@customer_bp.route("/<string:id>/edit_profile/verify_new_email", methods=["GET", "POST"])
 def verify_new_email(id):
-
+    print("customer data = " + str(session.get("customer")))
     print("session keys = " + str(session.keys()))
+
+    # Retrieve customer account details from new_data in session, else from customer in session (Include profile image later)
+    first_name =  session.get("customer").get("first_name")
+    last_name = session.get("customer").get("last_name")
+    display_name = session.get("customer").get("display_name")
+    email = session.get("customer").get("email")
+
+    if "new_data" in session:
+        if "first_name" in session.get("new_data"):
+            first_name = session.get("new_data").get("first_name")
+        if "last_name" in session.get("new_data"):
+            last_name = session.get("new_data").get("last_name")
+        if "display_name" in session.get("new_data"):
+            display_name = session.get("new_data").get("display_name")
+        if "email" in session.get("new_data"):
+            email = session.get("new_data").get("email")
+    
+    # Pass cust details as tuple then manually display each of them as though they are form fields & labels
+    cust_details = (first_name, last_name, display_name, email)
 
     # Clear new_email_otp in session, clear email in new_data in session if user clicked on close symbol
     if request.form.get("button") == "close_otp":
@@ -174,7 +204,7 @@ def verify_new_email(id):
         if "new_data" in session:
             session.get("new_data").pop("email")
 
-        return redirect(url_for("customer.edit_cust_profile", id=id))
+        return redirect(f"/{id}/edit_profile")
     
     # Resend otp if user clicked 'Resend PIN'
     if request.args.get("resend_pin"):
@@ -191,18 +221,17 @@ def verify_new_email(id):
         # Display otp sent msg
         flash("An OTP has been resent to your email!", "info")
 
-        return redirect(url_for("customer.verify_new_email", id=id))
+        return redirect(f"/{id}/edit_profile/verify_new_email")
 
     if request.method == "POST":
         otp_form = OTPForm2(request.form)
-        form = AccountDetailsForm(request.form)
 
         if otp_form.validate():
             # Check correct otp
             if otp_form.otp.data != session.get("new_email_otp"):
                 # Display invalid otp msg
                 flash("Invalid OTP, please try again!", "error")
-                return redirect(url_for("customer.verify_new_email", id=id))
+                return redirect(f"/{id}/edit_profile/verify_new_email")
             else:
                 # Display email verified msg
                 flash("Email Verified!")
@@ -210,31 +239,68 @@ def verify_new_email(id):
                 # Clear new_email_otp in session
                 session.pop("new_email_otp")
 
-                return redirect(url_for("customer.edit_cust_profile", id=id))
+                return redirect(f"/{id}/edit_profile")
         else:
-            return render_template("customer/edit_profile_otp.html", form=form, otp_form=otp_form)
+            return render_template("customer/edit_profile_otp.html", cust_details=cust_details, otp_form=otp_form)
 
     if request.method == "GET":
-        form = AccountDetailsForm()
         otp_form = OTPForm2()
+        return render_template("customer/edit_profile_otp.html", id=id, cust_details=cust_details, otp_form=otp_form)
 
-        # Display customer account details from new_data in session, else from customer in session (Include profile image later)
-        form.first_name.data =  session.get("customer").get("first_name")
-        form.last_name.data = session.get("customer").get("last_name")
-        form.display_name.data = session.get("customer").get("display_name")
-        form.email.data = session.get("customer").get("email")
 
-        if "new_data" in session:
-            if "first_name" in session.get("new_data"):
-                form.first_name.data = session.get("new_data").get("first_name")
-            if "last_name" in session.get("new_data"):
-                form.last_name.data = session.get("new_data").get("last_name")
-            if "display_name" in session.get("new_data"):
-                form.display_name.data = session.get("new_data").get("display_name")
-            if "email" in session.get("new_data"):
-                form.email.data = session.get("new_data").get("email")
+# Edit Profile page - Reset Password popup (Customer)
+@customer_bp.route("/<string:id>/edit_profile/reset_password", methods=["GET", "POST"])
+def reset_password(id):
+    print("session keys = " + str(session.keys()))
+    print("customer data = " + str(session.get("customer")))
 
-        return render_template("customer/edit_profile_otp.html", id=id, form=form, otp_form=otp_form)
+    # Retrieve customer account details from customer in session (Include profile image later)
+    first_name =  session.get("customer").get("first_name")
+    last_name = session.get("customer").get("last_name")
+    display_name = session.get("customer").get("display_name")
+    email = session.get("customer").get("email")
+    
+    # Pass cust details as tuple then manually display each of them as though they are form fields & labels
+    cust_details = (first_name, last_name, display_name, email)
+
+    # Redirect user to edit_customer_profile if user clicked on close symbol
+    if request.form.get("button") == "close_popup":
+        return redirect(f"/{id}/edit_profile")
+
+    if request.method == "POST":
+        password_form = ResetPasswordForm2(request.form)
+        form = AccountDetailsForm(request.form)
+
+        if password_form.validate():
+            # Hash password
+            password = password_form.password.data
+            hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+            # Check whether password is the same as existing password for customer
+            if session.get("customer").get("password") == hashed_password:
+                flash("Cannot set new password to be the same as current password", "error")
+                return render_template("customer/edit_profile_reset_pass.html", cust_details=cust_details, password_form=password_form)
+
+            # Check whether passwords match
+            if password_form.password.data != password_form.confirm_password.data:
+                flash("Passwords do not match!", "error")
+                return render_template("customer/edit_profile_reset_pass.html", cust_details=cust_details, password_form=password_form)
+
+            # Update user password data in shelve db, Update customer in session
+            user_id = session.get("customer").get("user_id")
+            update_cust_details(user_id, password=hashed_password)
+
+            # Display successful password reset msg
+            flash("Password has been resetted!", "success")
+
+            return redirect(f"/{id}/edit_profile")
+        else:
+            print("Form invalidated!")
+            return render_template("customer/edit_profile_reset_pass.html", id=id, cust_details=cust_details, password_form=password_form)
+
+    if request.method == "GET":
+        password_form = ResetPasswordForm2()
+        return render_template("customer/edit_profile_reset_pass.html", id=id, cust_details=cust_details, password_form=password_form)
 
 
 # Favourites page (Customer)

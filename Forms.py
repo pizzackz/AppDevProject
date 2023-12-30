@@ -54,5 +54,5 @@ class OTPForm2(Form):
 
 # Reset Password Form (Edit cust profile - Reset Password action)
 class ResetPasswordForm2(Form):
-    password = PasswordField("New Password", validators=[DataRequired(), password_complexity], render_kw={"placeholder": "Password"})
-    confirm_password = PasswordField("Confirm Password", validators=[DataRequired()], render_kw={"placeholder": "Confirm Password"})
+    password = PasswordField("New Password", validators=[password_complexity], render_kw={"placeholder": "Password"})
+    confirm_password = PasswordField("Confirm Password", render_kw={"placeholder": "Confirm Password"})

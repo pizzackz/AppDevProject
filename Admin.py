@@ -6,7 +6,7 @@ class Admin(User):
         super().__init__(user_id, first_name, last_name, username, email, password)
     
 
-    # Getters
+    # Methods
     def get_admin_data(self):
         admin_dict = {
             "user_id": self.get_user_id(),

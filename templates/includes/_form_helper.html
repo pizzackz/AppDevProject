@@ -2,7 +2,6 @@
 {% macro render_field(field) %}
     {{ field.label }}
     {{ field(**kwargs) | safe }}
-
     <!-- Validation error messages from Forms.py fields -->
     {% if field.errors %}
         <div class="text-danger">

@@ -42,6 +42,15 @@ def create_admin(first_name, last_name, username, email, password):
     db.close()
 
 
+# Retrieve Admin Details
+def retrieve_admin_details(user_id):
+    # Open db to retrieve data
+    db = shelve.open("user_accounts.db", "r")
+    admins_dict = db["Admins"]
+    admin = admins_dict.get(user_id)
+
+    return admin.get_admin_data()
+
 # Update Admin Details
 def update_admin_details(user_id, first_name=None, last_name=None, display_name=None, email=None, password=None):
     # Open db to store data
@@ -105,3 +114,7 @@ def delete_admin(username):
 
     db["Admins"] = admins_dict
     db.close()
+
+
+# Testing
+# create_admin("Yeo", "Jun Qi", "Croxvore", "croxvore@gmail.com", "Unitysec@2020")

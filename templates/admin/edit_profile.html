@@ -3,5 +3,35 @@
 {% block title %}Edit Profile{% endblock %}
 
 {% block content %}
-<h1>Edit Profile page for Admin {{ session.get("admin").get("display_name") }}</h1>
+{% from "includes/_form_helper.html" import render_field %}
+
+<form method="POST" action="{{ url_for('admin.edit_admin_profile', id=id) }}" id="admin_details">
+    <h1>Account Details</h1>
+    <button type="submit" name="button" value="revert" class="btn btn-primary">REVERT</button>
+
+    <!-- Display profile image -->
+    <p>Display Profile Image</p>
+    <button type="submit" name="button" value="edit_profile_pic" class="btn btn-primary">Edit Profile Picture</button>
+
+    <div class="form-group">
+        {{ render_field(form.first_name, class="form-control") }}
+        {{ render_field(form.last_name, class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ render_field(form.display_name, class="form-control") }}
+        {{ render_field(form.email, class="form-control") }}
+    </div>
+
+    <!-- Change customer_home to reset_password -->
+    <p>Reset your password <a href="{{ url_for('admin.edit_admin_profile', id=id, reset_password=True) }}">here</a></p>
+    <p>If you entered a different email address, we'll send you a verification code before letting you save your details</p>
+
+    <button type="submit" name="button" value="save" class="btn btn-primary">SAVE</button>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/disable_enable_submit.js') }}"></script>
 {% endblock %}
