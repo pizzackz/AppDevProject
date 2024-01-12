@@ -19,19 +19,17 @@
     <input type="submit" value="LOGIN" class="btn btn-primary" />
 </form>
 
-<a href="{{ url_for('login', reset_password=True) }}">Forgot Password</a>
-
+<a href="/login?reset_password=True">Forgot Password</a>
 {% endblock %}
 
 <hr>
 
-<p>New to tastefully? Sign up <a href="{{ url_for('signup') }}">here</a></p>
-<p>Just browsing? Our menu is <a href="{{ url_for('guest.menu') }}">here</a></p>
+<p>New to tastefully? Sign up <a href="/signup">here</a></p>
+<p>Just browsing? Our menu is <a href="/menu">here</a></p>
 
 {% endblock %}
 
 {% block scripts %}
-    {{ super() }}
-    <script src="{{ url_for('static', filename='js/disable_enable_submit.js') }}"></script>
+{{ super() }}
+<script src="{{ url_for('static', filename='js/disable_enable_submit.js') }}"></script>
 {% endblock %}
-    

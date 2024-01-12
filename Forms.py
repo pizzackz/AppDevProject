@@ -44,7 +44,6 @@ class AccountDetailsForm(Form):
     last_name = StringField("Last Name", validators=[DataRequired()])
     display_name = StringField("Display Name", validators=[DataRequired()])
     email = StringField("Email Address", validators=[DataRequired(), Email(granular_message=True, check_deliverability=True)])
-    # profile_picture = FileField('Profile Picture', validators=[])
 
 
 # OTP Form to verify email after trying to change email address
@@ -52,7 +51,25 @@ class OTPForm2(Form):
     otp = StringField("One Time Pin", validators=[otp_validator], render_kw={"placeholder": "OTP"})
 
 
-# Reset Password Form (Edit cust profile - Reset Password action)
+# Reset Password Form (Edit user profile - Reset Password action)
 class ResetPasswordForm2(Form):
     password = PasswordField("New Password", validators=[password_complexity], render_kw={"placeholder": "Password"})
     confirm_password = PasswordField("Confirm Password", render_kw={"placeholder": "Confirm Password"})
+
+
+# Create Admin Form
+class CreateAdminForm(Form):
+    username = StringField("Username", validators=[DataRequired(), unique_data], render_kw={"placeholder": "Username"})
+    first_name = StringField("First Name", validators=[DataRequired()], render_kw={"placeholder": "First Name"})
+    last_name = StringField("Last Name", validators=[DataRequired()], render_kw={"placeholder": "Last Name"})
+    email = StringField("Email Address", validators=[DataRequired(), Email(granular_message=True, check_deliverability=True), unique_data], render_kw={"placeholder": "Email"})
+    password = PasswordField("Password", validators=[password_complexity], render_kw={"placeholder": "Password"})
+    confirm_password = PasswordField("Confirm Password", render_kw={"placeholder": "Confirm Password"})
+
+
+# Update Admin Form
+class UpdateAdminForm(Form):
+    first_name = StringField("First Name", validators=[DataRequired()])
+    last_name = StringField("Last Name", validators=[DataRequired()])
+    display_name = StringField("Display Name", validators=[DataRequired()])
+    email = StringField("Email Address", validators=[DataRequired(), Email(granular_message=True, check_deliverability=True), unique_data])

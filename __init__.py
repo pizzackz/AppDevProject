@@ -1,6 +1,4 @@
-# IMPLEMENT LOGOUTS FOR CUSTOMERS & ADMINS!!!
-
-from flask import Flask, session, render_template, request, redirect, url_for, flash
+from flask import Flask, session, request, redirect, flash, render_template
 from flask_mail import Mail
 import hashlib
 
@@ -10,8 +8,8 @@ from Forms import BaseSignUpForm, OTPForm, PasswordForm, LoginForm, EmailForm, R
 from blueprints.guest_bp import guest_bp
 from blueprints.customer_bp import customer_bp
 from blueprints.admin_bp import admin_bp
-from functions import generate_otp, send_email, get_user_object, get_account_type, compare_passwords, generate_unique_token
-from cust_acc_functions import create_customer, update_cust_details
+from functions import generate_otp, send_email, get_user_object, get_account_type, compare_passwords
+from cust_acc_functions import create_customer, update_cust_details, delete_customer
 from admin_acc_functions import update_admin_details
 
 app = Flask(__name__)
@@ -28,175 +26,254 @@ mail = Mail(app)
 @app.route("/login", methods=["GET", "POST"])
 def login():
     # session.clear()
-    # Remove session data from signing up if redirected to login
+    # Clear session data from signing up if redirected to login
     session.pop("create_customer", None)
-    session.pop("signup_stage", None)
 
-    login_action = session.get("login_action", "login")
+    # Flash appropriate msg when redirected from guest pages
+    if request.form.get("button") == "order_page":
+        flash("Please login first before ordering!", "warning")
+        return redirect("/login")
+    if request.form.get("button") == "recipe_creator_page":
+        flash("Please login first before using our recipe creator!", "warning")
+        return redirect("/login")
 
-    print("login_action = " + login_action + ", session keys = " + str(session.keys()))
+    # Clear all user's logged in data if clicked on 'logout', redirect to clear url args
+    if request.args.get("logout"):
+        for key in ("customer", "admin", "new_data", "new_email_otp"):
+            session.pop(key, None)
+        return redirect("/login")
 
-    # Reset login_action in session, clear other login-related session data if user clicked 'Back to Login'
+    # Clear login-related session data if user clicked 'Back to Login', redirect to clear url args
     if request.args.get("back"):
-        session["login_action"] = "login"
-        session.pop("customer", None)
-        session.pop("admin", None)
-        session.pop("reset_pass_token", None)
+        for key in ("customer", "admin", "reset_pass_details"):
+            session.pop(key, None)
         return redirect("/login")
 
-    # Update login_action in session if user clicked 'Forgot Password'
+    # Redirect to send email page if user clicked 'Forgot Password'
     if request.args.get("reset_password"):
-        session["login_action"] = "send_email"
-        return redirect("/login")
+        return redirect("/login/send_email")
 
-    # Render appropriate template based on current login_action for POST requests
+    # Handle POST request
     if request.method == "POST":
-        if login_action == "login":
-            form = LoginForm(request.form)
+        form = LoginForm(request.form)
 
-            if form.validate():
-                # Identify type of account, Check whether account exists
-                user_object = get_user_object(username=form.username.data)
-                user_id = ""
-                account_type = ""
+        if form.validate():
+            # Identify type of account, Check whether account exists
+            user_object = get_user_object(username=form.username.data)
 
-                if user_object == False:
-                    # Display invalid username or password msg
-                    flash("Wrong Username or Password!", "error")
-                    print("Wrong Username")
+            # Display invalid username or password msg
+            if user_object == False:
+                flash("Wrong Username or Password!", "error")
+                print("Wrong Username")
 
-                    return render_template("login_base.html", form=form)
-                else:
-                    user_id = user_object.get_user_id()
-                    account_type = get_account_type(user_object=user_object)
-
-                # Handle password checking
-                if not compare_passwords(account_type, user_id, form.password.data):
-                    # Display invalid otp msg
-                    flash("Wrong Username or Password!", "error")
-                    print("Wrong Password")
-
-                    return render_template("login_base.html", form=form)
-                else:
-                    # Remove login_action in session, Create account type in session
-                    session.pop("login_action", None)
-                    if account_type == "customer":
-                        session[account_type] = user_object.get_cust_data()
-                    elif account_type == "admin":
-                        session[account_type] = user_object.get_admin_data()
-
-                    # Redirect users to appropriate home pages
-                    print("account_type = " + account_type + ", user_id[0:11] = " + user_id[0:11])
-
-                    if account_type == "customer":
-                        return redirect(f"{user_id[0:11]}/home")
-                    elif account_type == "admin":
-                        return redirect(f"admin/{user_id[0:11]}")
-            else:
                 return render_template("login_base.html", form=form)
-        elif login_action == "send_email":
-            form = EmailForm(request.form)
+            
+            user_id = user_object.get_user_id()
+            account_type = get_account_type(user_object=user_object)
 
-            if form.validate():
-                # Check whether account exists, Get user id
-                user_object = get_user_object(email=form.email.data)
-                user_id = ""
+            # Handle locked customer accounts trying to login
+            if account_type == "customer" and user_object.get_is_locked():
+                # Display account temporarily locked msg
+                print("Account locked")
 
-                if user_object == False:
-                    # Display invalid username or password msg
-                    flash("No such account with this email exists!", "error")
-                    print(f"Account with email f{form.email.data} does not exist")
+                # Redirect to locked_account page
+                return redirect(f"/login/locked_account?user_id={user_object.get_user_id()}")
 
-                    return render_template("login_send_email.html", form=form)
-                else:
-                    user_id = user_object.get_user_id()
+            # Handle password checking
+            if not compare_passwords(account_type, user_id, form.password.data):
+                # Display invalid otp msg
+                flash("Wrong Username or Password!", "error")
+                print("Wrong Password")
 
-                # Generate unique token
-                token = generate_unique_token(user_id)
-
-                # Store token in session, Store user data in session, Update login_action in session to reset password
-                session["reset_pass_token"] = token
-                if get_account_type(user_object=user_object) == "customer":
-                    session["customer"] = user_object.get_cust_data()
-                elif get_account_type(user_object=user_object) == "admin":
-                    session["admin"] = user_object.get_admin_data()
-                session["login_action"] = "reset_password"
-
-                # Create url with the and send email using it
-                url = url_for("login", token=token, _external=True)
-                send_email(mail, "Password Reset", "itastefully", [form.email.data], body=f"Click here to reset your password: {url}")
-
-                # Display reset password link sent msg
-                flash("The reset password link has been sent to your email!", "info")
-                print("login_action = " + session["login_action"] + ", reset pass token = " + session["reset_pass_token"])
-
-                return redirect("/login")
+                return render_template("login_base.html", form=form)
             else:
-                return render_template("login_send_email.html", form=form)
-        elif login_action == "reset_password":
-            # Render appropriate template once customer is sent reset password link
-            if session["reset_pass_token"] == request.args.get("token"):
-                form = ResetPasswordForm(request.form)
+                # Store account type in session
+                if account_type == "customer":
+                    session[account_type] = user_object.get_cust_data()
+                elif account_type == "admin":
+                    session[account_type] = user_object.get_admin_data()
 
-                # Clear reset pass token in session
-                session.pop("reset_pass_token", None)
+                # Redirect users to appropriate home pages
+                print("account_type = " + account_type + ", user_id[0:11] = " + user_id[0:11])
 
-                if form.validate():
-                    # Hash password
-                    password = form.password.data
-                    hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
-
-                    # Check whether password is the same as existing password for either customer or admin
-                    for user_type in ("customer", "admin"):
-                        if user_type in session and hashed_password == session.get(user_type).get("password"):
-                            flash("Cannot set new password to be the same as current password", "error")
-                            return render_template("login_reset_pass.html", form=form)
-
-                    # Check whether passwords match
-                    if form.password.data != form.confirm_password.data:
-                        flash("Passwords do not match!", "error")
-                        return render_template("login_reset_pass.html", form=form)
-
-                    # Update user password data in shelve db
-                    if "customer" in session:
-                        user_data = session.get("customer")
-                        update_cust_details(user_data.get("user_id"), password=hashed_password)
-                        session.pop("customer")
-                    elif "admin" in session:
-                        user_data = session.get("admin")
-                        update_admin_details(user_data.get("user_id"), password=hashed_password)
-                        session.pop("admin")
-
-                    # Display successful password reset msg
-                    flash("Password has been resetted!", "success")
-
-                    # Reset login_action in session, Clear reset pass token in session
-                    session["login_action"] = "login"
-                    session.pop("reset_pass_token", None)
-
-                    return redirect("/login")
-                else:
-                    return render_template("login_send_email.html", form=form)
-            else:
-                form = EmailForm(request.form)
-                return render_template("login_send_email.html", form=form)
-
-    # Render appropriate template based on current login_action for GET requests
-    if request.method == "GET":
-        print("login action = " + login_action)
-        if login_action == "login":
-            form = LoginForm()
+                if account_type == "customer":
+                    return redirect(f"{user_id[0:11]}/home")
+                elif account_type == "admin":
+                    return redirect(f"admin/{user_id[0:11]}")
+        else:
             return render_template("login_base.html", form=form)
-        elif login_action == "send_email":
-            form = EmailForm()
-            return render_template("login_send_email.html", form=form)
-        elif login_action == "reset_password":
-            if session["reset_pass_token"] == request.args.get("token"):
-                form = ResetPasswordForm()
-                return render_template("login_reset_pass.html", form=form)
-            else:
-                form = EmailForm(request.form)
+
+    # Handle GET request
+    if request.method == "GET":
+        form = LoginForm()
+        return render_template("login_base.html", form=form)
+
+
+# Login - Send email for password reset page
+@app.route("/login/send_email", methods=["GET", "POST"])
+def login_send_email():
+    # Handle POST request
+    if request.method == "POST":
+        form = EmailForm(request.form)
+        print("form validated = " + str(form.validate()))
+
+        if form.validate():
+            # Check whether account exists, Get user id
+            user_object = get_user_object(email=form.email.data)
+            user_id = ""
+
+            if user_object == False:
+                # Display invalid username or password msg
+                flash("No such account with this email exists!", "error")
+                print(f"Account with email f{form.email.data} does not exist")
+
                 return render_template("login_send_email.html", form=form)
+            else:
+                user_id = user_object.get_user_id()
+            
+            # Generate and send OTP
+            otp = generate_otp(6)
+            send_email(mail, "Your Verification Code", "itastefully@gmail.com", [form.email.data], body=f"Your verification code to reset your password is {otp}")
+
+            # Store user_id, otp, email data in reset_pass_details in session
+            session["reset_pass_details"] = {"email": form.email.data, "otp": otp}
+
+            # Display otp sent msg
+            flash("An OTP has been sent to your email!", "info")
+
+            return redirect("/login/verify_email")
+        else:
+            return render_template("login_send_email.html", form=form)
+
+    # Handle GET request
+    if request.method == "GET":
+        form = EmailForm()
+        return render_template("login_send_email.html", form=form)
+
+
+# Login - Verify email for password reset page
+@app.route("/login/verify_email", methods=["GET", "POST"])
+def login_verify_email():
+    # Resend otp if user clicked 'Resend PIN'
+    if request.args.get("resend_pin"):
+        # Generate and send otp
+        otp = generate_otp(6)
+        send_email(mail, "Your Verification Code", "itastefully@gmail.com", [session.get("reset_pass_details").get("email")], body=f"Your verification code to reset your password is {otp}")
+
+        # Display otp sent msg
+        flash("An OTP has been resent to your email!", "info")
+
+        # Update otp in reset_pass_details in session
+        session["reset_pass_details"]["otp"] = otp
+
+        return redirect("/login/verify_email")
+
+    # Handle POST request
+    if request.method == "POST":
+        form = OTPForm(request.form)
+        if form.validate():
+            # Check correct otp
+            if form.otp.data != session.get("reset_pass_details").get("otp"):
+                # Display invalid otp msg
+                flash("Invalid OTP, please try again!", "error")
+                return render_template("login_otp.html", form=form)
+
+            return redirect("/login/reset_password")
+        else:
+            return render_template("login_otp.html", form=form)
+
+    # Handle GET request
+    if request.method == "GET":
+        form = OTPForm()
+        return render_template("login_otp.html", form=form)
+
+
+# Login - Reset password page
+@app.route("/login/reset_password", methods=["GET", "POST"])
+def login_reset_password():
+    # Handle POST request
+    if request.method == "POST":
+        form = ResetPasswordForm(request.form)
+        if form.validate():
+            # Retrive necessary user data
+            user_object = get_user_object(email=session.get("reset_pass_details").get("email"))
+            account_type = get_account_type(user_object=user_object)
+            user_id = user_object.get_user_id()
+            existing_password = user_object.get_password()
+
+            # Hash password
+            password = form.password.data
+            hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+            # Check whether password match existing password
+            if hashed_password == existing_password:
+                flash("Cannot set new password to be the same as current password", "error")
+                return render_template("login_reset_pass.html", form=form)
+
+            # Check whether passwords match
+            if form.password.data != form.confirm_password.data:
+                flash("Passwords do not match!", "error")
+                return render_template("login_reset_pass.html", form=form)
+
+            # Update user password data in shelve db
+            if account_type == "customer":
+                update_cust_details(user_id, password=hashed_password)
+            elif account_type == "admin":
+                update_admin_details(user_id, password=hashed_password)
+
+            # Clear reset_pass_details in session
+            session.pop("reset_pass_details", None)
+
+            # Display successful password reset msg
+            flash("Password has been reset!", "success")
+
+            return redirect("/login")
+        else:
+            return render_template("login_reset_pass.html", form=form)
+
+    # Handle GET request
+    if request.method == "GET":
+        form = ResetPasswordForm()
+        return render_template("login_reset_pass.html", form=form)
+
+
+# Login - locked account page
+@app.route("/login/locked_account", methods=["GET", "POST"])
+def login_locked_account():
+    user_id = request.args.get("user_id")
+    print("user id = " + user_id)
+
+    # Handle POST request
+    if request.method == "POST":
+        # No form validation since there are only submit buttons
+        # Redirect to login page if clicked on close button
+        if request.form.get("button") == "close":
+            return redirect("/login")
+
+        # Delete account if clicked on yes on delete confirmation
+        if request.form.get("button") == "delete":
+            delete_customer(user_id)
+
+            # Display account deleted msg
+            flash("Your account has been successfully deleted!", "info")
+
+            return redirect("/login")
+
+        # Handle cust request to unlock if clicked on unlock
+        if request.form.get("button") == "unlock":
+            # Set request unlock attribute to True
+            update_cust_details(user_id, unlock_request=True)
+
+            # Display sent unlock request msg
+            flash("Your request to unlock this account has been sent! Please wait while our admins look into it!", "info")
+
+            return redirect("/login")
+
+    # Handle GET request
+    if request.method == "GET":
+        form = LoginForm()
+        user_data = get_user_object(user_id).get_cust_data()
+        return render_template("locked_account.html", form=form, user_data=user_data, user_id=user_id)
 
 
 # Signup page
@@ -204,18 +281,48 @@ def login():
 def signup():
     # session.clear()
     # Remove session data from logging in if redirected to signup
-    session.pop("login_action", None)
-    session.pop("reset_pass_token", None)
+    for key in ("customer", "admin", "reset_pass_details"):
+        session.pop(key, None)
 
-    stage = session.get("signup_stage", "base")
-    print("signup stage = " + stage)
-
-    # Clear/ Reset sessions if user clicked 'Back to Signup'
+    # Clear create_customer in session if user clicked 'Back to Signup'
     if request.args.get("back"):
         session.pop("create_customer", None)
-        session["signup_stage"] = "base"
         return redirect("/signup")
-    
+
+    # Handle POST request
+    if request.method == "POST":
+        form = BaseSignUpForm(request.form)
+        if form.validate():
+            # Generate and send OTP
+            otp = generate_otp(6)
+            send_email(mail, "Your Verification Code", "itastefully@gmail.com", [form.email.data], body=f"Your verification code is {otp}")
+
+            # Display otp sent msg
+            flash("An OTP has been sent to your email!", "info")
+
+            # Store temporary data in session
+            session["create_customer"] = {
+                "first_name": form.first_name.data,
+                "last_name": form.last_name.data,
+                "username": form.username.data,
+                "email": form.email.data,
+                "otp": otp,
+            }
+
+            return redirect("/signup/verify_email")
+        else:
+            print("Form was invalidated!")
+            return render_template("signup_base.html", form=form)
+
+    # Handle GET request
+    if request.method == "GET":
+        form = BaseSignUpForm()
+        return render_template("signup_base.html", form=form)
+
+
+# Signup - Verify email page
+@app.route("/signup/verify_email", methods=["GET", "POST"])
+def signup_verify_email():
     # Resend otp if user clicked 'Resend PIN'
     if request.args.get("resend_pin"):
         # Generate and send otp
@@ -228,85 +335,61 @@ def signup():
         # Update otp in create_customer in session
         session["create_customer"]["otp"] = otp
 
-        return redirect("/signup")
+        return redirect("/signup/verify_email")
 
-    # Redirect to appropriate template based on current stage for POST requests
+    # Handle POST request
     if request.method == "POST":
-        if stage == "base" or request.form.get("resend_otp"):
-            form = BaseSignUpForm(request.form)
-            if form.validate():
-                # Generate and send OTP
-                otp = generate_otp(6)
-                send_email(mail, "Your Verification Code", "itastefully@gmail.com", [form.email.data], body=f"Your verification code is {otp}")
-
-                # Display otp sent msg
-                flash("An OTP has been sent to your email!", "info")
-
-                # Store temporary data in session, update signup stage in session
-                session["create_customer"] = {
-                    "first_name": form.first_name.data,
-                    "last_name": form.last_name.data,
-                    "username": form.username.data,
-                    "email": form.email.data,
-                    "otp": otp,
-                }
-                session["signup_stage"] = "verify_email"
-
-                return redirect("/signup")
-            else:
-                print(form.errors)
-                return render_template("signup_base.html", form=form)
-        elif stage == "verify_email":
-            form = OTPForm(request.form)
-            if form.validate():
-                # Check correct otp
-                if form.otp.data != session.get("create_customer").get("otp"):
-                    # Display invalid otp msg
-                    flash("Invalid OTP, please try again!", "error")
-                    return render_template("signup_otp.html", form=form)
-
-                # Update signup stage in session
-                session["signup_stage"] = "set_password"
-                return redirect("/signup")
-            else:
+        form = OTPForm(request.form)
+        if form.validate():
+            # Check correct otp
+            if form.otp.data != session.get("create_customer").get("otp"):
+                # Display invalid otp msg
+                flash("Invalid OTP, please try again!", "error")
                 return render_template("signup_otp.html", form=form)
-        elif stage == "set_password":
-            form = PasswordForm(request.form)
+
+            return redirect("/signup/set_password")
+        else:
+            return render_template("signup_otp.html", form=form)
+
+    # Handle GET request
+    if request.method == "GET":
+        form = OTPForm()
+        return render_template("signup_otp.html", form=form)
+
+
+# Signup - Set password page
+@app.route("/signup/set_password", methods=["GET", "POST"])
+def signup_set_password():
+    # Handle POST request
+    if request.method == "POST":
+        form = PasswordForm(request.form)
+        if form.validate():
             # Check whether passwords match
-            if form.validate():
-                if form.password.data != form.confirm_password.data:
-                    flash("Passwords do not match!", "error")
-                    return render_template("signup_password.html", form=form)
-
-                # Hash password
-                password = form.password.data
-                hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
-
-                # Store ALL customer data in shelve db
-                create_customer(session["create_customer"], hashed_password)
-
-                # Display successful account creation msg
-                flash("Account created, login now!", "success")
-
-                # Clear signup stage, create_customer in session
-                session.pop("signup_stage", None)
-                session.pop("create_customer", None)
-
-                return redirect("/login")
-            else:
+            if form.password.data != form.confirm_password.data:
+                flash("Passwords do not match!", "error")
                 return render_template("signup_password.html", form=form)
 
-    # Render appropriate template based on current stage for GET requests
-    if request.method == "GET":
-        if stage == "base":
-            form = BaseSignUpForm()
-            return render_template("signup_base.html", form=form)
-        elif stage == "verify_email":
-            form = OTPForm()
-            return render_template("signup_otp.html", form=form)
-        elif stage == "set_password":
-            form = PasswordForm()
+            # Hash password
+            password = form.password.data
+            hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+            # Store ALL customer data in shelve db
+            create_customer(session.get("create_customer"), hashed_password)
+
+            # Display successful account creation msg
+            flash("Account created, login now!", "success")
+
+            # Clear create_customer in session
+            session.pop("create_customer", None)
+
+            return redirect("/login")
+        else:
             return render_template("signup_password.html", form=form)
+
+    # Handle GET request
+    if request.method == "GET":
+        form = PasswordForm()
+        return render_template("signup_password.html", form=form)
 
 
 # Error page (code 404)

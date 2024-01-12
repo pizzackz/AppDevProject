@@ -1,6 +1,5 @@
 import shelve
 import hashlib
-from flask import session, flash
 from wtforms import ValidationError
 
 
@@ -9,7 +8,7 @@ from wtforms import ValidationError
 def password_complexity(form, field):
     password = field.data
     error_list = []
-    
+
     if len(password) < 8:
         error_list.append("Password must be at least 8 characters long")
 
@@ -37,6 +36,13 @@ def unique_data(form, field):
 
         for customer in customers_dict.values():
             if not customer.is_unique_data(data, field_name):
+                raise ValidationError(f"{field_name.capitalize()} is already in use")
+    
+    if "Admins" in db:
+        admins_dict = db["Admins"]
+
+        for admin in admins_dict.values():
+            if not admin.is_unique_data(data, field_name):
                 raise ValidationError(f"{field_name.capitalize()} is already in use")
 
     db.close()
@@ -98,3 +104,4 @@ def otp_validator(form, field):
 
     if error_list:
         raise ValidationError("; ".join(error_list))
+

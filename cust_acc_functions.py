@@ -7,10 +7,10 @@ from Customer import Customer
 # Create Customer
 def create_customer(session_data, hashed_password):
     # Get all account details
-    first_name = session_data["first_name"]
-    last_name = session_data["last_name"]
-    username = session_data["username"]
-    email = session_data["email"]
+    first_name = session_data.get("first_name")
+    last_name = session_data.get("last_name")
+    username = session_data.get("username")
+    email = session_data.get("email")
 
     # Hash 1st 4 char of username & add random number in front to get user_id
     hashed_username = hashlib.sha256(username[0:3].encode("utf-8")).hexdigest()
@@ -46,36 +46,67 @@ def retrieve_cust_details(user_id):
 
 
 # Update Customer Details
-def update_cust_details(user_id, first_name=None, last_name=None, display_name=None, email=None, password=None):
+def update_cust_details(user_id, first_name=None, last_name=None, display_name=None, email=None, password=None, is_locked=None, locked_reason=None, unlock_request=None):
     # Open db to store data
     db = shelve.open("user_accounts.db", "c")
     customers_dict = db["Customers"]
     customer = customers_dict.get(user_id)
 
+    print("cust data = " + str(customer.get_cust_data()))
+
     # Update first_name of customer
     if first_name:
         customer.set_first_name(first_name)
-        print(f"Customer account f{user_id:10s}'s first name updated")
+        print(f"Customer account {user_id:.10s}'s first name updated")
     
     # Update last_name of customer
     if last_name:
         customer.set_last_name(last_name)
-        print(f"Customer account f{user_id:10s}'s last name updated")
+        print(f"Customer account {user_id:.10s}'s last name updated")
         
     # Update display_name of customer
     if display_name:
         customer.set_display_name(display_name)
-        print(f"Customer account f{user_id:10s}'s display name updated")
+        print(f"Customer account {user_id:.10s}'s display name updated")
 
     # Update email of customer
     if email:
         customer.set_email(email)
-        print(f"Customer account f{user_id:10s}'s email updated")
+        print(f"Customer account {user_id:.10s}'s email updated")
     
     # Update password of customer
     if password:
+        # print("exist pass = " + customer.get_password())
         customer.set_password(password)
-        print(f"Customer account f{user_id:10s}'s password updated")
+        # print("new pass = " + customer.get_password())
+        print(f"Customer account {user_id:.10s}'s password updated")
+
+    # Update locked status and reason
+    if is_locked and locked_reason:
+        customer.set_is_locked(is_locked)
+        customer.set_locked_reason(locked_reason)
+        print(f"Customer account {user_id:.10s} has been locked with a reason")
+    
+    # Update unlock request
+    if unlock_request:
+        customer.set_unlock_request(unlock_request)
+        print(f"Customer account {user_id:.10s} has requested for unlock")
 
     db["Customers"] = customers_dict
     db.close()
+
+
+# Detete Customer
+def delete_customer(user_id):
+    # Open db to delete data
+    db = shelve.open("user_accounts.db", "c")
+    customers_dict = db["Customers"]
+    customers_dict.pop(user_id, None)
+
+    db["Customers"] = customers_dict
+    db.close()
+
+    print(f"Customer account {user_id} was deleted!")
+
+
+# Testing
