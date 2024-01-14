@@ -1,4 +1,4 @@
-from flask import current_app, Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import current_app, Blueprint, render_template, request, redirect, session, flash
 import hashlib
 from Forms import AccountDetailsForm, OTPForm2, ResetPasswordForm2
 from functions import generate_otp, send_email
@@ -9,6 +9,9 @@ customer_bp = Blueprint("customer", __name__)
 # Home page (Customer)
 @customer_bp.route("/<string:id>/home")
 def customer_home(id):
+    # Clear temp cust data in session
+    session.pop("temp_cust_data", None)
+
     print(f"short_id = {id}, data = {session.get('customer')}")
     return render_template("customer/home.html", id=id)
 
@@ -116,10 +119,6 @@ def edit_cust_profile(id):
 
                 # Force reload by using redirect to clear all previously made changes
                 return redirect(f"/{id}/edit_profile")
-            elif request.form.get("button") == "edit_profile_pic":
-                print("Edit profile picture!")
-
-                return redirect(f"/{id}/edit_profile")
         else:
             print("Form data is invalidated")
             return render_template("customer/edit_profile.html", id=id, form=form)
@@ -130,7 +129,7 @@ def edit_cust_profile(id):
         return redirect(f"/{id}/edit_profile")
 
     # Save new data to db when redirected from verify_new_email
-    elif "new_data" in session and session.get("new_data", None) != {}:
+    if "new_data" in session and session.get("new_data", None) != {}:
         print("saving new data 2")
         new_data = session.get("new_data")
         user_id = session.get("customer").get("user_id")
@@ -154,7 +153,7 @@ def edit_cust_profile(id):
     if request.method == "GET":
         form = AccountDetailsForm()
 
-        # Display customer account details from new_data in session, else from customer in session (Include profile image later)
+        # Display customer account details from new_data in session, else from customer in session
         form.first_name.data =  session.get("customer").get("first_name")
         form.last_name.data = session.get("customer").get("last_name")
         form.display_name.data = session.get("customer").get("display_name")
@@ -198,8 +197,8 @@ def verify_new_email(id):
     # Pass cust details as tuple then manually display each of them as though they are form fields & labels
     cust_details = (first_name, last_name, display_name, email)
 
-    # Clear new_email_otp in session, clear email in new_data in session if user clicked on close symbol
-    if request.form.get("button") == "close_otp":
+    # Clear new_email_otp in session, clear email in new_data in session if user closed the popup
+    if request.form.get("button") == "close":
         session.pop("new_email_otp", None)
         if "new_data" in session:
             session.get("new_data").pop("email")
@@ -254,17 +253,17 @@ def reset_password(id):
     print("session keys = " + str(session.keys()))
     print("customer data = " + str(session.get("customer")))
 
-    # Retrieve customer account details from customer in session (Include profile image later)
+    # Retrieve customer account details from customer in session
     first_name =  session.get("customer").get("first_name")
     last_name = session.get("customer").get("last_name")
     display_name = session.get("customer").get("display_name")
     email = session.get("customer").get("email")
-    
+
     # Pass cust details as tuple then manually display each of them as though they are form fields & labels
     cust_details = (first_name, last_name, display_name, email)
 
     # Redirect user to edit_customer_profile if user clicked on close symbol
-    if request.form.get("button") == "close_popup":
+    if request.form.get("button") == "close":
         return redirect(f"/{id}/edit_profile")
 
     if request.method == "POST":
@@ -276,22 +275,26 @@ def reset_password(id):
             password = password_form.password.data
             hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
 
+            print("hashed pass = " + hashed_password)
+            print("existing pass = " + session.get("customer").get("password"))
+
             # Check whether password is the same as existing password for customer
             if session.get("customer").get("password") == hashed_password:
                 flash("Cannot set new password to be the same as current password", "error")
-                return render_template("customer/edit_profile_reset_pass.html", cust_details=cust_details, password_form=password_form)
+                return render_template("customer/edit_profile_reset_pass.html", id=id, cust_details=cust_details, password_form=password_form)
 
             # Check whether passwords match
             if password_form.password.data != password_form.confirm_password.data:
                 flash("Passwords do not match!", "error")
-                return render_template("customer/edit_profile_reset_pass.html", cust_details=cust_details, password_form=password_form)
+                return render_template("customer/edit_profile_reset_pass.html", id=id, cust_details=cust_details, password_form=password_form)
 
             # Update user password data in shelve db, Update customer in session
             user_id = session.get("customer").get("user_id")
             update_cust_details(user_id, password=hashed_password)
+            session["customer"] = retrieve_cust_details(user_id)
 
             # Display successful password reset msg
-            flash("Password has been resetted!", "success")
+            flash("Password has been reset!", "success")
 
             return redirect(f"/{id}/edit_profile")
         else:

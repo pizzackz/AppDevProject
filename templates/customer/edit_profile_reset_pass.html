@@ -43,24 +43,29 @@
 <form method="POST" action="/{{ id }}/edit_profile/reset_password" id="otp_form">
     <div class="modal fade show" id="myModal" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
-            {% block flash_messages %}
-                {{ super() }}
-            {% endblock %}
 
             <div class="modal-content">
 
                 <!-- Modal Header -->
                 <div class="modal-header">
                     <h4 class="modal-title">Reset Password</h4>
-                    <button type="submit" name="button" value="close_popup" class="btn-close"></button>
+                    <button type="submit" name="button" value="close" class="btn-close bypass-disable"></button>
                 </div>
 
                 <!-- Modal Body -->
                 <div class="modal-body">
+                    {% block flash_messages %}
+                        {{ super() }}
+                    {% endblock %}
+
                     {{ render_field(password_form.password, class="form-control") }}
                     {{ render_field(password_form.confirm_password, class="form-control") }}
 
                     <p>Set your new password</p>
+                </div>
+                
+                    <!-- Modal Footer -->
+                <div class="modal-footer">
                     <input type="submit" value="RESET" class="btn btn-primary" />
                 </div>
             </div>

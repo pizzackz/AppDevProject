@@ -26,9 +26,37 @@
 
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('admin.edit_admin_profile', id=id) }}">{{ session.get("admin").get("display_name") }}</a>
+                    <a class="nav-link" href="{{ url_for('admin.edit_admin_profile', id=id) }}">Edit Profile: {{ session.get("admin").get("display_name") }}</a>
+                </li>
+                <li class="nav-item">
+                    <input type="submit" name="button" value="Logout" class="nav-btn btn btn-danger bypass-disable" data-bs-toggle="modal" data-bs-target="#confirm-logout" />
                 </li>
             </ul>
         </div>
     </div>
 </nav>
+
+<!-- Confirm Logout Popup -->
+<div class="modal" id="confirm-logout">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Logout Confirmation</h4>
+                <button type="button" class="btn-close bypass-disable" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">Are you sure you want to logout?</div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <form action="{{ url_for('login', id=id, logout=True) }}" method="POST">
+                    <input type="submit" value="Yes" class="btn btn-danger bypass-disable" />
+                </form>
+                <button type="button" class="btn btn-secondary bypass-disable" data-bs-dismiss="modal">No</button>
+            </div>
+        </div>
+    </div>
+</div>

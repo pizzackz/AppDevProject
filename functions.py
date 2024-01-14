@@ -2,8 +2,6 @@ import string
 import random
 import shelve
 import hashlib
-import uuid
-from flask import session, flash
 from flask_mail import Message
 
 from Customer import Customer
@@ -42,7 +40,7 @@ def send_email(mail, subject, sender, recipients, body=None, html=None):
 
 
 # Get user (customer/ admin) object from username/ email, returns False when no such account found
-def get_user_object(username=None, email=None):
+def get_user_object(user_id=None, username=None, email=None):
     customers_dict = {}
     admins_dict = {}
     db = shelve.open("user_accounts.db", "c")
@@ -59,6 +57,11 @@ def get_user_object(username=None, email=None):
 
     db.close()
 
+    if user_id in customers_dict.keys():
+        return customers_dict.get(user_id)
+    elif user_id in admins_dict.keys():
+        return admins_dict.get(user_id)
+
     for customer in customers_dict.values():
         if (username and username == customer.get_username()) or (email and email == customer.get_email()):
             return customer
@@ -70,7 +73,7 @@ def get_user_object(username=None, email=None):
     return False
 
 
-# Get account type (customer/ admin) from user_object
+# Get account type (customer/ admin) from user_object, user_id
 def get_account_type(user_object=None, user_id=None):
     if user_object:
         if isinstance(user_object, Customer):
@@ -100,14 +103,3 @@ def compare_passwords(account_type, user_id, password):
     
     return hashed_password == actual_password
 
-
-# Generate unique tokens
-def generate_unique_token(user_id=None):
-    base_token = str(uuid.uuid4())
-
-    if user_id:
-        token = f"{user_id}_{base_token}"
-    else:
-        token = base_token
-
-    return token.replace("-", "")

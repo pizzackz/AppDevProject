@@ -12,9 +12,8 @@ def home():
 @guest_bp.route("/menu")
 def menu():
     # Remove session data when redirected from signup or login
-    session.pop("create_customer", None)
-    session.pop("signup_stage", None)
-    session.pop("action", None)
+    for key in ("customer", "admin", "reset_pass_details", "create_customer"):
+        session.pop(key, None)
 
     return render_template("guest/menu.html")
 

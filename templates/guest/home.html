@@ -13,10 +13,10 @@
 <p>Redefining Meals, Promoting Sustainability</p>
 
 <!-- Add code to flash message when redirected to login page -->
-<div class="buttons">
-    <a href="{{ url_for('login') }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Order</button></a>
-    <a href="{{ url_for('login') }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Recipe Creator</button></a>
-</div>
+<form method="POST" action="/login">
+    <button name="button" value="order_page" class="btn btn-primary bypass-disable">Order</button>
+    <button name="button" value="recipe_creator_page" class="btn btn-primary bypass-disable">Recipe Creator</button>
+</form>
 
 <p>Login / Signup to order</p>
 

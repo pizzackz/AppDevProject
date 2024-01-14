@@ -42,6 +42,28 @@ def create_admin(first_name, last_name, username, email, password):
     db.close()
 
 
+# Retrieve all admins
+def retrieve_all_admins():
+    admins_dict = {}
+    db = shelve.open("user_accounts.db", "c")
+    
+    if "Admins" in db:
+        admins_dict = db["Admins"]
+    else:
+        db["Admins"] = admins_dict
+        return []
+
+    db.close()
+
+    admins_list = []
+
+    for key in admins_dict:
+        admin = admins_dict.get(key)
+        admins_list.append(admin) 
+    
+    return admins_list
+
+
 # Retrieve Admin Details
 def retrieve_admin_details(user_id):
     # Open db to retrieve data
@@ -50,6 +72,7 @@ def retrieve_admin_details(user_id):
     admin = admins_dict.get(user_id)
 
     return admin.get_admin_data()
+
 
 # Update Admin Details
 def update_admin_details(user_id, first_name=None, last_name=None, display_name=None, email=None, password=None):
@@ -61,27 +84,27 @@ def update_admin_details(user_id, first_name=None, last_name=None, display_name=
     # Update first_name of customer
     if first_name:
         admin.set_first_name(first_name)
-        print(f"Admin account f{user_id:10s}'s first name updated")
+        print(f"Admin account f{user_id:.10s}'s first name updated")
     
     # Update last_name of customer
     if last_name:
-        admin.set_display_name(last_name)
-        print(f"Admin account f{user_id:10s}'s last name updated")
+        admin.set_last_name(last_name)
+        print(f"Admin account f{user_id:.10s}'s last name updated")
         
     # Update display_name of customer
     if display_name:
         admin.set_display_name(display_name)
-        print(f"Admin account f{user_id:10s}'s display name updated")
+        print(f"Admin account f{user_id:.10s}'s display name updated")
 
     # Update email of customer
     if email:
         admin.set_email(email)
-        print(f"Admin account f{user_id:10s}'s email updated")
+        print(f"Admin account f{user_id:.10s}'s email updated")
     
     # Update password of customer
     if password:
         admin.set_password(password)
-        print(f"Admin account f{user_id:10s}'s password updated")
+        print(f"Admin account f{user_id:.10s}'s password updated")
 
     db["Admins"] = admins_dict
 
@@ -89,32 +112,43 @@ def update_admin_details(user_id, first_name=None, last_name=None, display_name=
 
 
 # Delete Admin
-def delete_admin(username):
-    admin_object = get_user_object(username)
-    admin_id = ""
-
+def delete_admin(username=None, user_id=None):
     # Access database to delete admin account
     admins_dict = {}
+    user_data = {}
     db = shelve.open("user_accounts.db", "c")
 
     if "Admins" in db:
         admins_dict = db["Admins"]
     else:
         print("No admin accounts currently")
-        return
+        return None
 
-    if admin_object == False:
-        print("No such admin account")
-        return
-    else:
-        admin_id = admin_object.get_user_id()
+    if username:
+        admin_object = get_user_object(username)
+        admin_id = ""
 
-    admins_dict.pop(admin_id, None)
-    print(f"Admin account {admin_id:.10s} is deleted")
+        if admin_object == False:
+            print("No such admin account")
+            return None
+        else:
+            admin_id = admin_object.get_user_id()
 
-    db["Admins"] = admins_dict
-    db.close()
+        user_data = admins_dict.pop(admin_id, None)
+
+        db["Admins"] = admins_dict
+        db.close()
+    elif user_id:
+        user_data = admins_dict.pop(user_id, None)
+
+        db["Admins"] = admins_dict
+        print(db["Admins"])
+        db.close()
+
+    print(f"Admin account {user_id:.10s} is deleted")
+    print(user_data)
+
+    return user_data
 
 
 # Testing
-# create_admin("Yeo", "Jun Qi", "Croxvore", "croxvore@gmail.com", "Unitysec@2020")
