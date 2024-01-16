@@ -2,7 +2,7 @@ from flask import Flask, session, request, redirect, flash, render_template
 from flask_mail import Mail
 import hashlib
 
-from Config import Config
+from config import Config
 from Forms import BaseSignUpForm, OTPForm, PasswordForm, LoginForm, EmailForm, ResetPasswordForm
 
 from blueprints.guest_bp import guest_bp
