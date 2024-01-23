@@ -1,9 +1,11 @@
 from flask import Flask, session, request, redirect, flash, render_template
 from flask_mail import Mail
+from werkzeug.utils import secure_filename
 import hashlib
+import os
 
-from config import Config
-from Forms import BaseSignUpForm, OTPForm, PasswordForm, LoginForm, EmailForm, ResetPasswordForm
+from Config import Config
+from Forms import BaseSignUpForm, OTPForm, PasswordForm, LoginForm, EmailForm, ResetPasswordForm, FileForm
 
 from blueprints.guest_bp import guest_bp
 from blueprints.customer_bp import customer_bp
@@ -22,6 +24,21 @@ app.register_blueprint(admin_bp)
 mail = Mail(app)
 
 # Routes
+# Used for testing
+# @app.route("/test", methods=["GET", "POST"])
+# def test():
+#     form = FileForm(request.form)
+
+#     if request.method == "POST" and form.validate():
+#         file_item = request.files["file"]
+#         filename = file_item.filename
+#         file_item.save(os.path.join(app.config["UPLOAD_FOLDER"], "profile_pictures", id, secure_filename(filename))) # Replace 'id' with user_id
+
+#         return "Success!"
+
+#     return render_template("base.html", form=form)
+
+
 # Login page
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -81,7 +98,7 @@ def login():
 
             # Handle password checking
             if not compare_passwords(account_type, user_id, form.password.data):
-                # Display invalid otp msg
+                # Display invalid credentials msg
                 flash("Wrong Username or Password!", "error")
                 print("Wrong Password")
 
@@ -99,7 +116,7 @@ def login():
                 if account_type == "customer":
                     return redirect(f"{user_id[0:11]}/home")
                 elif account_type == "admin":
-                    return redirect(f"admin/{user_id[0:11]}")
+                    return redirect(f"{user_id[0:11]}/admin")
         else:
             return render_template("login_base.html", form=form)
 

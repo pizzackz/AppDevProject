@@ -15,6 +15,7 @@ class Admin(User):
             "display_name": self.get_display_name(),
             "username": self.get_username(),
             "email": self.get_email(),
-            "password": self.get_password()
+            "password": self.get_password(),
+            "profile_pic": self.get_profile_pic_name()
         }
         return admin_dict

@@ -75,36 +75,41 @@ def retrieve_admin_details(user_id):
 
 
 # Update Admin Details
-def update_admin_details(user_id, first_name=None, last_name=None, display_name=None, email=None, password=None):
+def update_admin_details(user_id, first_name=None, last_name=None, display_name=None, email=None, password=None, profile_pic_name=None):
     # Open db to store data
     db = shelve.open("user_accounts.db", "c")
     admins_dict = db["Admins"]
     admin = admins_dict.get(user_id)
 
-    # Update first_name of customer
+    # Update first_name of admin
     if first_name:
         admin.set_first_name(first_name)
-        print(f"Admin account f{user_id:.10s}'s first name updated")
+        print(f"Admin account {user_id:.10s}'s first name updated")
     
-    # Update last_name of customer
+    # Update last_name of admin
     if last_name:
         admin.set_last_name(last_name)
-        print(f"Admin account f{user_id:.10s}'s last name updated")
+        print(f"Admin account {user_id:.10s}'s last name updated")
         
-    # Update display_name of customer
+    # Update display_name of admin
     if display_name:
         admin.set_display_name(display_name)
-        print(f"Admin account f{user_id:.10s}'s display name updated")
+        print(f"Admin accountf{user_id:.10s}'s display name updated")
 
-    # Update email of customer
+    # Update email of admin
     if email:
         admin.set_email(email)
-        print(f"Admin account f{user_id:.10s}'s email updated")
+        print(f"Admin account {user_id:.10s}'s email updated")
     
-    # Update password of customer
+    # Update password of admin
     if password:
         admin.set_password(password)
-        print(f"Admin account f{user_id:.10s}'s password updated")
+        print(f"Admin account {user_id:.10s}'s password updated")
+
+    # Update profile picture of admin
+    if profile_pic_name:
+        admin.set_profile_pic_name(profile_pic_name)
+        print(f"Admin account {user_id:.10s}'s profile picutre updated!")
 
     db["Admins"] = admins_dict
 
@@ -152,3 +157,5 @@ def delete_admin(username=None, user_id=None):
 
 
 # Testing
+# for i in range(7):
+#     create_admin("Olegairo", "Jairus", "Jayroos fdksajkfldasjlfdsakjlfsdjksdf", "jayroos@gmail.com", "blahblah")

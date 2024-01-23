@@ -1,11 +1,18 @@
 <!DOCTYPE html>
-<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+<nav class="navbar navbar-expand-lg navbar-light shadow shadow-sm"
+    style="background-color:#ffedc5ff; border-bottom: black 1px solid;">
     <div class="container-fluid">
-        <!-- Replace this element with logo of our business -->
-        <a class="navbar-brand" href="{{ url_for('guest.home') }}">Tastefully Logo</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar"><span class="navbar-toggler-icon"></span></button>
+        <!-- Logo image -->
+        <a class="navbar-brand" href="{{ url_for('guest.home', id=id) }}">
+            <img src="{{ url_for('static', filename='images/logo.png') }}"
+                style="height: 3.5rem; width: auto; margin-left: 1rem;" />
+        </a>
+        <button class="navbar-toggler bypass-disable" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-        <div class="collapse navbar-collapse" id="collapsibleNavbar">
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <!-- Main pages -->
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('guest.home') }}">Home</a>
@@ -18,6 +25,7 @@
                 </li>
             </ul>
 
+            <!-- Login & Sign up -->
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('login') }}">Login</a>

@@ -1,0 +1,18 @@
+@font-face {
+    font-family: 'Inter-SemiBold';
+    src: url("../fonts/Inter-SemiBold.ttf") format("truetype");
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    font-family: 'Inter-SemiBold';
+    overflow-x: hidden;
+    overflow-y: auto;
+    background-color: #f3f3f3;
+    margin: 0;
+}
+
+input::placeholder {
+    text-align: center;
+}

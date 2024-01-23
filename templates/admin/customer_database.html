@@ -2,6 +2,106 @@
 {% extends "admin/home.html" %}
 {% block title %}Customer Database{% endblock %}
 
+{% block css %}
+{{ super() }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+<style>
+    .container {
+        position: absolute;
+        display: block;
+        left: 15vw;
+        width: 70vw;
+        top: 30vh;
+    }
+
+    .form-group .col-form-label {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .form-control::placeholder {
+        text-align: center;
+    }
+
+    .col-form-label {
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
+
+    .card.card-border-dark.mt-3 .card-body {
+        height: 50vh;
+        overflow-y: auto;
+    }
+
+    td, th {
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<h1>Customer Database page for Admin {{ session.get("admin").get("display_name") }}</h1>
+<div class="container" style="top: {% if cust_list %}10vh{% endif %};">
+    <form method="POST" action="">
+        <div class="form-group">
+            <label for="first_name" class="col-form-label text-center">Enter Customer's Username</label>
+            <div class="input-group">
+                <input class="form-control" id="username" name="username" type="text" {% if request.form %}value='{{ form.username.data }}'{% endif %} placeholder="Username" />
+                <button type="submit" class="btn btn-primary d-flex align-items-center disabled">
+                    <i class="bi bi-search me-1"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+
+    {% if cust_list %}
+    <div class="card card-border-dark mt-3">
+        <div class="card-header">
+            <h4 class="card-title">Search results for usernames containing '{{ form.username.data }}'</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Locked</th>
+                        <th>Last Online</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in cust_list %}
+                    <tr onclick="window.location.href='/admin/{{ id }}/customer_database?username={{ customer.get_username() }}'" style="cursor: pointer;">
+                        <td>{{ customer.get_username() }}</td>
+                        <td>{{ customer.get_email() }}</td>
+                        <td>
+                            {% if customer.get_is_locked() %}<mark>Yes</mark>
+                            {% else %}No{% endif %}
+                        </td>
+                        <td>{{ customer.get_last_online() }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    const usernameInput = document.getElementById("username");
+    const submitButton = document.querySelector(".input-group .btn");
+
+    usernameInput.addEventListener("input", () => {
+        if (usernameInput.value.trim()) {
+            submitButton.classList.remove("disabled");
+        } else {
+            submitButton.classList.add("disabled");
+        }
+    });
+</script>
 {% endblock %}

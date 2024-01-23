@@ -1,24 +1,51 @@
 <!DOCTYPE html>
-{% extends "admin/edit_profile_otp.html" %}
+{% extends "customer/edit_profile_otp.html" %}
 
-{% block title %}Edit Profile - Reset Password{% endblock %}
+{% block title %}Edit Profile - Change Profile Picture{% endblock %}
+
+{% block css %}
+{{ super() }}
+<style>
+    .modal-body label {
+        visibility: hidden;
+    }
+
+    #modal-profile-image {
+        display: flex;
+        justify-content: center;
+    }
+
+    .modal-body p {
+        font-size: 1.5285vw;
+        text-align: center;
+    }
+
+    #modal-profile-image img {
+        display: block;
+        height: 15vw;
+        width: 15vw;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 {% from "includes/_form_helper.html" import render_field %}
 
+
 <!-- Manually display customer data -->
-<form method="POST" action="" id="admin_details">
+<form method="POST" action="" id="customer_details">
     <div class="container-fluid row g-0">
         <div class="col-sm-3 col-md-3 col-lg-3" id="profile-image-half">
             <div id="profile-image">
-                {% if session.get("admin").get("profile_pic") == "default" %}
+                {% if session.get("customer").get("profile_pic") == "default" %}
                 <img class="rounded-circle" src="{{ url_for('static', filename='images/default_profile_pic.png') }}" />
                 {% else %}
                 <img class="rounded-circle"
-                    src="{{url_for('static', filename='uploads/admin/profile_pictures/' + session.get('admin').get('profile_pic')) }}" />
+                    src="{{url_for('static', filename='uploads/customer/profile_pictures/' + session.get('customer').get('profile_pic')) }}" />
                 {% endif %}
                 <button type="submit" name="button" value="edit_profile_pic"
-                    class="btn btn-primary bypass-disable">EDIT</button>
+                    class="btn btn-primary bypass-disable">EDIT
+                </button>
             </div>
         </div>
 
@@ -26,8 +53,8 @@
             <div id="top-row" class="row">
                 <h3 class="col">Account Details</h3>
                 <div id="revert-button" class="col">
-                    <button type="submit" name="button" value="revert"
-                        class="btn btn-primary bypass-disable">REVERT</button>
+                    <button type="submit" name="button" value="revert" class="btn btn-primary bypass-disable">REVERT
+                    </button>
                 </div>
             </div>
 
@@ -35,36 +62,38 @@
                 <div class="col">
                     <label for="first_name">First Name</label>
                     <input class="form-control" id="first_name" name="first_name" type="text"
-                        value="{{ admin_details[0] }}" disabled />
+                        value="{{ cust_details[0] }}" disabled />
                 </div>
                 <div class="col">
                     <label for="last_name">Last Name</label>
                     <input class="form-control" id="last_name" name="last_name" type="text"
-                        value="{{ admin_details[1] }}" disabled />
+                        value="{{ cust_details[1] }}" disabled />
                 </div>
             </div>
             <div class="form-group row">
                 <div class="col">
                     <label for="display_name">Display Name</label>
                     <input class="form-control" id="display_name" name="display_name" type="text"
-                        value="{{ admin_details[2] }}" disabled />
+                        value="{{ cust_details[2] }}" disabled />
                 </div>
                 <div class="col">
                     <label for="email">Email</label>
-                    <input class="form-control" id="email" name="email" type="text" value="{{ admin_details[3] }}"
+                    <input class="form-control" id="email" name="email" type="text" value="{{ cust_details[3] }}"
                         disabled />
                 </div>
             </div>
 
             <div id="extra-links">
-                <p>Reset your password <a href="#">here</a></p>
-                <p>If you entered a different email address, we'll send you a verification code before letting you save
+                <p>Reset your password <a href="/{{ id }}/edit_profile/reset_password?reset_password=True">here</a>
+                </p>
+                <p>If you entered a different email address, we'll send you a verification code before letting you
+                    save
                     your details
                 </p>
             </div>
 
             <div id="save-button">
-                <button type="submit" name="button" value="save" class="btn btn-primary rounded-pill" disabled>SAVE</button>
+                <button type="submit" name="button" value="save" class="btn btn-primary rounded-pill">SAVE</button>
             </div>
         </div>
     </div>
@@ -72,8 +101,8 @@
 
 <div class="modal-backdrop fade show"></div>
 
-<!-- Reset password popup -->
-<form method="POST" action="/{{ id }}/admin/edit_profile/reset_password" id="reset-passform">
+<!-- Edit Profile Picture popup -->
+<form method="POST" action="/{{ id }}/edit_profile_picture" id="edit-profile-pic-form" enctype="multipart/form-data">
     <div class="modal fade show" id="myModal" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
 
@@ -81,7 +110,7 @@
 
                 <!-- Modal Header -->
                 <div class="modal-header">
-                    <h4 class="modal-title">Reset Password</h4>
+                    <h4 class="modal-title">Edit Profile Picture</h4>
                     <button type="submit" name="button" value="close" class="btn-close bypass-disable"></button>
                 </div>
 
@@ -91,21 +120,25 @@
                     {{ super() }}
                     {% endblock %}
 
-                    <div class="form-group">
-                        {{ render_field(password_form.password, class="form-control") }}
+                    <p>Current Profile Picture</p>
+                    <div id="modal-profile-image">
+                        {% if session.get("customer").get("profile_pic") == "default" %}
+                        <img class="rounded-circle"
+                            src="{{ url_for('static', filename='images/default_profile_pic.png') }}" />
+                        {% else %}
+                        <img class="rounded-circle"
+                            src="{{url_for('static', filename='uploads/customer/profile_pictures/' + session.get('customer').get('profile_pic')) }}" />
+                        {% endif %}
                     </div>
-                    <div class="form-group">
-                        {{ render_field(password_form.confirm_password, class="form-control") }}
-                    </div>
-                    
-                    <br>
 
-                    <p>Set your new password</p>
+                    {{ render_field(form.file, class="form-control") }}
                 </div>
 
                 <!-- Modal Footer -->
                 <div class="modal-footer">
-                    <input type="submit" value="RESET" class="btn btn-primary" />
+                    <input type="submit" value="CHANGE" class="btn btn-primary" />
+                    <button type="submit" name="button" value="remove"
+                        class="btn btn-primary bypass-disable">REMOVE</button>
                 </div>
             </div>
         </div>

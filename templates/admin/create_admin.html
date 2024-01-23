@@ -3,6 +3,73 @@
 
 {% block title %}Create Admin{% endblock %}
 
+{% block css %}
+{{ super() }}
+<style>
+    #main-content {
+        margin-top: 5%;
+    }
+
+    .card {
+        width: 40vw;
+        background-color: #ffedc5;
+        margin-left: auto;
+        margin-right: auto;
+        border-radius: 50px;
+    }
+
+    .card-title {
+        margin-top: 16px;
+        margin-bottom: 0;
+    }
+
+    h3.card-title {
+        margin: 0;
+        text-align: center;
+    }
+
+    .card-body {
+        padding: 0;
+        margin: 16px;
+    }
+    
+    #create-admin {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+    }
+
+    .form-group {
+        margin: 0;
+        padding-top: 1.019vw;        
+    }
+
+    .form-group#names {
+        padding-top: 0;
+    }
+
+    .form-group label {
+        display: inline;
+        padding-left: 10px;
+    }
+
+    .form-group input {
+        margin-top: 0.5485vw;
+    }
+    
+    #submit-button {
+        display: flex;
+        justify-content: center;
+        padding-left: 0;
+    }
+
+    #submit-button input {
+        padding-left: 1.019vw;
+        padding-right: 1.019vw;
+    }
+</style>
+{% endblock %}
+
 {% block navbar %}
 {% include "includes/_admin_navbar2.html" %}
 {% endblock %}
@@ -10,39 +77,53 @@
 {% block content %}
 {% from "includes/_form_helper.html" import render_field %}
 
-<h1>Create New Admin Account</h1>
+<div class="container-fluid" id="main-content">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="card-title">Create New Admin Account</h3>
+    
+            <hr>
 
-<form method="POST" action="" id="create-admin">
-    <div class="form-group row">
-        <div class="col">
-            {{ render_field(form.first_name, class="form-control") }}
-        </div>
-        <div class="col">
-            {{ render_field(form.last_name, class="form-control") }}
+            <form method="POST" action="" id="create-admin">
+                <div class="form-group row" id="names">
+                    <div class="col">
+                        {{ render_field(form.first_name, class="form-control") }}
+                    </div>
+                    <div class="col">
+                        {{ render_field(form.last_name, class="form-control") }}
+                    </div>
+                </div>
+                <div class="form-group row" id="username-email">
+                    <div class="col">
+                        {{ render_field(form.username, class="form-control") }}
+                    </div>
+                    <div class="col">
+                        {{ render_field(form.email, class="form-control") }}
+                    </div>
+                    <div class="input-validation-message" id="row-2-input-validation"></div>
+                </div>
+                <div class="form-group row" id="passwords">
+                    <div class="col">
+                        {{ render_field(form.password, class="form-control") }}
+                    </div>
+                    <div class="col">
+                        {{ render_field(form.confirm_password, class="form-control") }}
+                    </div>
+                </div>
+
+                <hr>
+
+                <div id="submit-button">
+                    <input type="submit" value="CREATE" class="btn btn-primary rounded-pill" />
+                </div>
+            </form>
         </div>
     </div>
-    <div class="form-group row">
-        <div class="col">
-            {{ render_field(form.username, class="form-control") }}
-        </div>
-        <div class="col">
-            {{ render_field(form.email, class="form-control") }}
-        </div>
-    </div>
-    <div class="form-group row">
-        <div class="col">
-            {{ render_field(form.password, class="form-control") }}
-        </div>
-        <div class="col">
-            {{ render_field(form.confirm_password, class="form-control") }}
-        </div>
-    </div>
-    <input type="submit" value="CREATE" class="btn btn-primary" />
-</form>
+</div>
 
 {% endblock %}
 
 {% block scripts %}
-    {{ super() }}
-    <script src="{{ url_for('static', filename='js/disable_enable_submit.js') }}"></script>
+{{ super() }}
+<script src="{{ url_for('static', filename='js/disable_enable_submit.js') }}"></script>
 {% endblock %}

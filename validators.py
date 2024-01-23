@@ -1,28 +1,25 @@
 import shelve
 import hashlib
 from wtforms import ValidationError
+from flask import current_app
 
 
 # Custom validator functions for Forms.py
 # Password complexity validator
 def password_complexity(form, field):
     password = field.data
-    error_list = []
 
     if len(password) < 8:
-        error_list.append("Password must be at least 8 characters long")
+        raise ValidationError("Please enter at least 8 characters")
 
     if not any(char.islower() for char in password):
-        error_list.append("Password must contain at least one lowercase letter")
+        raise ValidationError("Please enter at least one lowercase letter")
 
     if not any(char.isupper() for char in password):
-        error_list.append("Password must contain at least one uppercase letter")
+        raise ValidationError("Please enter at least one uppercase letter")
 
     if not any(char in "!@#$%^&*()_+-=[]{}|;':\",.<>/?" for char in password):
-        error_list.append("Password must contain at least one symbol")
-
-    if error_list:
-        raise ValidationError("; ".join(error_list))
+        raise ValidationError("Please enter at least one symbol")
 
 
 # Unique data validator (for username, email)
@@ -36,14 +33,14 @@ def unique_data(form, field):
 
         for customer in customers_dict.values():
             if not customer.is_unique_data(data, field_name):
-                raise ValidationError(f"{field_name.capitalize()} is already in use")
+                raise ValidationError(f"Please use another {field_name.capitalize()}")
     
     if "Admins" in db:
         admins_dict = db["Admins"]
 
         for admin in admins_dict.values():
             if not admin.is_unique_data(data, field_name):
-                raise ValidationError(f"{field_name.capitalize()} is already in use")
+                raise ValidationError(f"Please use another {field_name.capitalize()}")
 
     db.close()
 
@@ -77,31 +74,24 @@ def data_exist(form, field):
 
     for customer in customers_dict.values():
         if not customer.is_unique_data(data, field_name):
-            data_exist = True
             return
 
     for admin in admins_dict.values():
         if not admin.is_unique_data(data, field_name):
-            data_exist = True
             return
 
     if not data_exist:
-        raise ValidationError(f"No account exists with this {field_name.capitalize()}")
+        raise ValidationError(f"Please enter a registered {field_name.capitalize()}")
 
 
 # 6 digit OTP specific validator
 def otp_validator(form, field):
     otp = field.data
-    error_list = []
 
     if len(otp) != 6:
-        error_list.append("One time pin must be exactly 6 digits")
+        raise ValidationError("Please enter exactly 6 digits")
 
     try:
         otp = int(otp)
     except ValueError:
-        error_list.append("One time pin must only contain numbers with no decimal places")
-
-    if error_list:
-        raise ValidationError("; ".join(error_list))
-
+        raise ValidationError("Please enter only numbers")

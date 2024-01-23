@@ -3,33 +3,83 @@
 
 {% block title %}Update Admin Details{% endblock %}
 
+{% block css %}
+{{ super() }}
+<style>
+    #extra-links {
+        width: 100%;
+        margin-top: 1.019vw;
+        text-align: center;
+    }
+
+    #save-button {
+        display: flex;
+        justify-content: end;
+        padding-left: 0;
+    }
+
+    #save-button button {
+        margin-right: 1.019vw;
+    }
+
+    #save-button button[value="save"] {
+        padding-left: 1.019vw;
+        padding-right: 1.019vw;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 {% from "includes/_form_helper.html" import render_field %}
 
-<form method="POST" action="" id="update-admin">
-    <h1>Account Details</h1>
-    <button type="submit" name="button" value="revert" class="btn btn-primary bypass-disable">REVERT</button>
+<div class="container-fluid" id="main-content">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="card-title">Update Admin Account</h3>
 
-    <div class="form-group row" id="create-admin">
-        <div class="col">
-            {{ render_field(form.first_name, class="form-control", data_original_value=form.first_name.data) }}
-        </div>
-        <div class="col">
-            {{ render_field(form.last_name, class="form-control", data_original_value=form.last_name.data) }}
+            <hr>
+
+            <form method="POST" action="" id="update-admin">
+                <div style="text-align: left;">
+                    <a href="/05010999/retrieve" style="margin-bottom: 1.019vw; margin-left: 1.019vw;"><i class="bi bi-arrow-left-circle"></i>
+                        Back to Admin List
+                    </a>
+                </div>
+
+                <div class="form-group row" id="create-admin">
+                    <div class="col">
+                        {{ render_field(form.first_name, class="form-control", data_original_value=form.first_name.data)
+                        }}
+                    </div>
+                    <div class="col">
+                        {{ render_field(form.last_name, class="form-control", data_original_value=form.last_name.data)
+                        }}
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col">
+                        {{ render_field(form.display_name, class="form-control",
+                        data_original_value=form.display_name.data) }}
+                    </div>
+                    <div class="col">
+                        {{ render_field(form.email, class="form-control", data_original_value=form.email.data) }}
+                    </div>
+                </div>
+
+                <div id="extra-links">
+                    <p>Reset password <a href="{{ url_for('admin.reset_password2', id=id, reset_password=True) }}">here</a></p>
+                </div>
+
+                <hr>
+
+                <div id="save-button">
+                    <button type="submit" name="button" value="revert"
+                        class="btn btn-primary bypass-disable">REVERT</button>
+                    <button type="submit" name="button" value="save" class="btn btn-primary rounded-pill">SAVE</button>
+                </div>
+            </form>
         </div>
     </div>
-    <div class="form-group row">
-        <div class="col">
-            {{ render_field(form.display_name, class="form-control", data_original_value=form.display_name.data) }}
-        </div>
-        <div class="col">
-            {{ render_field(form.email, class="form-control", data_original_value=form.email.data) }}
-        </div>
-    </div>
-    <p>Reset password <a href="/05010999/update/{{ id }}?reset_password=True">here</a>
-    </p>
-    
-    <button type="submit" name="button" value="save" class="btn btn-primary">SAVE</button>
-</form>
-    
+</div>
+
 {% endblock %}
