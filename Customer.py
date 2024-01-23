@@ -52,6 +52,7 @@ class Customer(User):
             "is_locked": self.__is_locked,
             "last_online": self.__last_online,
             "locked_reason": self.__locked_reason,
-            "unlock_request": self.__unlock_request
+            "unlock_request": self.__unlock_request,
+            "profile_pic": self.get_profile_pic_name()
         }
         return cust_dict

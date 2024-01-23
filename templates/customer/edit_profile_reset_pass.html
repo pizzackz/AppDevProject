@@ -1,40 +1,77 @@
 <!DOCTYPE html>
 {% extends "customer/edit_profile_otp.html" %}
 
+{% block title %}Edit Profile - Reset Password{% endblock %}
+
 {% block content %}
 {% from "includes/_form_helper.html" import render_field %}
 
+
+<!-- Manually display customer data -->
 <form method="POST" action="" id="customer_details">
-    <h1>Account Details</h1>
-    <button name="button" value="revert" class="btn btn-primary" disabled>REVERT</button>
-    <br>
-    
-    <!-- Manually display customer data -->
-    <div class="form-group row">
-        <div class="col">
-            <label for="first_name">First Name</label>
-            <input class="form-control" id="first_name" name="first_name" type="text" value="{{ cust_details[0] }}" disabled />
+    <div class="container-fluid row g-0">
+        <div class="col-sm-3 col-md-3 col-lg-3" id="profile-image-half">
+            <div id="profile-image">
+                {% if session.get("customer").get("profile_pic") == "default" %}
+                <img class="rounded-circle" src="{{ url_for('static', filename='images/default_profile_pic.png') }}" />
+                {% else %}
+                <img class="rounded-circle"
+                    src="{{url_for('static', filename='uploads/customer/profile_pictures/' + session.get('customer').get('profile_pic')) }}" />
+                {% endif %}
+                <button type="submit" name="button" value="edit_profile_pic"
+                    class="btn btn-primary bypass-disable">EDIT
+                </button>
+            </div>
         </div>
-        <div class="col">
-            <label for="last_name">Last Name</label>
-            <input class="form-control" id="last_name" name="last_name" type="text" value="{{ cust_details[1] }}" disabled />
+
+        <div class="col-sm-9 col-md-9 col-lg-9" id="main-details-half">
+            <div id="top-row" class="row">
+                <h3 class="col">Account Details</h3>
+                <div id="revert-button" class="col">
+                    <button type="submit" name="button" value="revert" class="btn btn-primary bypass-disable">REVERT
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <div class="col">
+                    <label for="first_name">First Name</label>
+                    <input class="form-control" id="first_name" name="first_name" type="text"
+                        value="{{ cust_details[0] }}" disabled />
+                </div>
+                <div class="col">
+                    <label for="last_name">Last Name</label>
+                    <input class="form-control" id="last_name" name="last_name" type="text"
+                        value="{{ cust_details[1] }}" disabled />
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col">
+                    <label for="display_name">Display Name</label>
+                    <input class="form-control" id="display_name" name="display_name" type="text"
+                        value="{{ cust_details[2] }}" disabled />
+                </div>
+                <div class="col">
+                    <label for="email">Email</label>
+                    <input class="form-control" id="email" name="email" type="text" value="{{ cust_details[3] }}"
+                        disabled />
+                </div>
+            </div>
+
+            <div id="extra-links">
+                <p>Reset your password <a href="/{{ id }}/edit_profile/reset_password?reset_password=True">here</a>
+                </p>
+                <p>If you entered a different email address, we'll send you a verification code before letting you
+                    save
+                    your details
+                </p>
+            </div>
+
+            <div id="save-button">
+                <button type="submit" name="button" value="save" class="btn btn-primary rounded-pill">SAVE</button>
+            </div>
         </div>
     </div>
-    <div class="form-group row">
-        <div class="col">
-            <label for="display_name">Display Name</label>
-            <input class="form-control" id="display_name" name="display_name" type="text" value="{{ cust_details[2] }}" disabled />
-        </div>
-        <div class="col">
-            <label for="email">Email</label>
-            <input class="form-control" id="email" name="email" type="text" value="{{ cust_details[3] }}" disabled />
-        </div>
-    </div>
-
-    <p>Reset your password <a href="">here</a></p>
-    <p>If you entered a different email address, we'll send you a verification code before letting you save your details</p>
-
-    <button name="button" value="save" class="btn btn-primary" disabled>SAVE</button>
 </form>
 
 <div class="modal-backdrop fade show"></div>
@@ -54,16 +91,20 @@
 
                 <!-- Modal Body -->
                 <div class="modal-body">
-                    {% block flash_messages %}
+                    {% block flash_messages_2 %}
                         {{ super() }}
                     {% endblock %}
 
-                    {{ render_field(password_form.password, class="form-control") }}
-                    {{ render_field(password_form.confirm_password, class="form-control") }}
+                    <div class="form-group">
+                        {{ render_field(password_form.password, class="form-control") }}
+                    </div>
+                    <div class="form-group">
+                        {{ render_field(password_form.confirm_password, class="form-control") }}
+                    </div>
 
                     <p>Set your new password</p>
                 </div>
-                
+
                     <!-- Modal Footer -->
                 <div class="modal-footer">
                     <input type="submit" value="RESET" class="btn btn-primary" />

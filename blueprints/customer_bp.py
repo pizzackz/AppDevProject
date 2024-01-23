@@ -1,7 +1,9 @@
 from flask import current_app, Blueprint, render_template, request, redirect, session, flash
+from werkzeug.utils import secure_filename
 import hashlib
-from Forms import AccountDetailsForm, OTPForm2, ResetPasswordForm2
-from functions import generate_otp, send_email
+import os
+from Forms import AccountDetailsForm, OTPForm2, ResetPasswordForm2, FileForm
+from functions import generate_otp, send_email, is_allowed_file, delete_file
 from cust_acc_functions import retrieve_cust_details, update_cust_details
 
 customer_bp = Blueprint("customer", __name__)
@@ -51,6 +53,15 @@ def edit_cust_profile(id):
 
         print(request.form.get("button"))
         print("customer in session = " + str(session["customer"]))
+
+        # Redirect to 'edit_profile_picture' if clicked on "edit profile picture"
+        if request.form.get("button") == "edit_profile_pic":
+            # Clear possible session data
+            session.pop("new_data", None)
+            session.pop("new_email_otp", None)
+            print("ran")
+
+            return redirect(f"/{id}/edit_profile_picture")
 
         if form.validate():
             if request.form.get("button") == "save":
@@ -116,6 +127,8 @@ def edit_cust_profile(id):
                 # Clear possible session data
                 session.pop("new_data", None)
                 session.pop("new_email_otp", None)
+
+                flash("Changes made are cleared!", "success")
 
                 # Force reload by using redirect to clear all previously made changes
                 return redirect(f"/{id}/edit_profile")
@@ -232,9 +245,6 @@ def verify_new_email(id):
                 flash("Invalid OTP, please try again!", "error")
                 return redirect(f"/{id}/edit_profile/verify_new_email")
             else:
-                # Display email verified msg
-                flash("Email Verified!")
-
                 # Clear new_email_otp in session
                 session.pop("new_email_otp")
 
@@ -304,6 +314,85 @@ def reset_password(id):
     if request.method == "GET":
         password_form = ResetPasswordForm2()
         return render_template("customer/edit_profile_reset_pass.html", id=id, cust_details=cust_details, password_form=password_form)
+
+
+# Edit Profile page - Edit Profile Picture poup (Customer)
+@customer_bp.route("/<string:id>/edit_profile_picture", methods=["GET", "POST"])
+def edit_profile_picture(id):
+    print("session keys = " + str(session.keys()))
+    print("customer data = " + str(session.get("customer")))
+
+    # Retrieve customer account details from customer in session
+    first_name =  session.get("customer").get("first_name")
+    last_name = session.get("customer").get("last_name")
+    display_name = session.get("customer").get("display_name")
+    email = session.get("customer").get("email")
+
+    # Pass customer details as tuple then manually display each of them as though they are form fields & labels
+    cust_details = (first_name, last_name, display_name, email)
+
+    # Redirect user to edit_customer_profile if user clicked on close symbol
+    if request.form.get("button") == "close":
+        return redirect(f"/{id}/edit_profile")
+
+    # Handle POST request
+    if request.method == "POST":
+        form = FileForm(request.form)
+
+        # Retrieve file object
+        file_item = request.files["file"]
+
+        # Reset profile image to default when clicked on 'remove'
+        if request.form.get("button") == "remove":
+            user_data = session.get("customer")
+
+            # Delete current local stored image file if have existing file saved
+            existing_file_path = delete_file("customer", "profile_pictures", f"{id}", current_app.config["ALLOWED_IMAGE_FILE_EXTENSIONS"])
+
+            # Flash no profile picture set message
+            if not existing_file_path:
+                flash("Please set a profile picture first before removing it!", "error")
+                return render_template("customer/edit_profile_picture.html", id=id, cust_details=cust_details, form=form)
+
+            # Set 'default' to user's profile_picture, Update customer in session
+            user_id = user_data.get("user_id")
+            update_cust_details(user_id, profile_pic_name="default")
+            session["customer"] = retrieve_cust_details(user_id)
+
+            # Display removed profile image msg
+            flash("Profile picture successfully removed!", "success")
+
+            return redirect(f"/{id}/edit_profile")
+
+        # Save profile image when clicked on 'change'
+        # Check whether file allowed
+        if is_allowed_file(file_item):
+            filename = secure_filename(f"{id}.{file_item.filename.rsplit('.', 1)[1]}")
+            
+            # Delete current local stored image file if have existing file saved
+            existing_file_path = delete_file("customer", "profile_pictures", f"{id}", current_app.config["ALLOWED_IMAGE_FILE_EXTENSIONS"])
+
+            # Save image in local storage
+            file_item.save(os.path.join("static", "uploads", "customer", "profile_pictures", filename))
+
+            # Update user profile picture in shelve db, Update customer in session
+            user_id = session.get("customer").get("user_id")
+            update_cust_details(user_id, profile_pic_name=filename)
+            session["customer"] = retrieve_cust_details(user_id)
+
+            # Display successful profile picture saved msg
+            flash("Your profile picture has been saved!", "success")
+
+            return redirect(f"/{id}/edit_profile")
+        else:
+            flash(f"You can only upload files with extension that are in the following list: {current_app.config['ALLOWED_IMAGE_FILE_EXTENSIONS']}", "error")
+            print("Invalid file submitted!")
+            return render_template("customer/edit_profile_picture.html", id=id, cust_details=cust_details, form=form)
+
+    # Handle GET request
+    if request.method == "GET":
+        form = FileForm()
+        return render_template("customer/edit_profile_picture.html", id=id, cust_details=cust_details, form=form)
 
 
 # Favourites page (Customer)

@@ -2,30 +2,65 @@
 {% extends "base.html" %}
 {% block title %}Login{% endblock %}
 
-{% block content %}
-<h1 class="display-4">Login</h1>
-<!-- Replace with logo of our business -->
-<h1>Tastefully Logo</h1>
-
-{% block form %}
-{% from "includes/_form_helper.html" import render_field %}
-<form method="POST" action="" id="login-base">
-    <div class="form-group">
-        {{ render_field(form.username, class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ render_field(form.password, class="form-control") }}
-    </div>
-    <input type="submit" value="LOGIN" class="btn btn-primary" />
-</form>
-
-<a href="/login?reset_password=True">Forgot Password</a>
+{% block css %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}" />
 {% endblock %}
 
-<hr>
+{% block content %}
+<div class="container-fluid row g-0">
+    <div class="col-sm-6 col-md-6 col-lg-6" id="left-half">
+        <img class="mx-auto img-fluid" id="logo" src="{{ url_for('static', filename='images/logo.png') }}" />
+    </div>
 
-<p>New to tastefully? Sign up <a href="/signup">here</a></p>
-<p>Just browsing? Our menu is <a href="/menu">here</a></p>
+    <div class="col-sm-6 col-md-6 col-lg-6" id="right-half">
+        <div class="text-center" id="content-box">
+
+            <div id="above-form-box" class="card">
+                <div class="semicircle-box">
+                    <div id="semicircle">
+                        <i class="bi bi-circle-fill"></i>
+                        <div id="semicircle2"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="form-box">
+                <div class="card-body">
+                    {% block form %}
+                    {% from "includes/_form_helper.html" import render_field %}
+                    <div id="form-box-fields">
+                        <h4>Login</h4>
+
+                        <hr style="margin: 0;">
+
+                        <form method="POST" action="" id="login-base">
+                            <div class="form-group row">
+                                {{ render_field(form.username, class="form-control") }}
+                            </div>
+                            <div class="form-group row">
+                                {{ render_field(form.password, class="form-control") }}
+                            </div>
+                            <input type="submit" value="LOGIN" class="btn btn-primary rounded-pill" />
+                        </form>
+
+                        <div id="reset-password-link">
+                            <a href="/login?reset_password=True">Forgot Password</a>
+                        </div>
+                    </div>
+                    {% endblock %}
+
+                    <hr>
+
+                    <div id="form-box-extra-links">
+                        <p>New to tastefully? Sign up <a href="/signup">here</a></p>
+                        <p>Just browsing? Our menu is <a href="/menu">here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
 

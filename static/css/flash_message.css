@@ -1,0 +1,59 @@
+/* Main properties */
+.popup {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    top: 3vh;
+    right: 0;
+    height: fit-content;
+    width: fit-content;
+    max-width: 50vw;
+    padding: 15px;
+    border-radius: 20px;
+    transform: translateX(100%);
+    animation: slide-in 1s forwards;
+}
+
+.popup .popup-content {
+    margin-right: 5px;
+    text-align: center;
+}
+
+
+/* BG colours */
+.popup.error {
+    background-color: #ff6f61;
+}
+
+.popup.success {
+    background-color: #9acd32;
+}
+
+.popup.info {
+    background-color: #add8e6;
+}
+
+.popup.warning {
+    background-color: #ffc107;
+}
+
+/* Close popup */
+.popup.close {
+    display: none
+}
+
+/* Animation keyframes */
+@keyframes slide-in {
+    0% {
+        transform: translateX(100%);
+    }
+    40% {
+        transform: translateX(-10%);
+    }
+    80% {
+        transform: translateX(0%);
+    }
+    100% {
+        transform: translateX(-10px);
+    }
+}

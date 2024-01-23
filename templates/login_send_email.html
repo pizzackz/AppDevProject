@@ -3,13 +3,24 @@
 
 {% block form %}
 {% from "includes/_form_helper.html" import render_field %}
-<form method="POST" action="" id="login-sen-email">
-    <a href="/login?back=True">Back to Login</a>
-    <div class="form-group">
-        {{ render_field(form.email, class="form-control") }}
+<div id="form-box-fields">
+    <div style="text-align: left; margin-bottom: 1.019vw;">
+        <a href="/login?back=True" style="margin-bottom: 1.019vw;"><i class="bi bi-arrow-left-circle"></i>
+            Back</a>
     </div>
 
-    <p>We'll send an email to the given email address to reset your password</p>
-    <input type="submit" value="SEND" class="btn btn-primary" />
-</form>
+    <hr style="margin: 0;">
+
+    <form method="POST" action="" id="login-send-email">
+        <div class="form-group row">
+            {{ render_field(form.email, class="form-control") }}
+        </div>
+
+        <br>
+
+        <p style="text-align: left; margin-bottom: 0; padding-left: 0.382vw;">We'll send an email to the given email address to reset your password</p>
+        <input type="submit" value="SEND" class="btn btn-primary rounded-pill" />
+    </form>
+
+</div>
 {% endblock %}
