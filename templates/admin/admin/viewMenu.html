@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Recipe Database{% endblock %}
+
+  <!-- To replace nav bar with jinja later on-->
+{% block css %}
+  {{ super() }}
+    <link rel="stylesheet" href="../../static/CSS/view_menu.css">
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-4 mb-4" style="text-align:center;font-size:3rem;">{{ menu_item.get_name() }}</h1>
+    <div style="text-align:center;margin-top:4rem;">
+            <img class="img-fluid" src="{{ url_for('static', filename='menu_image/' + menu_item.get_image()) }}" alt="Menu Image" style="max-width: 100%;">
+    </div>
+    <hr>
+
+    <div class="menu-details">
+        <h3 style="text-align:center;font-size:2rem;">Description</h3>
+        <p style="margin-top:2rem;">{{ menu_item.get_description() }}</p>
+    </div>
+
+    <hr>
+    <div class="menu-details">
+        <h3 style="text-align:center;font-size:2rem;">Price</h3>
+        <p style="margin-top:2rem;">{{ menu_item.get_price() }}</p>
+    </div>
+
+
+<div style="text-align:center;">
+    <a href="{{ url_for('menu') }}" class="btn btn-secondary mt-3 mb-4">Back to Menu</a>
+</div>
+</div>
+
+{% endblock %}
