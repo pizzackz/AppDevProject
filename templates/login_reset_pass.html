@@ -3,16 +3,26 @@
 
 {% block form %}
 {% from "includes/_form_helper.html" import render_field %}
-<form method="POST" action="" id="login-reset-pass">
-    <a href="/login?back=True">Back to Login</a>
-    <div class="form-group">
-        {{ render_field(form.password, class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ render_field(form.confirm_password, class="form-control") }}
+<div id="form-box-fields">
+    <div style="text-align: left; margin-bottom: 1.019vw;">
+        <a href="/login?back=True" style="margin-bottom: 1.019vw;"><i class="bi bi-arrow-left-circle"></i>
+            Back</a>        
     </div>
 
-    <p>Reset your password</p>
-    <input type="submit" value="RESET" class="btn btn-primary" />
-</form>
+    <hr style="margin: 0;">
+
+    <form method="POST" action="" id="login-reset-pass">
+        <div class="form-group row">
+            {{ render_field(form.password, class="form-control") }}
+        </div>
+        <div class="form-group row">
+            {{ render_field(form.confirm_password, class="form-control") }}
+        </div>
+
+        <br>
+        
+        <p style="text-align: left; margin-bottom: 0; padding-left: 0.382vw;">Reset your password</p>
+        <input type="submit" value="RESET" class="btn btn-primary rounded-pill" />
+    </form>
+</div>
 {% endblock %}

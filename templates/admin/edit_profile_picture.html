@@ -1,7 +1,32 @@
 <!DOCTYPE html>
 {% extends "admin/edit_profile_otp.html" %}
 
-{% block title %}Edit Profile - Reset Password{% endblock %}
+{% block title %}Edit Profile - Change Profile Picture{% endblock %}
+
+{% block css %}
+{{ super() }}
+<style>
+    .modal-body label {
+        visibility: hidden;
+    }
+
+    #modal-profile-image {
+        display: flex;
+        justify-content: center;
+    }
+
+    .modal-body p {
+        font-size: 1.5285vw;
+        text-align: center;
+    }
+
+    #modal-profile-image img {
+        display: block;
+        height: 15vw;
+        width: 15vw;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 {% from "includes/_form_helper.html" import render_field %}
@@ -64,7 +89,8 @@
             </div>
 
             <div id="save-button">
-                <button type="submit" name="button" value="save" class="btn btn-primary rounded-pill" disabled>SAVE</button>
+                <button type="submit" name="button" value="save" class="btn btn-primary rounded-pill"
+                    disabled>SAVE</button>
             </div>
         </div>
     </div>
@@ -72,8 +98,9 @@
 
 <div class="modal-backdrop fade show"></div>
 
-<!-- Reset password popup -->
-<form method="POST" action="/{{ id }}/admin/edit_profile/reset_password" id="reset-passform">
+<!-- Edit Profile Picture popup -->
+<form method="POST" action="/{{ id }}/admin/edit_profile_picture" id="edit-profile-pic-form"
+    enctype="multipart/form-data">
     <div class="modal fade show" id="myModal" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false">
         <div class="modal-dialog modal-dialog-centered">
 
@@ -81,7 +108,7 @@
 
                 <!-- Modal Header -->
                 <div class="modal-header">
-                    <h4 class="modal-title">Reset Password</h4>
+                    <h4 class="modal-title">Profile Picture</h4>
                     <button type="submit" name="button" value="close" class="btn-close bypass-disable"></button>
                 </div>
 
@@ -91,21 +118,25 @@
                     {{ super() }}
                     {% endblock %}
 
-                    <div class="form-group">
-                        {{ render_field(password_form.password, class="form-control") }}
+                    <p>Current Profile Picture</p>
+                    <div id="modal-profile-image">
+                        {% if session.get("admin").get("profile_pic") == "default" %}
+                        <img class="rounded-circle"
+                            src="{{ url_for('static', filename='images/default_profile_pic.png') }}" />
+                        {% else %}
+                        <img class="rounded-circle"
+                            src="{{url_for('static', filename='uploads/admin/profile_pictures/' + session.get('admin').get('profile_pic')) }}" />
+                        {% endif %}
                     </div>
-                    <div class="form-group">
-                        {{ render_field(password_form.confirm_password, class="form-control") }}
-                    </div>
-                    
-                    <br>
 
-                    <p>Set your new password</p>
+                    {{ render_field(form.file, class="form-control") }}
                 </div>
 
                 <!-- Modal Footer -->
                 <div class="modal-footer">
-                    <input type="submit" value="RESET" class="btn btn-primary" />
+                    <input type="submit" value="CHANGE" class="btn btn-primary" />
+                    <button type="submit" name="button" value="remove"
+                        class="btn btn-primary bypass-disable">REMOVE</button>
                 </div>
             </div>
         </div>

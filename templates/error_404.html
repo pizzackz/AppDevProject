@@ -20,7 +20,13 @@
         <h2>404 - Page not found</h2>
         <p>The page you are looking for might have been removed, had its name changed or is temporarily unavailable.</p>
         <!-- Might want to change home page according to type of user -->
+        {% if session.get("customer") %}
+        <a href="{{ url_for('customer.customer_home', id=session.get('customer').get('user_id')[0:10]) }}">Go To Homepage</a>
+        {% elif session.get("admin") %}
+        <a href="{{ url_for('admin.admin_home', id=session.get('admin').get('user_id')[0:10]) }}">Go To Homepage</a>
+        {% else %}
         <a href="{{ url_for('guest.home') }}">Go To Homepage</a>
+        {% endif %}
     </div>
 </div>
 
