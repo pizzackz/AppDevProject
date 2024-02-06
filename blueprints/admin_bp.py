@@ -672,3 +672,172 @@ def delete_admin_account(id):
 
     return redirect("/05010999/retrieve")
 
+# Recipe Pages
+
+@app.route('/recipe_database', methods=['GET', 'POST'])
+def admin_recipe_database():
+    db = shelve.open('recipes.db', 'c')
+
+    try:
+        recipe_dict = db['recipes']
+    except:
+        print('Error in retrieving recipes')
+        recipe_dict = {}
+
+    recipes = []
+    for key in recipe_dict:
+        recipe = recipe_dict.get(key)
+        recipes.append(recipe)
+        # For debugging
+        print(recipe.get_name(), recipe.get_id())
+
+    print(recipes)
+    if request.method == 'POST':
+        ingredients = request.form.get('ingredient')
+        ingredients = ingredients.split(',')
+        print(ingredients)
+        recipe2 = []
+        for i in range(0, len(ingredients)):
+            for s in range(0, len(recipes)):
+                if ingredients[i] in (recipes[s]).get_ingredients():
+                    if recipes[s] not in recipe2:
+                        recipe2.append(recipes[s])
+
+        db.close()
+        return render_template('admin/recipe_database.html', recipes=recipe2)
+
+    db.close()
+    return render_template('admin/recipe_database.html', recipes=recipes)
+
+
+@app.route('/create_recipe', methods=['GET', 'POST'])
+def create_recipe():
+    create_recipe_form = CreateRecipeForm(request.form)
+    if request.method == 'POST':
+        db = shelve.open('recipes.db', 'c')
+        recipe_dict = db.setdefault('recipes', {})  # Initialize if 'recipes' doesn't exist
+        recipe_dict = db['recipes']
+
+        name = create_recipe_form.name.data
+        picture = request.files['picture']
+        print(picture.filename)
+
+        picture_filename = picture.filename
+        picture_filename = picture_filename.split('.')
+        print(picture_filename[1])
+
+        if picture_filename[1] != 'jpg' and picture_filename[1] != 'png':
+            return render_template('admin/create_recipe.html', alert_error='Images are only allowed',
+                                   form=create_recipe_form)
+
+        picture_filename = name + '.' + picture_filename[1]
+        picture.save(os.path.join('static/images_recipe', picture_filename))
+
+        name = create_recipe_form.name.data
+
+        ingredients = create_recipe_form.ingredients.data
+        ingredients = ingredients.split(',')
+        print(ingredients)
+        if ingredients == ['']:
+            return render_template('admin/create_recipe.html', alert_error='Please add ingredients.',
+                                   form=create_recipe_form)
+
+        new_recipe = Recipe(create_recipe_form.name.data, ingredients, create_recipe_form.instructions.data,
+                            picture_filename)
+
+        print(new_recipe.get_instructions())
+
+        for key in recipe_dict:
+            recipe = recipe_dict.get(key)
+            if name == recipe.get_name():
+                return render_template('admin/create_recipe.html', alert_error='Recipe exists in Database.',
+                                       form=create_recipe_form)
+
+        recipe_dict[new_recipe.get_id()] = new_recipe
+        db['recipes'] = recipe_dict
+
+        db.close()
+
+        flash(f'{name} has been created', 'success')
+
+        return redirect(url_for('admin_recipe_database'))
+
+    return render_template('admin/create_recipe.html', form=create_recipe_form)
+
+
+@app.route('/view_recipe/<recipe_id>', methods=['GET', 'POST'])
+def admin_view_recipe(recipe_id):
+    print(recipe_id)
+    db = shelve.open('recipes.db', 'c')
+    recipe_dict = db['recipes']
+    recipe = recipe_dict.get(recipe_id)
+    print(recipe.get_instructions())
+    db.close()
+    return render_template('admin/view_recipe.html', recipe=recipe)
+
+
+@app.route('/edit_recipe/<recipe_id>', methods=['GET', 'POST'])
+def edit_recipe(recipe_id):
+    db = shelve.open('recipes.db', 'c')
+    recipe_dict = db['recipes']
+    recipe = recipe_dict.get(recipe_id)
+
+    update_recipe_form = CreateRecipeForm(request.form)
+
+    if request.method == 'POST':
+        name = update_recipe_form.name.data
+        ingredients = update_recipe_form.ingredients.data
+        ingredients = ingredients.split(',')
+        instructions = update_recipe_form.instructions.data
+        picture = request.files['picture']
+
+        if picture.filename != '':
+            old_picture = recipe.get_picture()
+            if old_picture:
+                os.remove(os.path.join('static/images_recipe', old_picture))
+            recipe.set_picture(picture.filename)
+            picture.save(os.path.join('static/images_recipe', picture.filename))
+
+        if name != '':
+            recipe.set_name(name)
+        if ingredients != []:
+            recipe.set_ingredients(ingredients)
+        if instructions != '':
+            recipe.set_instructions(instructions)
+
+        db['recipes'] = recipe_dict
+        db.close()
+
+        flash(f'{recipe.get_name()} has been updated', 'info')
+
+        return redirect(url_for('admin_recipe_database'))
+
+    update_recipe_form.name.data = recipe.get_name()
+    print(recipe.get_name())
+    update_recipe_form.instructions.data = recipe.get_instructions()
+
+    ingredients = recipe.get_ingredients()
+
+    return render_template('admin/update_recipe.html', form=update_recipe_form, ingredients=ingredients)
+
+
+@app.route('/delete_recipe/<recipe_id>')
+def delete_recipe(recipe_id):
+    db = shelve.open('recipes.db', 'c')
+    recipe_dict = db['recipes']
+
+    recipe = recipe_dict.get(recipe_id)
+    old_picture = recipe.get_picture()
+    if old_picture:
+        os.remove(os.path.join('static/images_recipe', old_picture))
+
+    name = recipe.get_name()
+
+    recipe_dict.pop(recipe_id)
+    db['recipes'] = recipe_dict
+    db.close()
+
+    flash(f'{name} has been deleted', 'info')
+
+    return redirect(url_for('admin_recipe_database'))
+

@@ -7,6 +7,9 @@ import os
 from Config import Config
 from Forms import BaseSignUpForm, OTPForm, PasswordForm, LoginForm, EmailForm, ResetPasswordForm, FileForm
 
+from form_recipe import *
+from recipe import *
+
 from blueprints.guest_bp import guest_bp
 from blueprints.customer_bp import customer_bp
 from blueprints.admin_bp import admin_bp
