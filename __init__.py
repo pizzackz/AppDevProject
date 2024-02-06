@@ -19,6 +19,7 @@ from admin_acc_functions import update_admin_details
 
 app = Flask(__name__)
 app.config.from_object(Config)
+app.secret_key = 'your_secret_key_here'
 
 app.register_blueprint(guest_bp)
 app.register_blueprint(customer_bp)
