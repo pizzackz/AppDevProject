@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 import hashlib
 import os
 
-from Config import Config
+from config import Config
 from Forms import BaseSignUpForm, OTPForm, PasswordForm, LoginForm, EmailForm, ResetPasswordForm, FileForm
 
 from form_recipe import *

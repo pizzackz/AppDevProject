@@ -1,4 +1,4 @@
-from flask import current_app, Blueprint, render_template, request, redirect, session, flash
+from flask import current_app, Blueprint, render_template, request, redirect, session, flash, url_for
 from werkzeug.utils import secure_filename
 import hashlib
 import os
@@ -6,6 +6,11 @@ from Forms import AccountDetailsForm, OTPForm2, ResetPasswordForm2, CreateAdminF
 from functions import generate_otp, send_email, get_user_object, is_unique_data, is_allowed_file, delete_file
 from admin_acc_functions import create_admin, retrieve_admin_details, retrieve_all_admins, update_admin_details, delete_admin
 from cust_acc_functions import retrieve_all_customers, retrieve_cust_details
+import shelve
+
+from form_recipe import *
+from recipe import *
+
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -674,7 +679,7 @@ def delete_admin_account(id):
 
 # Recipe Pages
 
-@app.route('/recipe_database', methods=['GET', 'POST'])
+@admin_bp.route('/recipe_database', methods=['GET', 'POST'])
 def admin_recipe_database():
     db = shelve.open('recipes.db', 'c')
 
@@ -710,7 +715,7 @@ def admin_recipe_database():
     return render_template('admin/recipe_database.html', recipes=recipes)
 
 
-@app.route('/create_recipe', methods=['GET', 'POST'])
+@admin_bp.route('/create_recipe', methods=['GET', 'POST'])
 def create_recipe():
     create_recipe_form = CreateRecipeForm(request.form)
     if request.method == 'POST':
@@ -765,7 +770,7 @@ def create_recipe():
     return render_template('admin/create_recipe.html', form=create_recipe_form)
 
 
-@app.route('/view_recipe/<recipe_id>', methods=['GET', 'POST'])
+@admin_bp.route('/view_recipe/<recipe_id>', methods=['GET', 'POST'])
 def admin_view_recipe(recipe_id):
     print(recipe_id)
     db = shelve.open('recipes.db', 'c')
@@ -776,7 +781,7 @@ def admin_view_recipe(recipe_id):
     return render_template('admin/view_recipe.html', recipe=recipe)
 
 
-@app.route('/edit_recipe/<recipe_id>', methods=['GET', 'POST'])
+@admin_bp.route('/edit_recipe/<recipe_id>', methods=['GET', 'POST'])
 def edit_recipe(recipe_id):
     db = shelve.open('recipes.db', 'c')
     recipe_dict = db['recipes']
@@ -821,7 +826,7 @@ def edit_recipe(recipe_id):
     return render_template('admin/update_recipe.html', form=update_recipe_form, ingredients=ingredients)
 
 
-@app.route('/delete_recipe/<recipe_id>')
+@admin_bp.route('/delete_recipe/<recipe_id>')
 def delete_recipe(recipe_id):
     db = shelve.open('recipes.db', 'c')
     recipe_dict = db['recipes']
