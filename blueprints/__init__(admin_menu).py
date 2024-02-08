@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = 'yoyoyo'
 
-@app.route('/menu')
+@customer_bp.route('/menu')
 def menu():
     db = shelve.open('menu.db', 'c')
     try:
@@ -25,7 +25,7 @@ def menu():
 
     return render_template('admin/admin_menu.html', menus=menus)
 
-@app.route('/create_menu', methods=['GET', 'POST'])
+@customer_bp.route('/create_menu', methods=['GET', 'POST'])
 def create_menu():
     create_menu = createMenu(request.form)
     if request.method == 'POST' and create_menu.validate():
@@ -61,7 +61,7 @@ def create_menu():
         return redirect(url_for('menu'))
     return render_template('admin/createMenu.html', form=create_menu)
 
-@app.route('/delete_menu/<menu_id>')
+@customer_bp.route('/delete_menu/<menu_id>')
 def delete_menu(menu_id):
     db = shelve.open('menu.db', 'c')
     menu_dict = db['Menu']
@@ -78,7 +78,7 @@ def delete_menu(menu_id):
     return redirect(url_for('menu'))
 
 
-@app.route('/update_menu/<menu_id>', methods=['GET', 'POST'])
+@customer_bp.route('/update_menu/<menu_id>', methods=['GET', 'POST'])
 def update_menu(menu_id):
     update_menu = createMenu(request.form)
     if request.method == 'POST' and update_menu.validate():
@@ -127,7 +127,7 @@ def update_menu(menu_id):
         return render_template('admin/updateMenu.html', form=update_menu)
 
 
-@app.route('/view_menu/<menu_id>')
+@customer_bp.route('/view_menu/<menu_id>')
 def view_menu(menu_id):
     db = shelve.open('menu.db', 'c')
     menu_dict = db['Menu']
