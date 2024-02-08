@@ -60,7 +60,7 @@
 
         </div>
     <div style="margin:auto;text-align:center;">
-        <a href="{{ url_for('recipe_database') }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
+        <a href="{{ url_for('recipe_database', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
         <input type="button" id="submit_recipe" onclick='submit_recipe1()' class="btn btn-primary mt-3 mb-4" value="Update Recipe">
     </div>
     </form>

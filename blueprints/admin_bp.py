@@ -16,6 +16,8 @@ from recipe import *
 from article_form import *
 from article import *
 
+# Modules for Menu
+from menu import *
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -95,14 +97,6 @@ def customer_database_profile(id):
     if request.method == "GET":
         print(session.get("cust_data", "Piglet"))
         return render_template("admin/cust_db_profile.html", id=id)
-
-
-# Recipe Database page (Admin)
-@admin_bp.route("/<string:id>/admin/recipe_database")
-def recipe_database(id):
-    print(f"data = {session.get('admin')}")
-    return render_template("admin/recipe_database.html", id=id)
-
 
 # Menu Database page (Admin)
 @admin_bp.route("/<string:id>/admin/menu_database")
@@ -682,10 +676,11 @@ def delete_admin_account(id):
 
     return redirect("/05010999/retrieve")
 
+
 # Recipe Pages
 
-@admin_bp.route('/recipe_database', methods=['GET', 'POST'])
-def admin_recipe_database():
+@admin_bp.route('/<string:id>/admin/recipe_database', methods=['GET', 'POST'])
+def recipe_database(id):
     db = shelve.open('recipes.db', 'c')
 
     try:
@@ -716,10 +711,10 @@ def admin_recipe_database():
                         recipe2.append(recipes[s])
 
         db.close()
-        return render_template('admin/recipe_database.html', recipes=recipe2)
+        return render_template('admin/recipe_database.html', recipes=recipe2, id=id)
 
     db.close()
-    return render_template('admin/recipe_database.html', recipes=recipes)
+    return render_template('admin/recipe_database.html', recipes=recipes, id=id)
 
 
 @admin_bp.route('/create_recipe', methods=['GET', 'POST'])
@@ -772,13 +767,13 @@ def create_recipe():
 
         flash(f'{name} has been created', 'success')
 
-        return redirect(url_for('admin_recipe_database'))
+        return redirect(url_for('recipe_database'), id=id)
 
     return render_template('admin/create_recipe.html', form=create_recipe_form)
 
 
 @admin_bp.route('/view_recipe/<recipe_id>', methods=['GET', 'POST'])
-def admin_view_recipe(recipe_id):
+def view_recipe(recipe_id):
     print(recipe_id)
     db = shelve.open('recipes.db', 'c')
     recipe_dict = db['recipes']
@@ -822,7 +817,7 @@ def edit_recipe(recipe_id):
 
         flash(f'{recipe.get_name()} has been updated', 'info')
 
-        return redirect(url_for('admin_recipe_database'))
+        return redirect(url_for('recipe_database'))
 
     update_recipe_form.name.data = recipe.get_name()
     print(recipe.get_name())
@@ -851,7 +846,7 @@ def delete_recipe(recipe_id):
 
     flash(f'{name} has been deleted', 'info')
 
-    return redirect(url_for('admin_recipe_database'))
+    return redirect(url_for('recipe_database'))
 
 # Menu (Jairus)
 @admin_bp.route('/menu')
