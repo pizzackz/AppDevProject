@@ -1,37 +1,87 @@
 <!DOCTYPE html>
-<nav class="navbar navbar-expand-lg navbar-light shadow shadow-sm"
+<nav class="navbar navbar-expand-lg g-0"
     style="background-color:#ffedc5ff; border-bottom: black 1px solid;">
     <div class="container-fluid">
         <!-- Logo image -->
-        <a class="navbar-brand" href="{{ url_for('guest.home', id=id) }}">
-            <img src="{{ url_for('static', filename='images/logo.png') }}"
+        <a class="navbar-brand" href="#">
+            <img src="{{ url_for('static', filename='def_images/logo.png') }}"
                 style="height: 3.5rem; width: auto; margin-left: 1rem;" />
         </a>
-        <button class="navbar-toggler bypass-disable" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+        <button class="navbar-toggler bypass-disable" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="collapse navbar-collapse ms-auto" id="navbarSupportedContent">
             <!-- Main pages -->
-            <ul class="navbar-nav ms-auto">
+            <ul class="navbar-nav ms-auto" style="margin-right: 6rem;">
+                <!-- Home -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('guest.home') }}">Home</a>
+                    <a class="nav-link" href="#">Home</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('guest.menu') }}">Menu</a>
+                <!-- Dropdown for Recipe Database -->
+                <li class="nav-item active dropdown">
+                    <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">Recipes</a>
+
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Recipe
+                                Database</a></li>
+                        <!-- Replace href value with actual url path for create_recipe -->
+                        <li><a class="dropdown-item" href="#">Create Recipe</a></li>
+                    </ul>
                 </li>
+                <!-- Dropdown for Menu Database -->
+                <li class="nav-item active dropdown">
+                    <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Menus</a>
+
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Menu
+                                Database</a></li>
+                        <!-- Replace href value with actual url path for create_menu -->
+                        <li><a class="dropdown-item" href="#">Create Menu</a></li>
+                    </ul>
+                </li>
+                <!-- Dropdown for Articles Database -->
+                <li class="nav-item active dropdown">
+                    <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">Articles</a>
+
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('article') }}">Articles
+                                Database</a></li>
+                        <!-- Replace href value with actual url path for create_article -->
+                        <li><a class="dropdown-item" href="{{ url_for('create_article') }}">Create Article</a></li>
+                    </ul>
+                </li>
+                <!-- Customer Database -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('guest.articles') }}">Articles</a>
+                    <a class="nav-link" href="#">Customers</a>
                 </li>
             </ul>
 
-            <!-- Login & Sign up -->
+            <!-- Dropdown for Profile and Logout -->
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('signup') }}">Sign Up</a>
+                <li class="nav-item dropdown">
+                    <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                        style="height: 3.5rem; border: black 1px solid; margin-right: 1rem; padding-left: 1rem; padding-right: 1rem;">
+
+                        <div class="profile-box d-flex align-items-center">
+                            <img src="{{ url_for('static', filename='def_images/default_profile_pic.png') }}"
+                                class="rounded-circle" alt="Profile Picture" style="height: 2.5rem; width: 2.5rem;" />
+                            <div class="profile-info ms-2">
+                                Johndoe123
+                            </div>
+                        </div>
+                    </a>
+
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Edit
+                                Profile</a>
+                        </li>
+                        <li><a class="dropdown-item nav-btn btn btn-danger" href="#">Logout</a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
         </div>
