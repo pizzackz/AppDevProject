@@ -3,8 +3,8 @@
     style="background-color:#ffedc5ff; border-bottom: black 1px solid;">
     <div class="container-fluid">
         <!-- Logo image -->
-        <a class="navbar-brand" href="#">
-            <img src="{{ url_for('static', filename='def_images/logo.png') }}"
+        <a class="navbar-brand" href="{{ url_for('customer.customer_home', id=id) }}">
+            <img src="{{ url_for('static', filename='images/logo.png') }}"
                 style="height: 3.5rem; width: auto; margin-left: 1rem;" />
         </a>
         <button class="navbar-toggler bypass-disable" type="button" data-bs-toggle="collapse"
@@ -16,28 +16,28 @@
             <!-- Main pages -->
             <ul class="navbar-nav ms-auto" style="margin-right: 6rem;">
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Home</a>
+                    <a class="nav-link" href="{{ url_for('customer.customer_home', id=id) }}">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Order</a>
+                    <a class="nav-link" href="{{ url_for('customer.order', id=id) }}">Order</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Recipe Creator</a>
+                    <a class="nav-link" href="{{ url_for('customer.recipe_creator', id=id) }}">Recipe Creator</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Favourites</a>
+                    <a class="nav-link" href="{{ url_for('customer.favourites', id=id) }}">Favourites</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('customer_articles', id=id) }}">Articles</a>
+                    <a class="nav-link" href="{{ url_for('customer.customer_articles', id=id) }}">Articles</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Current Delivery</a>
+                    <a class="nav-link" href="{{ url_for('customer.current_delivery', id=id) }}">Current Delivery</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Feedback</a>
+                    <a class="nav-link" href="{{ url_for('customer.feedback', id=id) }}">Feedback</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Order History</a>
+                    <a class="nav-link" href="{{ url_for('customer.order_history', id=id) }}">Order History</a>
                 </li>
             </ul>
 
@@ -48,19 +48,25 @@
                         style="height: 3.5rem; border: black 1px solid; margin-right: 1rem; padding-left: 1rem; padding-right: 1rem;">
 
                         <div class="profile-box d-flex align-items-center">
-                            <img src="{{ url_for('static', filename='def_images/default_profile_pic.png') }}"
+                            {% if session.get("customer").get("profile_pic") == "default" %}
+                            <img src="{{ url_for('static', filename='images/default_profile_pic.png') }}"
                                 class="rounded-circle" alt="Profile Picture" style="height: 2.5rem; width: 2.5rem;" />
+                            {% else %}
+                            <img src="{{url_for('static', filename='uploads/customer/profile_pictures/' + session.get('customer').get('profile_pic')) }}"
+                                class="rounded-circle" alt="Profile Picture" style="height: 2.5rem; width: 2.5rem;" />
+                            {% endif %}
                             <div class="profile-info ms-2">
-                                JaneHo456
+                                {{ session.get("customer").get("display_name") }}
                             </div>
                         </div>
                     </a>
 
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Edit
+                        <li><a class="dropdown-item" href="{{ url_for('customer.edit_cust_profile', id=id) }}">Edit
                                 Profile</a>
                         </li>
-                        <li><a class="dropdown-item nav-btn btn btn-danger" href="#">Logout</a>
+                        <li><a class="dropdown-item nav-btn btn btn-danger" href="#" data-bs-toggle="modal"
+                                data-bs-target="#confirm-logout">Logout</a>
                         </li>
                     </ul>
                 </li>
@@ -68,3 +74,28 @@
         </div>
     </div>
 </nav>
+
+<!-- Confirm Logout Popup -->
+<div class="modal" id="confirm-logout">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Logout Confirmation</h4>
+                <button type="button" class="btn-close bypass-disable" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">Are you sure you want to logout?</div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <form action="{{ url_for('login', id=id, logout=True) }}" method="POST">
+                    <input type="submit" value="Yes" class="btn btn-danger bypass-disable" />
+                </form>
+                <button type="button" class="btn btn-secondary bypass-disable" data-bs-dismiss="modal">No</button>
+            </div>
+        </div>
+    </div>
+</div>
