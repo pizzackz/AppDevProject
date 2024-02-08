@@ -157,5 +157,5 @@ def delete_admin(username=None, user_id=None):
 
 
 # Testing
-# for i in range(5):
-#     create_admin("Olegairo", "Jairus", "Jairus", "jayroos@gmail.com", "blahblah")
+# for i in range(7):
+#     create_admin("Olegairo", "Jairus", "Jayroos fdksajkfldasjlfdsakjlfsdjksdf", "jayroos@gmail.com", "blahblah")

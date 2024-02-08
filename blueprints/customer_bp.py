@@ -24,6 +24,14 @@ def order(id):
     print(f"short_id = {id}, data = {session.get('customer')}")
     return render_template("customer/order.html", id=id)
 
+
+# Recipe Creator page (Customer)
+@customer_bp.route("/<string:id>/recipe_creator")
+def recipe_creator(id):
+    print(f"short_id = {id}, data = {session.get('customer')}")
+    return render_template("customer/recipe_creator.html", id=id)
+
+
 # Edit Profile page (Customer)
 @customer_bp.route("/<string:id>/edit_profile", methods=["GET", "POST"])
 def edit_cust_profile(id):
@@ -420,6 +428,3 @@ def feedback(id):
 def order_history(id):
     print(f"short_id = {id}, data = {session.get('customer')}")
     return render_template("customer/order_history.html", id=id)
-
-@customer_bp.route()
-

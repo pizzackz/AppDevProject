@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 {% extends "base.html" %}
 
 {% block title %}Admin Home{% endblock %}
@@ -6,59 +7,15 @@
 {% include "includes/_admin_navbar.html" %}
 {% endblock %}
 
-{% block css %}
-  {{ super() }}
-  <link rel="stylesheet" href="../../static/css/home.css">
-{% endblock %}
-
 {% block content %}
-<div style="text-align:center;margin:3.5rem;">
-  <img style="height:12rem;" src="../../static/media/logo.png">
+<h1>Welcome {{ session.get("admin").get("display_name") }}!</h1>
+
+<!-- Buttons to navigate to other places **Replace url paths accordingly** -->
+<div class="buttons">
+    <a href="{{ url_for('admin.recipe_database', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Recipes</button></a>
+    <a href="{{ url_for('admin.menu_database', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Menus</button></a>
+    <a href="{{ url_for('admin.articles_database', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Articles</button></a>
+    <a href="{{ url_for('admin.customer_database', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Customers</button></a>
 </div>
-<hr>
-<h2 style="text-align:center;font-size:2rem;">Welcome {{ session.get("admin").get("display_name") }}, what would you like to do?</h2>
-<div style="margin:3rem;margin-left:10vw;margin-right:10vw;text-align:center;">
-
-
-  <a href="{{ url_for('admin.recipe_database', id=id) }}">
-    <div class="card" style="width: 14rem;height:14rem;padding:1rem;">
-      <img style="width:8rem;margin:auto;" src="../../static/home_logo/recipe-book.png" class="card-img-top" alt="...">
-      <div class="card-body">
-        <h3 style="margin-top:0.3rem;">Recipes</h3>
-      </div>
-    </div>
-  </a>
-  <a href="{{ url_for('admin.menu_database', id=id) }}">
-    <div class="card" style="width: 14rem;height:14rem;padding:1rem;">
-      <img style="width:8rem;margin:auto;" src="../../static/home_logo/menu.png" class="card-img-top" alt="...">
-      <div class="card-body">
-        <h3 style="margin-top:0.3rem;">Menu</h3>
-      </div>
-    </div>
-  </a>
-  <a href="{{ url_for('admin.articles_database', id=id) }}">
-    <div class="card" style="width: 14rem;height:14rem;padding:1rem;">
-      <img style="width:8rem;margin:auto;" src="../../static/home_logo/article.png" class="card-img-top" alt="...">
-      <div class="card-body">
-        <h3 style="margin-top:0.3rem;">Articles</h3>
-      </div>
-    </div>
-  </a>
-  <a href="{{ url_for('admin.customer_database', id=id) }}">
-    <div class="card" style="width: 14rem;height:14rem;padding:1rem;">
-      <img style="width:8rem;margin:auto;" src="../../static/home_logo/people.png" class="card-img-top" alt="...">
-      <div class="card-body">
-        <h3 style="margin-top:0.3rem;">Customer</h3>
-      </div>
-    </div>
-  </a>
-
-
-
-
-
-</div>
-
-
 
 {% endblock %}

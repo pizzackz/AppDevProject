@@ -9,109 +9,27 @@
 {% block css %}
 {{ super() }}
 <style>
-    body {
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-    }
-
-    #content {
-        display: flex;
-        flex: 1;
-        justify-content: center;
-        align-items: center;
-    }
-
-    main {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    #table {
-        width: 70vw;
-        height: fit-content;
-        background-color: #ffedc540;
-        box-shadow: 0 0.4rem 0.8rem #0005;
-        border-radius: 0.8rem;
-        overflow: hidden;
-    }
-
-    #table-header {
-        width: 100%;
-        background-color: #ffedc5;
-        padding: 0.8rem 1rem;
-        text-align: center;
-    }
-
-    #table-header h3, #table-header p {
-        display: block;
-    }
-
-    #table-header p {
-        margin-bottom: 0;
-    }
-
-    #table-body {
-        width: 95%;
-        max-height: calc(89% - 1.6rem);
-        background-color: #fffb;
-        margin: 0.8rem auto;
-        border-radius: 0.6rem;
-        overflow: auto;
-    }
-
-    #table-body::-webkit-scrollbar {
-        width: 0.5rem;
-        height: 0.5rem;
-    }
-
-    #table-body::-webkit-scrollbar-thumb{
-        border-radius: 0.5rem;
-        background-color: #0004;
-        visibility: hidden;
-    }
-
-    #table-body:hover::-webkit-scrollbar-thumb {
-        visibility: visible;
+    #main-content h3 {
+        margin-top: 16px;
     }
 
     table {
-        width: 100%;
+        border-collapse: collapse;
+        border: black 1px solid;
     }
-
-    td img {
-        width: 36px;
-        height: 36px;
-        margin-right: 0.5rem;
-        border-radius: 50%;
-        vertical-align: middle;
-    }
-
-    table, th, td {
-        padding: 1rem;
+    
+    th, td {
         text-align: center;
     }
 
-    thead th {
-        position: sticky;
-        top: 0;
-        left: 0;
-        background-color: #d5d1defe;
+    th {
+        font-size: 20px;
     }
 
-    tbody tr:nth-child(even) {
-        background-color: #d3d3d3cc;
+    thead#tr {
+        background-color: #ffedc5;
     }
 
-    tbody tr:nth-child(odd) {
-        background-color: #d3d3d333;
-    }
-
-    tbody tr:hover {
-        background-color: #d3d3d380;
-    }
 </style>
 {% endblock %}
 
@@ -120,36 +38,27 @@
 {{ session.keys() }}
 {% endif %}
 
-<div class="container-fluid" id="content">
-    <main id="table">
-        <section id="table-header">
-            <h3>List of Admins</h3>
-            <p>Total: {{ count }}</p>
-        </section>
-    
-        <section id="table-body">
-            <table>
+<div class="container-fluid">
+    <div id="main-content">
+        <h3>List of Admins</h3>
+        <p id="admin-count">Total: {{ count }}</p>
+
+        <hr>
+
+        <div id="table-content">
+            <table class="table table-striped">
                 <thead>
-                    <tr>
-                        <th colspan="2">Username</th>
+                    <tr id="thead-tr">
+                        <th>Username</th>
                         <th>Display Name</th>
                         <th>Email</th>
-                        <th colspan="2">Actions</th>
+                        <th class="text-center" colspan="2">Actions</th>
                     </tr>
                 </thead>
-    
                 <tbody>
                     {% for admin in admins_list %}
                     <tr>
-                        <td colspan="2">
-                            {% if admin.get_profile_pic_name() == "default"%}
-                            <img src="{{ url_for('static', filename='images/default_profile_pic.png') }}" />
-                            {% else %}
-                            <img src="{{ url_for('static', filename='uploads/admin/profile_pictures/' + admin.get_user_id()) }}" />
-                            {% endif %}
-                            
-                            {{ admin.get_username() }}
-                        </td>
+                        <td>{{ admin.get_username() }}</td>
                         <td>{{ admin.get_display_name() }}</td>
                         <td>{{ admin.get_email() }}</td>
                         <td class="text-center"><a
@@ -159,24 +68,24 @@
                             <!-- Button to Open the Modal -->
                             <button type="button" class="btn btn-danger" data-bs-toggle="modal"
                                 data-bs-target="#myModal_{{ admin.get_user_id() }}">Delete</button>
-    
+
                             <!-- The Modal -->
                             <div class="modal" id="myModal_{{ admin.get_user_id() }}">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
-    
+
                                         <!-- Modal Header -->
                                         <div class="modal-header">
                                             <h4 class="modal-title">Delete Confirmation</h4>
                                             <button type="button" class="btn-close bypass-disable"
                                                 data-bs-dismiss="modal"></button>
                                         </div>
-    
+
                                         <!-- Modal Body -->
                                         <div class="modal-body">Are you sure you want to delete {{
                                             admin.get_username() }}?
                                         </div>
-    
+
                                         <!-- Modal Footer -->
                                         <div class="modal-footer">
                                             <form action="/05010999/delete/{{ admin.get_user_id() }}" method="POST">
@@ -194,9 +103,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </section>
-    </main>
+        </div>
+    </div>
 </div>
-
-
 {% endblock %}
