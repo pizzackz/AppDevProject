@@ -38,15 +38,15 @@
 
             <h5><u>How to Use</u>
               <ul>
-                <li>Type in an ingredient and click +.</li>
-                <li>If you want to remove the ingredient, press the x beside the ingredient.</li>
+                <li>Type in an ingredient or the dish name and click +.</li>
+                <li>If you want to remove the ingredient or dish, press the x beside the ingredient/name.</li>
               </ul>
             </h5>
           </div>
             <br>
             <form class="form-inline" id="form1" method="post" action="{{ url_for('recipe_database') }}">
               <div class="input_ingredient">
-                  <input type="text" class="form-control form-control-lg mb-2" name="ingredient" id="ingredient" placeholder="chicken, tomato">
+                  <input type="text" class="form-control form-control-lg mb-2" name="ingredient" id="ingredient" placeholder="chicken, salad">
                   <input type="button" value="+" id="add_ingredient" class="btn btn-success btn-lg mb-2">
               </div>
 

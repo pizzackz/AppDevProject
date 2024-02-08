@@ -704,7 +704,9 @@ def admin_recipe_database():
         recipe2 = []
         for i in range(0, len(ingredients)):
             for s in range(0, len(recipes)):
-                if ingredients[i] in (recipes[s]).get_ingredients():
+                name = (recipes[s]).get_name()
+                name = name.lower()
+                if ingredients[i] in (recipes[s]).get_ingredients() or ingredients[i] in name:
                     if recipes[s] not in recipe2:
                         recipe2.append(recipes[s])
 

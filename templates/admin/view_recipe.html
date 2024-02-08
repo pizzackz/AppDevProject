@@ -13,29 +13,26 @@
 
 {% block content %}
 <div class="container">
-    <h1 class="mb-4" style="text-align:center;font-size:3rem;margin-top:3rem;">{{ recipe.get_name() }}</h1>
-    <div class="card-deck" style="margin-top:3rem;">
-        <div class="card" style="width:60rem;margin:auto;">
-            <div class="row">
-              <div class="col-sm-6">
-                <div class="card-block" style="margin:1rem;">
-                    <h3>Ingredients:</h3>
-                    <ul style="font-size:1.1rem;">
-                        {% for ingredient in recipe.get_ingredients() %}
-                        <li>{{ ingredient }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-              </div>
 
-              <div class="col-sm-auto" style="width:fit-content">
-                <img class="d-block w-300" src="{{ url_for('static', filename='images_recipe/' + recipe.get_picture()) }}" alt="{{ recipe.get_name() }} Image">
-              </div>
-            </div>
+  <div class="card border-light mb-3" style="margin:auto;margin-top:4rem;max-width: 1000px;">
+    <div class="row g-0">
+      <div class="col-6">
+        <img style="width:97%" src="{{ url_for('static', filename='images_recipe/' + recipe.get_picture()) }}" class="img-fluid rounded-start" alt="...">
+      </div>
+      <div class="col-6">
+        <div class="card-body">
+          <h5 class="card-title" style="font-size:3rem;">{{ recipe.get_name() }}</h5>
+          <h4 class="card-text" style="margin-top:1.5rem;">Ingredients:</h4>
+          <ul class="card-text" style="font-size:1.1rem;">
+            {% for ingredient in recipe.get_ingredients() %}
+            <li>{{ ingredient }}</li>
+            {% endfor %}
+          </ul>
         </div>
-
+      </div>
     </div>
-    
+  </div>
+
     <hr>
     <div class="recipe-details">
         <h3 style="text-align:center;font-size:2rem;">Instructions</h3>
@@ -44,7 +41,7 @@
 
 
 <div style="text-align:center;">
-    <a href="{{ url_for('recipe_database') }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
+    <a href="{{ url_for('admin_recipe_database') }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
 </div>
 </div>
 
