@@ -3,8 +3,6 @@
 
 {% block content %}
 
-
-
     <header class="py-5">
         <div style="background-color:#ffffff" class="py-5">
             <div class="text-center text-white">
@@ -30,8 +28,7 @@
                             <!-- Product price-->
                             <a href="{{ url_for('view_article', article_id=article_item.get_id() ) }}" class="view btn btn-success m-1">View</a>
                             <a href="{{ url_for('update_article', article_id=article_item.get_id() ) }}" class="update btn btn-primary m-1">Update</a>
-                            <a href="{{ url_for('delete_article', article_id=article_item.get_id() ) }}" class="delete btn btn-danger m-1">Delete</a>
-
+                            <a onclick="confirmdelete('{{ article_item.get_name() }}', '{{ article_item.get_id() }}')" class="btn btn-danger m-2" data-bs-toggle="modal" data-bs-target="#exampleModal">Delete</a>
                         </div>
                     </div>
                 </div>
@@ -40,4 +37,9 @@
         </div>
     </div>
     </div>
-{% endblock %}}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="../../static/css/article_delete.js"></script>
+{% endblock %}

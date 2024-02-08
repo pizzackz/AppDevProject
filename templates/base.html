@@ -19,12 +19,36 @@
 <body>
     {% block navbar %}{% endblock %}
 
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-body text-center" id="modal-body">
+              Are you sure you want to delete this item?
+            </div>
+            <div class="modal-footer justify-content-center">
+              <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-danger btn-lg" id="delete">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     {% block flash_messages %}
-    {% for message in get_flashed_messages(with_categories=True) %}
-    <div class="popup {{ message[0] }}" style="z-index: 999;">
-        <div class="popup-content ms-auto">{{ message[1] }}</div>
-        <button type="button" class="btn btn-close bypass-disable ms-auto" aria-label="Close"></button>
-    </div>
+    <!-- Flash messages from __init__.py.  -->
+    {% for message in get_flashed_messages(category_filter=["info"]) %}
+        <script>
+            display_popup('{{ message }}', 'info');
+        </script>
+    {% endfor %}
+    {% for message in get_flashed_messages(category_filter=["error"]) %}
+        <script>
+            display_popup('{{ message }}', 'error');
+        </script>
+    {% endfor %}
+    {% for message in get_flashed_messages(category_filter=["success"]) %}
+        <script>
+            display_popup('{{ message }}', 'success');
+        </script>
     {% endfor %}
     {% endblock %}
 

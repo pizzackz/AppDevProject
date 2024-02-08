@@ -9,7 +9,7 @@ print("hello")
 app = Flask(__name__)
 app.secret_key='hello_world'
 
-@app.route('/create_article', methods=['GET', 'POST'])
+@admin_bp.route('/create_article', methods=['GET', 'POST'])
 def create_article():
     create_article = createArticle(request.form)
     if request.method == 'POST' and create_article.validate():
@@ -39,7 +39,7 @@ def create_article():
         return redirect(url_for('article'))
     return render_template('admin/article/create_article.html', form=create_article)
 
-@app.route('/view_article/<article_id>')
+@admin_bp.route('/view_article/<article_id>')
 def view_article(article_id):
     db = shelve.open('article.db', 'c')
     article_dict = db['article_item']
@@ -50,7 +50,7 @@ def view_article(article_id):
 
     return render_template('admin/article/view_article.html', article_item=article_item)
 
-@app.route('/article')
+@admin_bp.route('/article')
 def article():
     db = shelve.open('article.db', 'c')
     try:
@@ -67,7 +67,7 @@ def article():
 
     return render_template('admin/article/admin_articles.html', form=createArticle, articles=articles)
 
-@app.route('/update_article/<article_id>', methods=['GET', 'POST'])
+@admin_bp.route('/update_article/<article_id>', methods=['GET', 'POST'])
 def update_article(article_id):
     update_article = createArticle(request.form)
     if request.method == 'POST' and update_article.validate():
@@ -120,7 +120,7 @@ def update_article(article_id):
 
         return render_template('admin/article/update_article.html', form=update_article)
 
-@app.route('/delete_article/<article_id>')
+@admin_bp.route('/delete_article/<article_id>')
 def delete_article(article_id):
     db=shelve.open('article.db', 'c')
     article_dict=db['article_item']
@@ -136,7 +136,7 @@ def delete_article(article_id):
 
     return redirect(url_for('article'))
 
-@app.route('/customer_articles')
+@admin_bp.route('/customer_articles')
 def customer_articles():
     db = shelve.open('article.db', 'c')
     try:
