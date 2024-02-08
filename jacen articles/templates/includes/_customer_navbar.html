@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<nav class="navbar navbar-expand-lg navbar-light shadow shadow-sm"
+    style="background-color:#ffedc5ff; border-bottom: black 1px solid;">
+    <div class="container-fluid">
+        <!-- Logo image -->
+        <a class="navbar-brand" href="#">
+            <img src="{{ url_for('static', filename='def_images/logo.png') }}"
+                style="height: 3.5rem; width: auto; margin-left: 1rem;" />
+        </a>
+        <button class="navbar-toggler bypass-disable" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <!-- Main pages -->
+            <ul class="navbar-nav ms-auto" style="margin-right: 6rem;">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Order</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Recipe Creator</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Favourites</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('customer_articles', id=id) }}">Articles</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Current Delivery</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Feedback</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Order History</a>
+                </li>
+            </ul>
+
+            <!-- Dropdown for Profile and Logout -->
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                        style="height: 3.5rem; border: black 1px solid; margin-right: 1rem; padding-left: 1rem; padding-right: 1rem;">
+
+                        <div class="profile-box d-flex align-items-center">
+                            <img src="{{ url_for('static', filename='def_images/default_profile_pic.png') }}"
+                                class="rounded-circle" alt="Profile Picture" style="height: 2.5rem; width: 2.5rem;" />
+                            <div class="profile-info ms-2">
+                                JaneHo456
+                            </div>
+                        </div>
+                    </a>
+
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Edit
+                                Profile</a>
+                        </li>
+                        <li><a class="dropdown-item nav-btn btn btn-danger" href="#">Logout</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
