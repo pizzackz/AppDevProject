@@ -1,0 +1,42 @@
+p {
+    white-space:pre-line;
+    font-size:1.2em;
+    text-align: center;
+}
+
+
+
+.menu-details {
+    width:40rem;
+    margin:auto;
+}
+.menu-details p {
+    display:block;
+    margin:5rem;
+    margin-top:1rem;
+}
+
+@font-face {
+    font-family: 'Inter-SemiBold';
+    src: url("../fonts/Inter-SemiBold.ttf") format("truetype");
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    font-family: 'Inter-SemiBold';
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+.img-fluid{
+    max-height: 300px;
+    height: 100%;
+    min-width: 350px;
+    aspect-ratio: 1.7/1;
+}
+
+*{
+    font-family: Inter-SemiBold;
+}
