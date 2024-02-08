@@ -14,8 +14,8 @@
 </head>
 <body>
     {% block navbar %}
-    {% include 'includes/_navbar.html' %}
-    {% endblock %}  
+    {% include 'includes/_customer_navbar.html' %}
+    {% endblock %}
     <div id="popup"></div>
     {% block flash_messages %}
     <script src="{{ url_for('static', filename='javascipt/flash_message.js') }}"></script>
