@@ -1,0 +1,11 @@
+#article_item{
+    text-align: center;
+}
+
+.m-2{
+    display: inline-block;
+    margin: 10px;
+}
+img{
+    max-height: 200px;
+}
