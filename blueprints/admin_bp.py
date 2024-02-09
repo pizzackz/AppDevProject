@@ -18,6 +18,7 @@ from article import *
 
 # Modules for Menu
 from menu import *
+from menuForm import *
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -717,7 +718,7 @@ def recipe_database(id):
     return render_template('admin/recipe_database.html', recipes=recipes, id=id)
 
 
-@admin_bp.route('/create_recipe', methods=['GET', 'POST'])
+@admin_bp.route('/<string:id>/admin/create_recipe', methods=['GET', 'POST'])
 def create_recipe():
     create_recipe_form = CreateRecipeForm(request.form)
     if request.method == 'POST':
@@ -772,7 +773,7 @@ def create_recipe():
     return render_template('admin/create_recipe.html', form=create_recipe_form)
 
 
-@admin_bp.route('/view_recipe/<recipe_id>', methods=['GET', 'POST'])
+@admin_bp.route('/<string:id>/admin/view_recipe/<recipe_id>', methods=['GET', 'POST'])
 def view_recipe(recipe_id):
     print(recipe_id)
     db = shelve.open('recipes.db', 'c')
@@ -783,7 +784,7 @@ def view_recipe(recipe_id):
     return render_template('admin/view_recipe.html', recipe=recipe)
 
 
-@admin_bp.route('/edit_recipe/<recipe_id>', methods=['GET', 'POST'])
+@admin_bp.route('/<string:id>/admin/edit_recipe/<recipe_id>', methods=['GET', 'POST'])
 def edit_recipe(recipe_id):
     db = shelve.open('recipes.db', 'c')
     recipe_dict = db['recipes']
@@ -828,7 +829,7 @@ def edit_recipe(recipe_id):
     return render_template('admin/update_recipe.html', form=update_recipe_form, ingredients=ingredients)
 
 
-@admin_bp.route('/delete_recipe/<recipe_id>')
+@admin_bp.route('/<string:id>/admin/delete_recipe/<recipe_id>')
 def delete_recipe(recipe_id):
     db = shelve.open('recipes.db', 'c')
     recipe_dict = db['recipes']
@@ -849,7 +850,7 @@ def delete_recipe(recipe_id):
     return redirect(url_for('recipe_database'))
 
 # Menu (Jairus)
-@admin_bp.route('/menu')
+@admin_bp.route('/<string:id>/admin/menu')
 def menu():
     db = shelve.open('menu.db', 'c')
     try:
@@ -865,7 +866,7 @@ def menu():
 
     return render_template('admin/admin_menu.html', menus=menus)
 
-@admin_bp.route('/create_menu', methods=['GET', 'POST'])
+@admin_bp.route('/<string:id>/admin/create_menu', methods=['GET', 'POST'])
 def create_menu():
     create_menu = createMenu(request.form)
     if request.method == 'POST' and create_menu.validate():
@@ -901,7 +902,7 @@ def create_menu():
         return redirect(url_for('menu'))
     return render_template('admin/createMenu.html', form=create_menu)
 
-@admin_bp.route('/delete_menu/<menu_id>')
+@admin_bp.route('/<string:id>/admin/delete_menu/<menu_id>')
 def delete_menu(menu_id):
     db = shelve.open('menu.db', 'c')
     menu_dict = db['Menu']
@@ -918,7 +919,7 @@ def delete_menu(menu_id):
     return redirect(url_for('menu'))
 
 
-@admin_bp.route('/update_menu/<menu_id>', methods=['GET', 'POST'])
+@admin_bp.route('/<string:id>/admin/update_menu/<menu_id>', methods=['GET', 'POST'])
 def update_menu(menu_id):
     update_menu = createMenu(request.form)
     if request.method == 'POST' and update_menu.validate():
@@ -967,7 +968,7 @@ def update_menu(menu_id):
         return render_template('admin/updateMenu.html', form=update_menu)
 
 
-@admin_bp.route('/view_menu/<menu_id>')
+@admin_bp.route('/<string:id>/admin/view_menu/<menu_id>')
 def view_menu(menu_id):
     db = shelve.open('menu.db', 'c')
     menu_dict = db['Menu']
@@ -979,7 +980,7 @@ def view_menu(menu_id):
 
 
 # Articles
-@admin_bp.route('/create_article', methods=['GET', 'POST'])
+@admin_bp.route('/<string:id>/admin/create_article', methods=['GET', 'POST'])
 def create_article():
     create_article = createArticle(request.form)
     if request.method == 'POST' and create_article.validate():
@@ -1009,7 +1010,7 @@ def create_article():
         return redirect(url_for('article'))
     return render_template('admin/article/create_article.html', form=create_article)
 
-@admin_bp.route('/view_article/<article_id>')
+@admin_bp.route('/<string:id>/admin/view_article/<article_id>')
 def view_article(article_id):
     db = shelve.open('article.db', 'c')
     article_dict = db['article_item']
@@ -1020,7 +1021,7 @@ def view_article(article_id):
 
     return render_template('admin/article/view_article.html', article_item=article_item)
 
-@admin_bp.route('/article')
+@admin_bp.route('/<string:id>/admin/article')
 def article():
     db = shelve.open('article.db', 'c')
     try:
@@ -1037,7 +1038,7 @@ def article():
 
     return render_template('admin/article/admin_articles.html', form=createArticle, articles=articles)
 
-@admin_bp.route('/update_article/<article_id>', methods=['GET', 'POST'])
+@admin_bp.route('/<string:id>/admin/update_article/<article_id>', methods=['GET', 'POST'])
 def update_article(article_id):
     update_article = createArticle(request.form)
     if request.method == 'POST' and update_article.validate():
@@ -1090,7 +1091,7 @@ def update_article(article_id):
 
         return render_template('admin/article/update_article.html', form=update_article)
 
-@admin_bp.route('/delete_article/<article_id>')
+@admin_bp.route('/<string:id>/admin/delete_article/<article_id>')
 def delete_article(article_id):
     db=shelve.open('article.db', 'c')
     article_dict=db['article_item']
@@ -1106,7 +1107,7 @@ def delete_article(article_id):
 
     return redirect(url_for('article'))
 
-@admin_bp.route('/customer_articles')
+@admin_bp.route('/<string:id>/admin/customer_articles')
 def customer_articles():
     db = shelve.open('article.db', 'c')
     try:
