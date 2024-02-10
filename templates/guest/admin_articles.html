@@ -1,10 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Article Database{% endblock %}
 
-    {% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}
-
 {% block content %}
-
+    {% block navbar %} {% include "_admin_navbar.html" %} {% endblock %}
 
 <script>
     // Confirmation button
@@ -39,7 +37,7 @@ function confirmdelete(content, id) {
                             <!-- Product name-->
                             <h5 class="card-title">{{ article_item.get_title() }}</h5>
                             <!-- Product price-->
-                            <a href="{{ url_for('admin.view_article', article_id=article_item.get_id(), id=id ) }}" class="view btn btn-success m-1">View</a>
+                            <a href="{{ url_for('guest.view_article', article_id=article_item.get_id(), id=id ) }}" class="view btn btn-success m-1">View</a>
                         </div>
                     </div>
                 </div>

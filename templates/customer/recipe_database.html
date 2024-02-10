@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Recipe Database{% endblock %}
 
+
   <!-- To replace nav bar with jinja later on-->
 {% block css %}
   {{ super() }}
@@ -11,6 +12,8 @@
   {{ super() }}
   <script src="../../static/js/recipe_database.js"></script>
 {% endblock %}
+
+    {% block navbar %} {% include "includes/_customer_navbar.html" %} {% endblock %}
 
 {% block content %}
 <!-- Modal -->
@@ -44,7 +47,7 @@
             </h5>
           </div>
             <br>
-            <form class="form-inline" id="form1" method="post" action="{{ url_for('recipe_database') }}">
+            <form class="form-inline" id="form1" method="post" action="{{ url_for('admin.recipe_database', id=id) }}">
               <div class="input_ingredient">
                   <input type="text" class="form-control form-control-lg mb-2" name="ingredient" id="ingredient" placeholder="chicken, salad">
                   <input type="button" value="+" id="add_ingredient" class="btn btn-success btn-lg mb-2">
@@ -62,15 +65,20 @@
       </div>
 
     <div id="parent2">
-      <div id="recipe_items" class="row justify-content-center">
+      <div id="recipe_items" class="row card-deck justify-content-center">
         {% for recipe in recipes %}
             <div class="card m-2" style="width: 18rem;">
                     <img src="{{ url_for('static', filename='images_recipe/' + recipe.get_picture()) }}" class="card-img-top" alt="{{ recipe.get_name() }}">
 <!--                    <img src="https://via.placeholder.com/150" class="card-img-top" alt="Placeholder Image">-->
                 <div class="card-body">
                     <h5 class="card-title">{{ recipe.get_name() }}</h5>
-                    <p class="card-text">{{ recipe.get_ingredients() }}</p>
-                    <a href="{{ url_for('view_recipe', recipe_id=recipe.get_id() ) }}" class="btn btn-success m-2">View Recipe</a>
+                    <p class="card-text">
+                        {% for ingredient in recipe.get_ingredients() %}
+                        {{ ingredient }}{% if not loop.last %},{% endif %}
+                        {% endfor %}
+
+                    </p>
+                    <a href="{{ url_for('admin.view_recipe', recipe_id=recipe.get_id(), id=id ) }}" class="btn btn-success m-2">View Recipe</a>
                 </div>
             </div>
             {% endfor %}
@@ -85,5 +93,22 @@
     </div>
 
     </div>
+    <script>
+        // Confirmation button
+function confirmdelete(content, id, admin_id) {
+    console.log(content);
+    document.getElementById('modal-body').innerHTML = 'Are you sure you want to delete ' + content + '?';
+    document.getElementById('delete').onclick = function() {
+        window.location.href = "delete_recipe/" + id;
+    }
+}
+    </script>
+
+
+    {% if success %}
+    <script>
+      display_popup('{{ success }}', 'success');
+    </script>
+    {% endif %}
 
 {% endblock %}

@@ -3,15 +3,18 @@
 
   <!-- To replace nav bar with jinja later on-->
 {% block css %}
-  {{ super() }}
-    <link rel="stylesheet" href="../../static/css/view_recipe.css">
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/view_recipe.css') }}">
 {% endblock %}
 
 {% block scripts %}
   {{ super() }}
 {% endblock %}
 
+    {% block navbar %} {% include "includes/_customer_navbar.html" %} {% endblock %}
+
 {% block content %}
+
 <div class="container">
 
   <div class="card border-light mb-3" style="margin:auto;margin-top:4rem;max-width: 1000px;">
@@ -41,7 +44,7 @@
 
 
 <div style="text-align:center;">
-    <a href="{{ url_for('admin_recipe_database') }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
+    <a href="{{ url_for('admin.recipe_database', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
 </div>
 </div>
 

@@ -13,7 +13,9 @@
   <script src="../../static/js/recipe_database.js"></script>
 {% endblock %}
 
-    {% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}
+    {% block navbar %}
+    {% include "includes/_navbar.html" %}
+    {% endblock %}
 
 {% block content %}
 
@@ -48,7 +50,7 @@
             </h5>
           </div>
             <br>
-            <form class="form-inline" id="form1" method="post" action="{{ url_for('admin.recipe_database', id=id) }}">
+            <form class="form-inline" id="form1" method="post" action="{{ url_for('guest.recipe_database') }}">
               <div class="input_ingredient">
                   <input type="text" class="form-control form-control-lg mb-2" name="ingredient" id="ingredient" placeholder="chicken, salad">
                   <input type="button" value="+" id="add_ingredient" class="btn btn-success btn-lg mb-2">
@@ -79,9 +81,7 @@
                         {% endfor %}
 
                     </p>
-                    <a href="{{ url_for('admin.view_recipe', recipe_id=recipe.get_id(), id=id ) }}" class="btn btn-success m-2">View Recipe</a>
-                    <a href="{{ url_for('admin.edit_recipe', recipe_id=recipe.get_id(), id=id ) }}" class="btn btn-primary m-2">Edit Recipe</a>
-                    <a onclick="confirmdelete('{{ recipe.get_name() }}', '{{ recipe.get_id() }}', '{{ session.get('admin').get('user_id')}}')" class="btn btn-danger m-2" data-bs-toggle="modal" data-bs-target="#exampleModal">Delete</a>
+                    <a href="{{ url_for('guest.view_recipe', recipe_id=recipe.get_id()) }}" class="btn btn-success m-2">View Recipe</a>
                 </div>
             </div>
             {% endfor %}

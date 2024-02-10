@@ -1,7 +1,10 @@
 {% extends "base.html" %}
 {% block title %}Update Menu Item{% endblock %}
 
+    {% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}
+
 {% block content %}
+
 {% from "includes/_formHelper.html" import render_field %}
 
 <h1 class="display-4">Update User</h1>

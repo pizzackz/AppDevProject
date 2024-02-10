@@ -2,8 +2,8 @@
 {% block title %}{% endblock %}
 {% from "includes/_formHelper.html" import render_field %}
 
-    {% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}
 
+    {% block navbar %} {% include "includes/_navbar.html" %} {% endblock %}
 {% block content %}
 
         <div class="container mt-5">
@@ -29,7 +29,7 @@
                     </article>
 
                     <div>
-                        <a href="{{url_for('admin.article', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to articles</a>
+                        <a href="{{url_for('guest.article') }}" class="btn btn-secondary mt-3 mb-4">Back to articles</a>
                     </div>
                     <!-- Comments section-->
                     <section class="mb-5">

@@ -10,9 +10,7 @@
 {% block scripts %}
   {{ super() }}
 {% endblock %}
-
-    {% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}
-
+    {% block navbar %} {% include "includes/_navbar.html" %} {% endblock %}
 {% block content %}
 
 <div class="container">
@@ -44,7 +42,7 @@
 
 
 <div style="text-align:center;">
-    <a href="{{ url_for('admin.recipe_database', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
+    <a href="{{ url_for('guest.recipe_database') }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
 </div>
 </div>
 

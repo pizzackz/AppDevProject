@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Create Menu Item{% endblock %}
 
+    {% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}
+
 {% block content %}
 {% from "includes/_formHelper.html" import render_field %}
+
 
 <h1 class="display-4">Create Menu Item</h1>
 

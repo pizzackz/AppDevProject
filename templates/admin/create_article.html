@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Create Article{% endblock %}
 
+    {% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}
+
 {% block content %}
 {% from "includes/_formHelper.html" import render_field %}
 

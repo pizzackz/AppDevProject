@@ -13,6 +13,8 @@
   <script src="../../static/js/recipe_creator.js"></script>
 {% endblock %}
 
+    {% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}
+
 {% block content %}
 {% from "includes/_form_helper.html" import render_field, render_field_picture %}
 <div>

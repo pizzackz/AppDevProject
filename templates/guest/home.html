@@ -7,17 +7,24 @@
 {% include "includes/_navbar.html" %}
 {% endblock %}
 
+{% block css %}
+    {{ super() }}
+    <link rel="stylesheet" href="../../static/css/guest_home.css">
+{% endblock %}
+
 {% block content %}
 
-<h1>Tastefully Logo</h1>
-<p>Redefining Meals, Promoting Sustainability</p>
+<div style="text-align:center;margin:3.5rem;">
+  <img style="height:12rem;margin-top:8.5rem;margin-left:1.5rem;" src="../../static/media/logo.png">
+</div>
+<h3 style="text-align:center;margin-top:-3.5rem;margin-bottom:1.5rem;">Redefining Meals, Promoting Sustainability</h3>
 
 <!-- Add code to flash message when redirected to login page -->
-<form method="POST" action="/login">
+<form method="POST" action="/login" style="text-align:center;">
     <button name="button" value="order_page" class="btn btn-primary bypass-disable">Order</button>
     <button name="button" value="recipe_creator_page" class="btn btn-primary bypass-disable">Recipe Creator</button>
 </form>
 
-<p>Login / Signup to order</p>
+<p style="margin-top:1rem;text-align:center;">Login / Signup to order</p>
 
 {% endblock %}

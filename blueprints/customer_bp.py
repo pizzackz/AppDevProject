@@ -7,6 +7,11 @@ from Forms import AccountDetailsForm, OTPForm2, ResetPasswordForm2, FileForm
 from functions import generate_otp, send_email, is_allowed_file, delete_file
 from cust_acc_functions import retrieve_cust_details, update_cust_details
 
+# Modules for Articles
+from article_form import *
+
+
+
 customer_bp = Blueprint("customer", __name__)
 
 # Home page (Customer)
@@ -429,6 +434,106 @@ def feedback(id):
 def order_history(id):
     print(f"short_id = {id}, data = {session.get('customer')}")
     return render_template("customer/order_history.html", id=id)
+
+@customer_bp.route('/<string:id>/customer/recipe_database', methods=['GET', 'POST'])
+def recipe_database(id):
+    db = shelve.open('recipes.db', 'c')
+
+    try:
+        recipe_dict = db['recipes']
+    except:
+        print('Error in retrieving recipes')
+        recipe_dict = {}
+
+    recipes = []
+    for key in recipe_dict:
+        recipe = recipe_dict.get(key)
+        recipes.append(recipe)
+        # For debugging
+        print(recipe.get_name(), recipe.get_id())
+
+    print(recipes)
+    if request.method == 'POST':
+        ingredients = request.form.get('ingredient')
+        ingredients = ingredients.split(',')
+        print(ingredients)
+        recipe2 = []
+        for i in range(0, len(ingredients)):
+            for s in range(0, len(recipes)):
+                name = (recipes[s]).get_name()
+                name = name.lower()
+                if ingredients[i] in (recipes[s]).get_ingredients() or ingredients[i] in name:
+                    if recipes[s] not in recipe2:
+                        recipe2.append(recipes[s])
+
+        db.close()
+        return render_template('customer/recipe_database.html', recipes=recipe2, id=id)
+
+    db.close()
+    return render_template('customer/recipe_database.html', recipes=recipes, id=id)
+
+@customer_bp.route('/<string:id>/customer/view_recipe/<recipe_id>', methods=['GET', 'POST'])
+def view_recipe(recipe_id, id):
+    print(recipe_id)
+    db = shelve.open('recipes.db', 'c')
+    recipe_dict = db['recipes']
+    recipe = recipe_dict.get(recipe_id)
+    print(recipe.get_instructions())
+    db.close()
+    return render_template('customer/view_recipe.html', recipe=recipe, id=id)
+
+@customer_bp.route('/<string:id>/customer/menu')
+def menu(id):
+    db = shelve.open('menu.db', 'c')
+    try:
+        menu_dict = db['Menu']
+    except:
+        print("Error in retrieving Menu from user.db.")
+        menu_dict = {}
+
+    menus = []
+    for menu_item in menu_dict.values():
+        menus.append(menu_item)
+        print("new image = "+str(menu_item.get_image()))
+
+    return render_template('customer/customer_menu.html', menus=menus, id=id)
+
+@customer_bp.route('/<string:id>/customer/view_menu/<menu_id>')
+def view_menu(menu_id, id):
+    db = shelve.open('menu.db', 'c')
+    menu_dict = db['Menu']
+    menu_item = menu_dict.get(menu_id)
+
+    db.close()
+
+    return render_template('customer/viewMenu.html', menu_item=menu_item, id=id)
+
+@customer_bp.route('/<string:id>/customer/article')
+def article(id):
+    db = shelve.open('article.db', 'c')
+    try:
+        article_dict = db['article_item']
+    except:
+        print("Error in retrieving Article from article.db.")
+        article_dict = {}
+    print(article_dict)
+    articles = []
+    for article in article_dict.values():
+        articles.append(article)
+    print(articles)
+    db.close()
+
+    return render_template('customer/customer_articles.html', form=createArticle, articles=articles, id=id)
+@customer_bp.route('/<string:id>/customer/view_article/<article_id>')
+def view_article(article_id, id):
+    db = shelve.open('article.db', 'c')
+    article_dict = db['article_item']
+    article_item = article_dict.get(article_id)
+
+    db['article_item'] = article_dict
+    db.close()
+
+    return render_template('customer/view_article.html', article_item=article_item, id=id)
 
 
 
