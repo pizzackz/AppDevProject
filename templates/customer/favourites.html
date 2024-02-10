@@ -25,9 +25,10 @@
       </div>
     </div>
 
-<h1>Favourite Recipes</h1>
+<h1 style="text-align:center;margin:2rem;font-size:2.6rem;">Favourite Recipes</h1>
     <div id="parent2">
       <div id="recipe_items" class="row card-deck justify-content-center">
+      {% if recipes %}
         {% for recipe in recipes %}
             <div class="card m-2" style="width: 18rem;">
                     <img src="{{ url_for('static', filename='images_recipe/' + recipe.get_picture()) }}" class="card-img-top" alt="{{ recipe.get_name() }}">
@@ -45,6 +46,10 @@
                 </div>
             </div>
             {% endfor %}
+          {% else %}
+          <h4>No favourites added!</h4>
+
+          {% endif %}
 
 
         </div>
