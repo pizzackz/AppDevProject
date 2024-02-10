@@ -6,7 +6,6 @@
 {% block navbar %}
 {% include "includes/_customer_navbar.html" %}
 {% endblock %}
-    {% block navbar %} {% include "includes/_customer_navbar.html" %} {% endblock %}
 
 {% block content %}
 
@@ -32,14 +31,6 @@
 <h2 style="text-align:center;font-size:2rem;">Welcome {{ session.get("customer").get("display_name") }}, what would you like to do?</h2>
 <div style="margin:3rem;margin-left:10vw;margin-right:10vw;text-align:center;">
 
-  <a href="{{ url_for('customer.menu_database', id=id) }}">
-    <div class="card" style="width: 14rem;height:14rem;padding:1rem;">
-      <img style="width:8rem;margin:auto;" src="../../static/home_logo/menu.png" class="card-img-top" alt="...">
-      <div class="card-body">
-        <h3 style="margin-top:0.3rem;">Order</h3>
-      </div>
-    </div>
-  </a>
   <a href="{{ url_for('customer.recipe_database', id=id) }}">
     <div class="card" style="width: 14rem;height:14rem;padding:1rem;">
       <img style="width:8rem;margin:auto;" src="../../static/home_logo/recipe-book.png" class="card-img-top" alt="...">
@@ -56,14 +47,7 @@
       </div>
     </div>
   </a>
-  <a href="{{ url_for('customer.customer_database', id=id) }}">
-    <div class="card" style="width: 14rem;height:14rem;padding:1rem;">
-      <img style="width:8rem;margin:auto;" src="../../static/home_logo/people.png" class="card-img-top" alt="...">
-      <div class="card-body">
-        <h3 style="margin-top:0.3rem;">Customer</h3>
-      </div>
-    </div>
-  </a>
+
 
 </div>
 

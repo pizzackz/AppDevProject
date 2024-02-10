@@ -1,4 +1,4 @@
-from flask import current_app, Blueprint, render_template, request, redirect, session, flash
+from flask import current_app, Blueprint, render_template, request, redirect, session, flash, url_for
 from werkzeug.utils import secure_filename
 import hashlib
 import shelve
@@ -10,6 +10,9 @@ from cust_acc_functions import retrieve_cust_details, update_cust_details
 # Modules for Articles
 from article_form import *
 
+# Module for recipe
+from recipe import *
+
 
 
 customer_bp = Blueprint("customer", __name__)
@@ -20,7 +23,6 @@ def customer_home(id):
     # Clear temp cust data in session
     session.pop("temp_cust_data", None)
 
-    print(f"short_id = {id}, data = {session.get('customer')}")
     return render_template("customer/home.html", id=id)
 
 
@@ -401,11 +403,11 @@ def edit_profile_picture(id):
         return render_template("customer/edit_profile_picture.html", id=id, cust_details=cust_details, form=form)
 
 
-# Favourites page (Customer)
-@customer_bp.route("/<string:id>/favourites")
-def favourites(id):
-    print(f"short_id = {id}, data = {session.get('customer')}")
-    return render_template("customer/favourites.html", id=id)
+# # Favourites page (Customer)
+# @customer_bp.route("/<string:id>/favourites")
+# def favourites(id):
+#     print(f"short_id = {id}, data = {session.get('customer')}")
+#     return render_template("customer/favourites.html", id=id)
 
 
 # Articles page (Customer)
@@ -481,6 +483,85 @@ def view_recipe(recipe_id, id):
     print(recipe.get_instructions())
     db.close()
     return render_template('customer/view_recipe.html', recipe=recipe, id=id)
+
+@customer_bp.route('/<string:id>/customer/favourites', methods=['GET', 'POST'])
+def favourites(id):
+    db = shelve.open('favourites.db', 'c')
+    try:
+        recipe_dict = db[str(id)]
+    except:
+        print('Error in retrieving recipes')
+        recipe_dict = {}
+
+    recipes = []
+    for key in recipe_dict:
+        recipe = recipe_dict.get(key)
+        recipes.append(recipe)
+        # For debugging
+        print(recipe.get_name(), recipe.get_id())
+
+    print(recipes)
+
+    db.close()
+    return render_template('customer/favourites.html', recipes=recipes, id=id)
+
+@customer_bp.route('/<string:id>/customer/add_favourite/<recipe_id>', methods=['GET', 'POST'])
+def add_favourite(recipe_id, id):
+    db = shelve.open('recipes.db', 'c')
+    recipe_dict = db['recipes']
+    favourite_db = shelve.open('favourites.db', 'c')
+    try:
+        user_favourite_dict = favourite_db[str(id)]
+    except:
+        print('Error in retrieving recipes')
+        user_favourite_dict = {}
+
+    favourite_recipe = recipe_dict.get(recipe_id)
+    print(favourite_recipe.get_name())
+
+    for key in user_favourite_dict:
+        recipe = recipe_dict.get(key)
+        if recipe_id == recipe.get_id():
+            flash(f'{recipe.get_name()} is already in favourites', 'error')
+            return redirect(url_for('customer.recipe_database', id=id))
+
+    user_favourite_dict[recipe_id] = favourite_recipe
+    print(f'Added {favourite_recipe.get_name()}')
+    favourite_db[str(id)] = user_favourite_dict
+    favourite_db.close()
+    db.close()
+
+    flash(f'{favourite_recipe.get_name()} has been added to favourites', 'info')
+    return redirect(url_for('customer.recipe_database', id=id))
+
+@customer_bp.route('/<string:id>/customer/remove_favourite/<recipe_id>')
+def remove_favourite(recipe_id, id):
+    db = shelve.open('favourites.db', 'c')
+    id = str(id)
+    recipe_dict = db.get(id)
+
+    recipe = recipe_dict.get(recipe_id)
+    name = recipe.get_name()
+
+    recipe_dict.pop(recipe_id)
+    db[id] = recipe_dict
+    db.close()
+
+    flash(f'{name} has been deleted', 'info')
+
+    return redirect(url_for('customer.favourites', id=id))
+
+@customer_bp.route('/<string:id>/customer/favourite/<recipe_id>', methods=['GET', 'POST'])
+def view_favourite(recipe_id, id):
+    print(recipe_id)
+    db = shelve.open('favourites.db', 'c')
+    id = str(id)
+    recipe_dict = db[id]
+    recipe = recipe_dict.get(recipe_id)
+    print(recipe.get_instructions())
+    db.close()
+    return render_template('customer/view_favourite.html', recipe=recipe, id=id)
+
 
 @customer_bp.route('/<string:id>/customer/menu')
 def menu(id):
