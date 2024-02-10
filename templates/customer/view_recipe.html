@@ -40,10 +40,10 @@
         </div>
   </div>
 
-
 <div style="text-align:center;">
     <a href="{{ url_for('customer.recipe_database', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
     <a href="{{ url_for('customer.add_favourite', recipe_id=recipe.get_id(), id=id ) }}" class="btn btn-warning mt-3 mb-4">Add to Favourites</a>
+    <button class="btn btn-primary mt-3 mb-4" onclick="window.print()">Export to PDF</button>
 </div>
 </div>
 

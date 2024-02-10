@@ -20,10 +20,10 @@
 <h3 style="text-align:center;margin-top:-3.5rem;margin-bottom:1.5rem;">Redefining Meals, Promoting Sustainability</h3>
 
 <!-- Add code to flash message when redirected to login page -->
-<form method="POST" action="/login" style="text-align:center;">
-    <button name="button" value="order_page" class="btn btn-primary bypass-disable">Order</button>
-    <button name="button" value="recipe_creator_page" class="btn btn-primary bypass-disable">Recipe Creator</button>
-</form>
+<div style="text-align:center;">
+    <a href="{{ url_for('guest.articles') }}" class="btn btn-primary">Articles</a>
+    <a href="{{ url_for('guest.recipe_database') }}" class="btn btn-primary">Recipes</a>
+</div>
 
 <p style="margin-top:1rem;text-align:center;">Login / Signup to order</p>
 
