@@ -3,17 +3,17 @@
 
   <!-- To replace nav bar with jinja later on-->
 {% block css %}
-  {{ super() }}
-  <link rel="stylesheet" href="../../static/css/create_recipe.css">
+    {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/create_recipe.css') }}">
 {% endblock %}
 
 {% block scripts %}
   {{ super() }}
-  <script src="../../static/js/update_recipe.js"></script>
 {% endblock %}
 
 {% block content %}
 {% from "includes/_form_helper.html" import render_field, render_field_picture %}
+<script src="{{ url_for('static', filename='js/update_recipe.js') }}"></script>
 <div>
     <h1 class="mb-4" style="text-align:center;margin-top:1.5rem;font-size:3rem;">Update Recipe</h1>
 <div class="container mt-5">
@@ -60,7 +60,7 @@
 
         </div>
     <div style="margin:auto;text-align:center;">
-        <a href="{{ url_for('recipe_database', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
+        <a href="{{ url_for('admin.recipe_database', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
         <input type="button" id="submit_recipe" onclick='submit_recipe1()' class="btn btn-primary mt-3 mb-4" value="Update Recipe">
     </div>
     </form>

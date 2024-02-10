@@ -7,3 +7,16 @@
 {% endfor %}
 {% endif %}
 {% endmacro %}
+{% macro render_field_picture(field, class) %}
+    {{ field(class_=class, **kwargs) | safe }}
+    <!-- Validation error messages from Forms.py fields -->
+    {% if field.errors %}
+        <div class="text-danger">
+            {% for error in field.errors %}
+                <script>
+                    display_popup('{{ error }}')
+                </script>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endmacro %}

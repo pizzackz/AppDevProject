@@ -17,7 +17,9 @@
 
 
 <body>
-    {% block navbar %}{% endblock %}
+    {% block navbar %}
+    {% include "includes/_admin_navbar.html" %}
+    {% endblock %}
 
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -36,6 +38,7 @@
     <div id="popup"></div>
 
     {% block flash_messages %}
+    <script src="{{ url_for('static', filename='js/flash_message.js') }}"></script>
     <!-- Flash messages from __init__.py.  -->
     {% for message in get_flashed_messages(category_filter=["info"]) %}
         <script>

@@ -99,15 +99,6 @@ function localStorageGet() {
     ingredient_list = JSON.parse(jsonString);
 }
 
-// Confirmation button
-function confirmdelete(content, id) {
-    console.log(content);
-    document.getElementById('modal-body').innerHTML = 'Are you sure you want to delete ' + content + '?';
-    document.getElementById('delete').onclick = function() {
-        window.location.href = "/delete_recipe/" + id;
-    }
-}
-
 // Activate overlay
 function overlayon() {
     const overlay = document.getElementById('overlay');

@@ -4,8 +4,8 @@
 
   <!-- To replace nav bar with jinja later on-->
 {% block css %}
-  {{ super() }}
-  <link rel="stylesheet" href="../../static/css/create_recipe.css">
+    {{ super() }}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/create_recipe.css') }}">
 {% endblock %}
 
 {% block scripts %}
@@ -55,7 +55,7 @@
 
         </div>
     <div style="margin:auto;text-align:center;">
-        <a href="{{ url_for('recipe_database', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
+        <a href="{{ url_for('admin.recipe_database', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
         <input type="button" id="submit_recipe" onclick='submit_recipe1()' class="btn btn-primary mt-3 mb-4" value="Add Recipe">
     </div>
     </form>

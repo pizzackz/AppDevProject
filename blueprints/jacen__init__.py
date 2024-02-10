@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.secret_key='hello_world'
 
 @admin_bp.route('/create_article', methods=['GET', 'POST'])
-def create_article():
+def create_article(id):
     create_article = createArticle(request.form)
     if request.method == 'POST' and create_article.validate():
         article_dict = {}
@@ -36,11 +36,11 @@ def create_article():
         db['article_item'] = article_dict
         db.close()
 
-        return redirect(url_for('article'))
-    return render_template('admin/article/create_article.html', form=create_article)
+        return redirect(url_for('article', id=id))
+    return render_template('admin/article/create_article.html', form=create_article, id=id)
 
 @admin_bp.route('/view_article/<article_id>')
-def view_article(article_id):
+def view_article(article_id, id):
     db = shelve.open('article.db', 'c')
     article_dict = db['article_item']
     article_item = article_dict.get(article_id)
@@ -48,10 +48,10 @@ def view_article(article_id):
     db['article_item'] = article_dict
     db.close()
 
-    return render_template('admin/article/view_article.html', article_item=article_item)
+    return render_template('admin/article/view_article.html', article_item=article_item, id=id)
 
 @admin_bp.route('/article')
-def article():
+def article(id):
     db = shelve.open('article.db', 'c')
     try:
         article_dict = db['article_item']
@@ -65,10 +65,10 @@ def article():
     print(articles)
     db.close()
 
-    return render_template('admin/article/admin_articles.html', form=createArticle, articles=articles)
+    return render_template('admin/article/admin_articles.html', form=createArticle, articles=articles, id=id)
 
 @admin_bp.route('/update_article/<article_id>', methods=['GET', 'POST'])
-def update_article(article_id):
+def update_article(article_id, id):
     update_article = createArticle(request.form)
     if request.method == 'POST' and update_article.validate():
         db = shelve.open('article.db', 'c')
@@ -83,7 +83,7 @@ def update_article(article_id):
         if not ("." in picture_filename and picture_filename.rsplit(".", 1)[1].lower() in ("jpg", "png", "jpeg")):
             flash("File type is not allowed. Please use jpeg, jpg or png files only!", "error")
             print("file is not allowed")
-            return render_template('admin/article/update_article.html', form=update_article)
+            return render_template('admin/article/update_article.html', form=update_article, id=id)
         file_path = os.path.join('static', 'image', picture_filename)
         picture.save(file_path)
 
@@ -106,7 +106,7 @@ def update_article(article_id):
 
         db['article_item'] = article_dict
         db.close()
-        return redirect(url_for('article'))
+        return redirect(url_for('article', id=id))
     else:
         db = shelve.open('article.db', 'c')
         article_dict = db['article_item']
@@ -118,10 +118,10 @@ def update_article(article_id):
         update_article.description.data = article_item.get_description()
         update_article.image.data = article_item.get_image()
 
-        return render_template('admin/article/update_article.html', form=update_article)
+        return render_template('admin/article/update_article.html', form=update_article, id=id)
 
 @admin_bp.route('/delete_article/<article_id>')
-def delete_article(article_id):
+def delete_article(article_id, id):
     db=shelve.open('article.db', 'c')
     article_dict=db['article_item']
     article=article_dict.get(article_id)
@@ -134,10 +134,10 @@ def delete_article(article_id):
     db['article_item']=article_dict
     db.close()
 
-    return redirect(url_for('article'))
+    return redirect(url_for('article', id=id))
 
 @admin_bp.route('/customer_articles')
-def customer_articles():
+def customer_articles(id):
     db = shelve.open('article.db', 'c')
     try:
         article_dict = db['article_item']
@@ -151,7 +151,7 @@ def customer_articles():
     print(articles)
     db.close()
 
-    return render_template('customer/customer_articles.html', articles=articles)
+    return render_template('customer/customer_articles.html', articles=articles, id=id)
 
 
 

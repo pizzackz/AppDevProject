@@ -28,7 +28,7 @@
                         <li><a class="dropdown-item" href="{{ url_for('admin.recipe_database', id=id) }}">Recipe
                                 Database</a></li>
                         <!-- Replace href value with actual url path for create_recipe -->
-                        <li><a class="dropdown-item" href="#">Create Recipe</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin.create_recipe', id=id) }}">Create Recipe</a></li>
                     </ul>
                 </li>
                 <!-- Dropdown for Menu Database -->
@@ -48,10 +48,10 @@
                         aria-expanded="false">Articles</a>
 
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('admin.articles_database', id=id) }}">Articles
+                        <li><a class="dropdown-item" href="{{ url_for('admin.article', id=id) }}">Articles
                                 Database</a></li>
                         <!-- Replace href value with actual url path for create_article -->
-                        <li><a class="dropdown-item" href="#">Create Article</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin.create_article', id=id) }}">Create Article</a></li>
                     </ul>
                 </li>
                 <!-- Customer Database -->

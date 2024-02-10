@@ -107,10 +107,10 @@ def menu_database(id):
 
 
 # Articles Database page (Admin)
-@admin_bp.route("/<string:id>/admin/articles_database")
-def articles_database(id):
-    print(f"data = {session.get('admin')}")
-    return render_template("admin/articles_database.html", id=id)
+# @admin_bp.route("/<string:id>/admin/articles_database")
+# def articles_database(id):
+#     print(f"data = {session.get('admin')}")
+#     return render_template("admin/articles_database.html", id=id)
 
 
 # Customer Feedback page (Admin)
@@ -719,7 +719,7 @@ def recipe_database(id):
 
 
 @admin_bp.route('/<string:id>/admin/create_recipe', methods=['GET', 'POST'])
-def create_recipe():
+def create_recipe(id):
     create_recipe_form = CreateRecipeForm(request.form)
     if request.method == 'POST':
         db = shelve.open('recipes.db', 'c')
@@ -736,7 +736,7 @@ def create_recipe():
 
         if picture_filename[1] != 'jpg' and picture_filename[1] != 'png':
             return render_template('admin/create_recipe.html', alert_error='Images are only allowed',
-                                   form=create_recipe_form)
+                                   form=create_recipe_form, id=id)
 
         picture_filename = name + '.' + picture_filename[1]
         picture.save(os.path.join('static/images_recipe', picture_filename))
@@ -748,7 +748,7 @@ def create_recipe():
         print(ingredients)
         if ingredients == ['']:
             return render_template('admin/create_recipe.html', alert_error='Please add ingredients.',
-                                   form=create_recipe_form)
+                                   form=create_recipe_form, id=id)
 
         new_recipe = Recipe(create_recipe_form.name.data, ingredients, create_recipe_form.instructions.data,
                             picture_filename)
@@ -759,7 +759,7 @@ def create_recipe():
             recipe = recipe_dict.get(key)
             if name == recipe.get_name():
                 return render_template('admin/create_recipe.html', alert_error='Recipe exists in Database.',
-                                       form=create_recipe_form)
+                                       form=create_recipe_form, id=id)
 
         recipe_dict[new_recipe.get_id()] = new_recipe
         db['recipes'] = recipe_dict
@@ -768,24 +768,24 @@ def create_recipe():
 
         flash(f'{name} has been created', 'success')
 
-        return redirect(url_for('recipe_database'), id=id)
+        return redirect(url_for('admin.recipe_database', id=id))
 
-    return render_template('admin/create_recipe.html', form=create_recipe_form)
+    return render_template('admin/create_recipe.html', form=create_recipe_form, id=id)
 
 
 @admin_bp.route('/<string:id>/admin/view_recipe/<recipe_id>', methods=['GET', 'POST'])
-def view_recipe(recipe_id):
+def view_recipe(recipe_id, id):
     print(recipe_id)
     db = shelve.open('recipes.db', 'c')
     recipe_dict = db['recipes']
     recipe = recipe_dict.get(recipe_id)
     print(recipe.get_instructions())
     db.close()
-    return render_template('admin/view_recipe.html', recipe=recipe)
+    return render_template('admin/view_recipe.html', recipe=recipe, id=id)
 
 
 @admin_bp.route('/<string:id>/admin/edit_recipe/<recipe_id>', methods=['GET', 'POST'])
-def edit_recipe(recipe_id):
+def edit_recipe(recipe_id, id):
     db = shelve.open('recipes.db', 'c')
     recipe_dict = db['recipes']
     recipe = recipe_dict.get(recipe_id)
@@ -818,7 +818,7 @@ def edit_recipe(recipe_id):
 
         flash(f'{recipe.get_name()} has been updated', 'info')
 
-        return redirect(url_for('recipe_database'))
+        return redirect(url_for('admin.recipe_database', id=id))
 
     update_recipe_form.name.data = recipe.get_name()
     print(recipe.get_name())
@@ -826,11 +826,11 @@ def edit_recipe(recipe_id):
 
     ingredients = recipe.get_ingredients()
 
-    return render_template('admin/update_recipe.html', form=update_recipe_form, ingredients=ingredients)
+    return render_template('admin/update_recipe.html', form=update_recipe_form, ingredients=ingredients, id=id)
 
 
 @admin_bp.route('/<string:id>/admin/delete_recipe/<recipe_id>')
-def delete_recipe(recipe_id):
+def delete_recipe(recipe_id, id):
     db = shelve.open('recipes.db', 'c')
     recipe_dict = db['recipes']
 
@@ -847,11 +847,11 @@ def delete_recipe(recipe_id):
 
     flash(f'{name} has been deleted', 'info')
 
-    return redirect(url_for('recipe_database'))
+    return redirect(url_for('admin.recipe_database', id=id))
 
 # Menu (Jairus)
 @admin_bp.route('/<string:id>/admin/menu')
-def menu():
+def menu(id):
     db = shelve.open('menu.db', 'c')
     try:
         menu_dict = db['Menu']
@@ -864,10 +864,10 @@ def menu():
         menus.append(menu_item)
         print("new image = "+str(menu_item.get_image()))
 
-    return render_template('admin/admin_menu.html', menus=menus)
+    return render_template('admin/admin_menu.html', menus=menus, id=id)
 
 @admin_bp.route('/<string:id>/admin/create_menu', methods=['GET', 'POST'])
-def create_menu():
+def create_menu(id):
     create_menu = createMenu(request.form)
     if request.method == 'POST' and create_menu.validate():
         menu_dict = {}
@@ -881,14 +881,14 @@ def create_menu():
         if any(menu_item.get_name() == name_to_check for menu_item in menu_dict.values()):
             flash('Duplicate item', 'error')
             db.close()
-            return redirect(url_for('menu'))
+            return redirect(url_for('admin.menu', id=id))
 
         picture = request.files['image']
         picture_filename = secure_filename(picture.filename)
         if not ("." in picture_filename and picture_filename.rsplit(".", 1)[1].lower() in ("jpg", "png", "jpeg")):
             flash("File type is not allowed. Please use jpeg, jpg or png files only!", "error")
             print("file is not allowed")
-            return render_template('admin/createMenu.html', form=create_menu)
+            return render_template('admin/createMenu.html', form=create_menu, id=id)
         file_path = os.path.join('static', 'menu_image', picture_filename)
         picture.save(file_path)
 
@@ -899,8 +899,8 @@ def create_menu():
         db['Menu'] = menu_dict
         db.close()
 
-        return redirect(url_for('menu'))
-    return render_template('admin/createMenu.html', form=create_menu)
+        return redirect(url_for('admin.menu', id=id))
+    return render_template('admin/createMenu.html', form=create_menu, id=id)
 
 @admin_bp.route('/<string:id>/admin/delete_menu/<menu_id>')
 def delete_menu(menu_id):
@@ -916,11 +916,11 @@ def delete_menu(menu_id):
     db['Menu'] = menu_dict
     db.close()
 
-    return redirect(url_for('menu'))
+    return redirect(url_for('admin.menu', id=id))
 
 
 @admin_bp.route('/<string:id>/admin/update_menu/<menu_id>', methods=['GET', 'POST'])
-def update_menu(menu_id):
+def update_menu(menu_id, id):
     update_menu = createMenu(request.form)
     if request.method == 'POST' and update_menu.validate():
         db = shelve.open('menu.db', 'c')
@@ -944,7 +944,7 @@ def update_menu(menu_id):
             if not ("." in picture_filename and picture_filename.rsplit(".", 1)[1].lower() in ("jpg", "png", "jpeg")):
                 flash("File type is not allowed. Please use jpeg, jpg or png files only!", "error")
                 print("file is not allowed")
-                return render_template('admin/updateMenu.html', form=update_menu)
+                return render_template('admin/updateMenu.html', form=update_menu, id=id)
             picture_path = os.path.join('static', 'menu_image', picture_filename)
             picture.save(picture_path)
             menu_item.set_image(picture_filename)  # Update the image attribute
@@ -953,7 +953,7 @@ def update_menu(menu_id):
 
         db['Menu'] = menu_dict
         db.close()
-        return redirect(url_for('menu'))
+        return redirect(url_for('admin.menu', id=id))
     else:
         db = shelve.open('menu.db', 'c')
         menu_dict = db['Menu']
@@ -965,23 +965,23 @@ def update_menu(menu_id):
         update_menu.price.data = menu_item.get_price()
         update_menu.image.data = menu_item.get_image()
 
-        return render_template('admin/updateMenu.html', form=update_menu)
+        return render_template('admin/updateMenu.html', form=update_menu, id=id)
 
 
 @admin_bp.route('/<string:id>/admin/view_menu/<menu_id>')
-def view_menu(menu_id):
+def view_menu(menu_id, id):
     db = shelve.open('menu.db', 'c')
     menu_dict = db['Menu']
     menu_item = menu_dict.get(menu_id)
 
     db.close()
 
-    return render_template('admin/viewMenu.html', menu_item=menu_item)
+    return render_template('admin/viewMenu.html', menu_item=menu_item, id=id)
 
 
 # Articles
 @admin_bp.route('/<string:id>/admin/create_article', methods=['GET', 'POST'])
-def create_article():
+def create_article(id):
     create_article = createArticle(request.form)
     if request.method == 'POST' and create_article.validate():
         article_dict = {}
@@ -996,22 +996,23 @@ def create_article():
         if not ("." in picture_filename and picture_filename.rsplit(".", 1)[1].lower() in ("jpg", "png", "jpeg")):
             flash("File type is not allowed. Please use jpeg, jpg or png files only!", "error")
             print("file is not allowed")
-            return render_template('admin/article/create_article.html', form=create_article)
-        file_path = os.path.join('static', 'image', picture_filename)
+            return render_template('admin/create_article.html', form=create_article, id=id)
+        file_path = os.path.join('static', 'images_articles', picture_filename)
         picture.save(file_path)
 
         article = article_item(picture_filename, create_article.title.data, create_article.category.data, create_article.description.data)
+        print(article.get_id())
         article_dict[article.get_id()] = article
         print("save image = " + str(picture_filename))
 
         db['article_item'] = article_dict
         db.close()
 
-        return redirect(url_for('article'))
-    return render_template('admin/article/create_article.html', form=create_article)
+        return redirect(url_for('admin.article', id=id))
+    return render_template('admin/create_article.html', form=create_article, id=id)
 
 @admin_bp.route('/<string:id>/admin/view_article/<article_id>')
-def view_article(article_id):
+def view_article(article_id, id):
     db = shelve.open('article.db', 'c')
     article_dict = db['article_item']
     article_item = article_dict.get(article_id)
@@ -1019,10 +1020,10 @@ def view_article(article_id):
     db['article_item'] = article_dict
     db.close()
 
-    return render_template('admin/article/view_article.html', article_item=article_item)
+    return render_template('admin/view_article.html', article_item=article_item, id=id)
 
 @admin_bp.route('/<string:id>/admin/article')
-def article():
+def article(id):
     db = shelve.open('article.db', 'c')
     try:
         article_dict = db['article_item']
@@ -1036,10 +1037,10 @@ def article():
     print(articles)
     db.close()
 
-    return render_template('admin/article/admin_articles.html', form=createArticle, articles=articles)
+    return render_template('admin/admin_articles.html', form=createArticle, articles=articles, id=id)
 
 @admin_bp.route('/<string:id>/admin/update_article/<article_id>', methods=['GET', 'POST'])
-def update_article(article_id):
+def update_article(article_id, id):
     update_article = createArticle(request.form)
     if request.method == 'POST' and update_article.validate():
         db = shelve.open('article.db', 'c')
@@ -1054,22 +1055,22 @@ def update_article(article_id):
         if not ("." in picture_filename and picture_filename.rsplit(".", 1)[1].lower() in ("jpg", "png", "jpeg")):
             flash("File type is not allowed. Please use jpeg, jpg or png files only!", "error")
             print("file is not allowed")
-            return render_template('admin/article/update_article.html', form=update_article)
-        file_path = os.path.join('static', 'image', picture_filename)
+            return render_template('admin/update_article.html', form=update_article, id=id)
+        file_path = os.path.join('static', 'images_articles', picture_filename)
         picture.save(file_path)
 
         article_item.set_image(picture_filename)
-        article_dict[article.get_id()] = article
+        article_dict[article_item.get_id()] = article_item
         print("save image = " + str(picture_filename))
 
         if picture.filename != '':
-            old_picture_path = os.path.join('static', 'image', article_item.get_image())
+            old_picture_path = os.path.join('static', 'images_articles', article_item.get_image())
             if os.path.exists(old_picture_path):
                 os.remove(old_picture_path)
 
             # Save the new image file
 
-            picture_path = os.path.join('static', 'image', picture_filename)
+            picture_path = os.path.join('static', 'images_articles', picture_filename)
             picture.save(picture_path)
             article_item.set_image(picture_filename)  # Update the image attribute
 
@@ -1077,7 +1078,7 @@ def update_article(article_id):
 
         db['article_item'] = article_dict
         db.close()
-        return redirect(url_for('article'))
+        return redirect(url_for('admin.article', id=id))
     else:
         db = shelve.open('article.db', 'c')
         article_dict = db['article_item']
@@ -1089,26 +1090,26 @@ def update_article(article_id):
         update_article.description.data = article_item.get_description()
         update_article.image.data = article_item.get_image()
 
-        return render_template('admin/article/update_article.html', form=update_article)
+        return render_template('admin/update_article.html', form=update_article, id=id)
 
 @admin_bp.route('/<string:id>/admin/delete_article/<article_id>')
-def delete_article(article_id):
+def delete_article(article_id, id):
     db=shelve.open('article.db', 'c')
     article_dict=db['article_item']
     article=article_dict.get(article_id)
     print(article)
     old_picture=article.get_image()
     if old_picture:
-        os.remove(os.path.join('static', 'image', old_picture))
+        os.remove(os.path.join('static', 'images_articles', old_picture))
 
     article_dict.pop(article_id)
     db['article_item']=article_dict
     db.close()
 
-    return redirect(url_for('article'))
+    return redirect(url_for('admin.article', id=id))
 
 @admin_bp.route('/<string:id>/admin/customer_articles')
-def customer_articles():
+def customer_articles(id):
     db = shelve.open('article.db', 'c')
     try:
         article_dict = db['article_item']
@@ -1122,4 +1123,4 @@ def customer_articles():
     print(articles)
     db.close()
 
-    return render_template('customer/customer_articles.html', articles=articles)
+    return render_template('customer/customer_articles.html', articles=articles, id=id)

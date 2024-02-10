@@ -2,10 +2,6 @@
 
 {% block title %}Admin Home{% endblock %}
 
-{% block navbar %}
-{% include "includes/_admin_navbar.html" %}
-{% endblock %}
-
 {% block css %}
   {{ super() }}
   <link rel="stylesheet" href="../../static/css/home.css">
@@ -36,7 +32,7 @@
       </div>
     </div>
   </a>
-  <a href="{{ url_for('admin.articles_database', id=id) }}">
+  <a href="{{ url_for('admin.article', id=id) }}">
     <div class="card" style="width: 14rem;height:14rem;padding:1rem;">
       <img style="width:8rem;margin:auto;" src="../../static/home_logo/article.png" class="card-img-top" alt="...">
       <div class="card-body">

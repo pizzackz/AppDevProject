@@ -20,7 +20,7 @@
                             <a class="badge bg-secondary text-decoration-none link-light" href="#!">Category: {{ article_item.get_category() }}</a>
                         </header>
                         <!-- Preview image figure-->
-                        <figure class="mb-5"><img style="max-height:200px; max-width:400px" src="{{ url_for('static', filename='image/' + article_item.get_image()) }}" alt="Article Image"></figure>
+                        <figure class="mb-5"><img style="max-height:200px; max-width:400px" src="{{ url_for('static', filename='images_articles/' + article_item.get_image()) }}" alt="Article Image"></figure>
                         <!-- Post content-->
                         <section class="mb-5">
                             <div style="white-space: pre-line; font-size: 1.2em;" class="fs-5 mb-4">{{ article_item.get_description() | safe}}</div>
@@ -28,7 +28,7 @@
                     </article>
 
                     <div>
-                        <a href="{{url_for('article') }}" class="btn btn-secondary mt-3 mb-4">Back to articles</a>
+                        <a href="{{url_for('admin.article', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to articles</a>
                     </div>
                     <!-- Comments section-->
                     <section class="mb-5">

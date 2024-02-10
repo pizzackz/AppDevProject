@@ -154,4 +154,4 @@ def delete_all_customers():
 # Testing
 # create_customer({"first_name": "Yeo", "last_name": "Jun Qi", "username": "Croxvore19", "email": "croxvore@gmail.com", "last_online": "13/01/2024"}, hashlib.sha256("Unitysec@2020".encode("utf-8")).hexdigest())
 # delete_all_customers()
-delete_customer(user_id="4947aed0ff0962494b5bcddd6ef7f23b957742c5213e3a4455d7983a09f3ffe1386")
+# delete_customer(user_id="4947aed0ff0962494b5bcddd6ef7f23b957742c5213e3a4455d7983a09f3ffe1386")

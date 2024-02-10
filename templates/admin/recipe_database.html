@@ -1,10 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}Recipe Database{% endblock %}
 
-{% block navbar %}
-{% include "includes/_admin_navbar.html" %}
-{% endblock %}
-
 
   <!-- To replace nav bar with jinja later on-->
 {% block css %}
@@ -80,9 +76,9 @@
                         {% endfor %}
 
                     </p>
-                    <a href="{{ url_for('admin_view_recipe', recipe_id=recipe.get_id() ) }}" class="btn btn-success m-2">View Recipe</a>
-                    <a href="{{ url_for('edit_recipe', recipe_id=recipe.get_id() ) }}" class="btn btn-primary m-2">Edit Recipe</a>
-                    <a onclick="confirmdelete('{{ recipe.get_name() }}', '{{ recipe.get_id() }}')" class="btn btn-danger m-2" data-bs-toggle="modal" data-bs-target="#exampleModal">Delete</a>
+                    <a href="{{ url_for('admin.view_recipe', recipe_id=recipe.get_id(), id=id ) }}" class="btn btn-success m-2">View Recipe</a>
+                    <a href="{{ url_for('admin.edit_recipe', recipe_id=recipe.get_id(), id=id ) }}" class="btn btn-primary m-2">Edit Recipe</a>
+                    <a onclick="confirmdelete('{{ recipe.get_name() }}', '{{ recipe.get_id() }}', '{{ session.get('admin').get('user_id')}}')" class="btn btn-danger m-2" data-bs-toggle="modal" data-bs-target="#exampleModal">Delete</a>
                 </div>
             </div>
             {% endfor %}
@@ -97,6 +93,17 @@
     </div>
 
     </div>
+    <script>
+        // Confirmation button
+function confirmdelete(content, id, admin_id) {
+    console.log(content);
+    document.getElementById('modal-body').innerHTML = 'Are you sure you want to delete ' + content + '?';
+    document.getElementById('delete').onclick = function() {
+        window.location.href = "delete_recipe/" + id;
+    }
+}
+    </script>
+
 
     {% if success %}
     <script>
