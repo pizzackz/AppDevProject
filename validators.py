@@ -1,7 +1,6 @@
 import shelve
-import hashlib
+from werkzeug.security import generate_password_hash
 from wtforms import ValidationError
-from flask import current_app
 
 
 # Custom validator functions for Forms.py
@@ -26,21 +25,21 @@ def password_complexity(form, field):
 def unique_data(form, field):
     data = field.data
     field_name = field.name
-    
+
     db = shelve.open("user_accounts.db", "c")
     if "Customers" in db:
         customers_dict = db["Customers"]
 
         for customer in customers_dict.values():
             if not customer.is_unique_data(data, field_name):
-                raise ValidationError(f"Please use another {field_name.capitalize()}")
-    
+                raise ValidationError(f"{field_name.capitalize()} already in use. Try another")
+
     if "Admins" in db:
         admins_dict = db["Admins"]
 
         for admin in admins_dict.values():
             if not admin.is_unique_data(data, field_name):
-                raise ValidationError(f"Please use another {field_name.capitalize()}")
+                raise ValidationError(f"{field_name.capitalize()} already in use. Try another")
 
     db.close()
 
@@ -53,7 +52,7 @@ def data_exist(form, field):
 
     # Hash given data if field is password
     if "password" in field_name:
-        data = hashlib.sha256(data.encode("utf-8")).hexdigest()
+        data = generate_password_hash(data, salt_length=8)
 
     customers_dict = {}
     admins_dict = {}

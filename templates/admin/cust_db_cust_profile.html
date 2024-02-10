@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+{% extends "admin/cust_db_base.html" %}
+{% block title %}Customer Database - Customer Details{% endblock %}
+
+{% block css %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/edit_profile.css') }}" />
+<style>
+    #content-header {
+        display: flex;
+        justify-content: space-between;
+        margin-right: 1rem;
+        font-size: 1.2rem;
+    }
+    
+    #content-header a, #content-header p {
+        margin-bottom: 0;
+        vertical-align: middle;
+    }
+
+    #brief-cust-info table td:nth-child(1) {
+        padding-right: 0.5rem;
+    }
+
+    #buttons {
+        display: flex;
+        max-width: 100%;
+        margin-top: 1.8rem;
+        justify-content: center;
+    }
+
+    #buttons button {
+        width: 8rem;
+        padding: 0.6rem;
+        margin-left: 0.5rem;
+        margin-right: 0.5rem;
+    }
+
+    #order-history-button {
+        margin-top: 1.8rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    #order-history-button button {
+        width: 12rem;
+        padding: 0.6rem;
+    }
+
+    #requests {
+        margin-top: 1.8rem;
+        text-align: center;
+        background-color: #d3d3d380;
+        padding-top: 0.8rem;
+        padding-bottom: 0.8rem;
+        border-radius: 0.5rem;
+    }
+
+    #requests ul {
+        list-style-type: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% from "includes/_form_helper.html" import render_field %}
+<div class="container-fluid row g-0" id="container">
+    <div class="col-3" id="left">
+        <form method="POST" action="" id="admin_details_profile_pic">
+            <div id="profile-image">
+                {% if cust_details.get("profile_pic") == "default" %}
+                <img class="rounded-circle" src="{{ url_for('static', filename='images/default_profile_pic.png') }}" />
+                {% else %}
+                <img class="rounded-circle"
+                    src="{{ url_for('static', filename='uploads/customer/profile_pictures/' + cust_details.get('profile_pic')) }}" />
+                {% endif %}
+            </div>
+            <div id="buttons">
+                {% if cust_details.get("is_locked") %}
+                <button type="submit" name="button" value="unlock_button" class="btn btn-warning rounded-pill bypass-disable">UNLOCK</button>
+                {% else %}
+                <button type="submit" name="button" value="lock_button" class="btn btn-danger rounded-pill bypass-disable">LOCK</button>
+                {% endif %}
+                <button type="submit" name="button" value="delete_button" class="btn btn-danger rounded-pill bypass-disable">DELETE</button>
+            </div>
+            <div id="order-history-button">
+                <button type="submit" name="button" value="order_history_button" class="btn btn-primary bypass-disable">ORDER HISTORY</button>
+            </div>
+            {% if cust_details.get("is_locked") and cust_details.get("has_request") %}
+            <div id="requests">
+                {% if cust_details.get("has_request") %}
+                <h4>Requested to:</h4>
+                <ul class="list-group">
+                    {% if cust_details.get("unlock_request") %}
+                    <li>Unlock Account</li>
+                    {% endif %}
+                    {% if cust_details.get("delete_request") %}
+                    <li>Delete Account</li>
+                    {% endif %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="col" id="right">
+        <div id="content">
+            <form method="POST" action="" id="admin_details">
+                <div id="content-header">
+                    <div id="back-link" style="display: flex; align-items: center;">
+                        <a href="{{ url_for('admin.customer_database', id=id) }}"><i class="bi bi-arrow-left-circle"></i>
+                            Back to Search</a>
+                    </div>
+                    <div id="brief-cust-info">
+                        <table>
+                            <tr>
+                                <td>Current Customer: </td>
+                                <td>{{ cust_details.get("username") }}</td>
+                            </tr>
+                            <tr>
+                                <td>Account Created on: </td>
+                                <td>{{ cust_details.get("joined_date") }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="content-body">
+                    <div class="form-group row">
+                        <div class="col">
+                            {{ render_field(form.first_name, class="form-control") }}
+                        </div>
+                        <div class="col">
+                            {{ render_field(form.last_name, class="form-control") }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col">
+                            {{ render_field(form.display_name, class="form-control")
+                            }}
+                        </div>
+                        <div class="col">
+                            {{ render_field(form.email, class="form-control") }}
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col">
+                            <label for="locked_status">Locked Status</label>
+                            {% if cust_details.get("is_locked") %}
+                            <input class="form-control" id="locked-status-true" name="locked-status" type="text"
+                                value="Locked" style="background-color: #ff6f61;" disabled />
+                            {% else %}
+                            <input class="form-control" id="locked-status-false" name="locked-status" type="text"
+                                value="Unlocked" style="background-color: #9acd32;" disabled />
+                            {% endif %}
+                        </div>
+                        <div class="col">
+                            <label for="last_online">Last Online</label>
+                            <input class="form-control" id="last-online" name="last-online" type="text"
+                                value="{{ cust_details.get('last_online') }}" disabled />
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

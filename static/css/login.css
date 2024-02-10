@@ -1,126 +1,149 @@
-body, input::placeholder, input[type="submit"], label, p {
-    font-size: 0.9vw;
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+#container {
+    display: flex;
+    flex: 1;
+}
+
+#left-half, #right-half {
+    min-height: 100vh;
+    max-width: 50vw;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
 #left-half {
-    height: 100vh;
-    background-color:#ffedc5;
+    background-color: #ffedc5;
     display: flex;
+    flex: 1;
     align-items: center;
     justify-content: center;
 }
 
 #right-half {
-    height: 100vh;
     background-color: #f3f3f3;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex: 1;
 }
 
-#logo {
-    width: 22.5vw;
+#left-half img {
+    max-width: 27rem;
+    max-height: 100%;
+    width: auto;
     height: auto;
 }
 
-#content-box {
-    width: 22.5vw;
+#content {
+    display: flex;
+    flex-direction: column;
+    max-width: 27rem;
 }
 
-#above-form-box {
-    background-color: transparent;
-    border: none;
-}
-
-#above-form-box .semicircle-box {
-    padding-top: 0;
-    padding-bottom: 0;
+#content-header {
+    width: 100%;
     display: flex;
     justify-content: center;
+    background-color: transparent;
 }
 
-#semicircle {
+#content-body {
+    width: 100%;
+    max-height: 90%;
     background-color: #ffedc5;
-    width: 8.9vw;
-    height: 4.5vw;
-    border-radius: 4.5vw 4.5vw 0 0;
+    border-radius: 1.8rem;
 }
 
-.bi.bi-circle-fill {
+#avatar-container {
+    background-color: #ffedc5;
+    width: 10rem;
+    height: 5rem;
+    border-radius: 5rem 5rem 0 0;
+}
+
+#avatar-head {
     color: #4285f4;
-    font-size: 2.55vw;
-    margin-top: 16px;
-    text-shadow: 0 0.127vw 0.254vw rgba(0, 0, 0, 0.75);
+    font-size: 3rem;
+    margin-top: 1rem;
+    text-shadow: 0 0.15rem 0.3rem rgba(0, 0, 0, 0.75);
 }
 
-#semicircle2 {
+#avatar-body {
+    position: relative;
+    z-index: 1;
     background-color: #4285f4;
-    width: 5.61vw;
-    height: 2.55vw;
-    border-radius: 2.04vw 2.04vw 0 0;
+    width: 6rem;
+    height: 3rem;
+    border-radius: 2.25rem 2.25rem 0 0;
     margin: 0 auto;
-    box-shadow: 0 0.1275vw 0.255vw rgba(0, 0, 0, 0.75);
+    box-shadow: 0 0.15rem 0.3rem rgba(0, 0, 0, 0.75);
 }
 
-#form-box {
-    background-color: #ffedc5;
-    border-radius: 1.5285vw;
-}
-
-#form-box h4 {
+#main-content h3 {
+    margin-top: 1rem;
+    margin-bottom: 0;
+    margin-left: 1.5rem;
     text-align: left;
-    font-size: 2vw;
-    font-weight: 900;
-    margin-bottom: 1.019vw;
 }
 
-#form-box-fields {
+#back-link {
+    text-align: left;
+    margin-top: 1rem;
+    margin-left: 1.5rem;
+    margin-bottom: 1.2rem;
+    font-size: 1.2rem;
+}
+
+#form {
     width: 100%;
-    padding: 2.038vw;
-    padding-bottom: 1.019vw;
-}
-
-#login-base {
-    height: 100%;
-    width: 100%;
-}
-
-#form-box-fields label {
-    display: inline;
-    width: fit-content;
-    padding: 0 0 0 0.5vw;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .form-group {
-    margin: 0;
-    padding-top: 1.019vw;
+    margin: 0 2rem 1.5rem 2rem;
 }
 
-.form-control {
-    padding: 0.382vw 0.764vw;
-    font-size: 1.019vw;
+label {
+    text-align: left;
+    font-size: 1.2rem;
+    margin-bottom: 0.6rem;
 }
 
-#form-box-fields input {
-    margin-top: 1.019vw;
+.form-group input {
+    padding: 0.6rem;
 }
 
-#form-box-fields input.rounded-pill {
-    padding: 0.408vw 1.529vw;
-    font-size: 0.815vw;
+.form-group input::placeholder {
+    font-size: 1.2rem;
 }
 
-#reset-password-link, #resend-otp-link {
-    margin-top: 1.019vw;
+#extra-statement {
+    margin-left: 2.5rem;
+    margin-right: 2.5rem;
+    text-align: left;
 }
 
-#form-box hr {
-    margin: 0 2.038vw;
-    margin-top: 0.51vw;
+input[type="submit"] {
+    padding: 0.5rem 1.8rem;
 }
 
-#form-box-extra-links {
-    width: 100%;
-    padding-top: 1.019vw;
-    padding-bottom: 1.019vw;
+#extra-details {
+    margin-top: 1rem;
+}
+
+#links p {
+    margin-bottom: 0.5rem;
+}
+
+hr {
+    margin-left: 1.5rem;
+    margin-right: 1.5rem;
 }

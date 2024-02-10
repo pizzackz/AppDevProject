@@ -3,57 +3,52 @@
 
 {% block content %}
 <div class="container-fluid row g-0">
-    <div class="col-sm-6 col-md-6 col-lg-6" id="left-half">
-        <img class="mx-auto img-fluid" id="logo" src="{{ url_for('static', filename='images/logo.png') }}" />
+    <div id="left-half">
+        <img id="logo" src="{{ url_for('static', filename='images/logo.png') }}" />
     </div>
 
-    <div class="col-sm-6 col-md-6 col-lg-6" id="right-half">
-        <div id="content-box" class="text-center">
-
-            <div id="above-form-box" class="card">
-                <div class="semicircle-box">
-                    <div id="semicircle">
-                        <i class="bi bi-circle-fill"></i>
-                        <div id="semicircle2"></div>
-                    </div>
+    <div id="right-half">
+        <div id="content">
+            <div id="content-header">
+                <div id="avatar-container">
+                    <i class="bi bi-circle-fill" id="avatar-head"></i>
+                    <div id="avatar-body"></div>
                 </div>
             </div>
 
-            <div id="form-box">
-                <div class="card-body">
+            <div id="content-body">
+                <div id="main-content">
                     {% block form %}
                     {% from "includes/_form_helper.html" import render_field %}
-                    <div id="form-box-fields">
-                        <div style="text-align: left; margin-bottom: 1.019vw;">
-                            <a href="/signup?back=True" style="margin-bottom: 1.019vw;">
-                                <i class="bi bi-arrow-left-circle"></i> Back
-                            </a>
+                    <div id="back-link">
+                        <a href="/signup?back=True" style="margin-bottom: 1.2rem;">
+                            <i class="bi bi-arrow-left-circle"></i> Back
+                        </a>
+                    </div>
+
+                    <hr>
+
+                    <form method="POST" action="" id="verify-email-form">
+                        <div class="form-group row">
+                            {{ render_field(form.otp, class="form-control") }}
                         </div>
 
-                        <hr style="margin: 0;">
+                        <div id="extra-statement">
+                            <p>Please check your inbox and enter the code above</p>
+                        </div>
 
-                        <form method="POST" action="" id="verify-email-form">
-                            <div class="form-group row">
-                                {{ render_field(form.otp, class="form-control") }}
-                            </div>
+                        <input type="submit" value="VERIFY" class="btn btn-primary rounded-pill disabled" />
 
-                            <br>
-
-                            <p style="text-align: left;">Please check your inbox and enter the code above</p>
-
-                            <input type="submit" value="VERIFY" class="btn btn-primary rounded-pill disabled" />
-
-                            <div id="resend-otp-link">
-                                <a href="/signup/verify_email?resend_pin=True">Resend PIN</a>
-                            </div>
-                        </form>
-                    </div>
+                        <div id="extra-details">
+                            <a href="/signup/verify_email?resend_pin=True">Resend PIN</a>
+                        </div>
+                    </form>
 
                     {% endblock %}
 
                     <hr>
 
-                    <div id="form-box-extra-links">
+                    <div id="links">
                         <p>Already have an account? Log in <a href="/login">here</a></p>
                         <p>Just browsing? Our menu is <a href="/menu">here</a></p>
                     </div>

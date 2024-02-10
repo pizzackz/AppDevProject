@@ -5,69 +5,7 @@
 
 {% block css %}
 {{ super() }}
-<style>
-    #main-content {
-        margin-top: 5%;
-    }
-
-    .card {
-        width: 40vw;
-        background-color: #ffedc5;
-        margin-left: auto;
-        margin-right: auto;
-        border-radius: 50px;
-    }
-
-    .card-title {
-        margin-top: 16px;
-        margin-bottom: 0;
-    }
-
-    h3.card-title {
-        margin: 0;
-        text-align: center;
-    }
-
-    .card-body {
-        padding: 0;
-        margin: 16px;
-    }
-    
-    #create-admin {
-        height: 100%;
-        width: 100%;
-        margin: 0;
-    }
-
-    .form-group {
-        margin: 0;
-        padding-top: 1.019vw;        
-    }
-
-    .form-group#names {
-        padding-top: 0;
-    }
-
-    .form-group label {
-        display: inline;
-        padding-left: 10px;
-    }
-
-    .form-group input {
-        margin-top: 0.5485vw;
-    }
-    
-    #submit-button {
-        display: flex;
-        justify-content: center;
-        padding-left: 0;
-    }
-
-    #submit-button input {
-        padding-left: 1.019vw;
-        padding-right: 1.019vw;
-    }
-</style>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/admin_database.css') }}" />
 {% endblock %}
 
 {% block navbar %}

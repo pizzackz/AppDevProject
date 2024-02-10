@@ -6,9 +6,13 @@
 {% block css %}
 {{ super() }}
 <style>
+    #back-link {
+        margin-left: 1.2rem;
+    }
+
     #extra-links {
         width: 100%;
-        margin-top: 1.019vw;
+        margin-top: 1.2rem;
         text-align: center;
     }
 
@@ -19,12 +23,12 @@
     }
 
     #save-button button {
-        margin-right: 1.019vw;
+        margin-right: 1.2rem;
     }
 
     #save-button button[value="save"] {
-        padding-left: 1.019vw;
-        padding-right: 1.019vw;
+        padding-left: 1.2rem;
+        padding-right: 1.2rem;
     }
 </style>
 {% endblock %}
@@ -40,8 +44,8 @@
             <hr>
 
             <form method="POST" action="" id="update-admin">
-                <div style="text-align: left;">
-                    <a href="/05010999/retrieve" style="margin-bottom: 1.019vw; margin-left: 1.019vw;"><i class="bi bi-arrow-left-circle"></i>
+                <div id="back-link">
+                    <a href="{{ url_for('admin.retrieve_admin') }}"><i class="bi bi-arrow-left-circle"></i>
                         Back to Admin List
                     </a>
                 </div>
@@ -67,7 +71,7 @@
                 </div>
 
                 <div id="extra-links">
-                    <p>Reset password <a href="{{ url_for('admin.reset_password2', id=id, reset_password=True) }}">here</a></p>
+                    <p>Reset password <a href="{{ url_for('admin.reset_password2', id=id) }}">here</a></p>
                 </div>
 
                 <hr>

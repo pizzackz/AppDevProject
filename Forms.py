@@ -1,6 +1,7 @@
-from wtforms import Form, StringField, PasswordField, FileField
-from wtforms.validators import Email
+from wtforms import Form, StringField, PasswordField, FileField, TextAreaField
+from wtforms.validators import Email, DataRequired, Length
 from validators import unique_data, password_complexity, data_exist, otp_validator
+
 
 # Signup Form (Base stage)
 class BaseSignUpForm(Form):
@@ -80,5 +81,36 @@ class SearchCustomerForm(Form):
     username = StringField("Enter Customer's Username", render_kw={"placeholder": "JohnDoe1"})
 
 
+# Change Profile Picture Form (Edit Profile - Customer & Admin)
 class FileForm(Form):
     file = FileField("File")
+
+
+# Display Customer Account Details Form (Customer Database - Retrieve Customer - Admin View)
+class AccountDetailsForm2(Form):
+    first_name = StringField("First Name", render_kw={"disabled": True})
+    last_name = StringField("Last Name", render_kw={"disabled": True})
+    display_name = StringField("Display Name", render_kw={"disabled": True})
+    email = StringField("Email Address", render_kw={"disabled": True})
+
+
+# Lock Details Form (Customer Database - Lock Customer - Admin View)
+class LockCustomerAccountForm(Form):
+    reason = TextAreaField("Reason for locking", render_kw={"placeholder": "Enter Reason"})
+
+class CreateRecipeForm(Form):
+    name = StringField("Name", validators=[DataRequired(), Length(max=255)], render_kw={"class": "form-control"})
+    ingredients = StringField("Ingredients", validators=[DataRequired()], render_kw={"class": "form-control"})
+    instructions = TextAreaField("Instructions", validators=[DataRequired()], render_kw={"class": "form-control"})
+    picture = FileField("Picture", render_kw={"class": "form-control", "accept": "image/*"})
+    
+class createArticle(Form):
+    category = StringField('Category', [Length(min=1, max=150), DataRequired()])
+    title = StringField('Article Title', [Length(min=1, max=150), DataRequired()])
+    image = FileField('Upload Image')
+    description = TextAreaField('Description', [DataRequired()])
+
+class comment_sec(Form):
+    title = StringField('Username', [Length(min=1, max=150), DataRequired()])
+    image = FileField('Profile picture')
+    description = TextAreaField('Description', [DataRequired()])

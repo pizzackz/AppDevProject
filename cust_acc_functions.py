@@ -1,7 +1,9 @@
 import shelve
 import random
 import hashlib
+from datetime import datetime
 from Customer import Customer
+from werkzeug.security import generate_password_hash
 
 
 # Create Customer
@@ -14,7 +16,7 @@ def create_customer(session_data, hashed_password):
     last_online = session_data.get("last_online")
 
     # Hash 1st 4 char of username & add random number in front to get user_id
-    hashed_username = hashlib.sha256(username[0:3].encode("utf-8")).hexdigest()
+    hashed_username = hashlib.sha256(username[0:3].encode("utf-8")).hexdigest()[0:9]
     user_id = f"{random.randint(100, 500)}{hashed_username}"
     print("user_id = " + user_id)
 
@@ -72,13 +74,11 @@ def retrieve_cust_details(user_id):
 
 
 # Update Customer Details
-def update_cust_details(user_id, first_name=None, last_name=None, display_name=None, email=None, password=None, is_locked=None, locked_reason=None, unlock_request=None, last_online=None, profile_pic_name=None):
+def update_cust_details(user_id, first_name=None, last_name=None, display_name=None, email=None, password=None, is_locked=None, locked_reason=None, unlock_request=None, delete_request=None, last_online=None, profile_pic_name=None):
     # Open db to store data
     db = shelve.open("user_accounts.db", "c")
     customers_dict = db["Customers"]
     customer = customers_dict.get(user_id)
-
-    # print("cust data = " + str(customer.get_cust_data()))
 
     # Update first_name of customer
     if first_name:
@@ -108,20 +108,25 @@ def update_cust_details(user_id, first_name=None, last_name=None, display_name=N
         print(f"Customer account {user_id:.10s}'s password updated")
 
     # Update locked status and reason
-    if is_locked and locked_reason:
+    if is_locked != None and locked_reason != None:
         customer.set_is_locked(is_locked)
         customer.set_locked_reason(locked_reason)
-        print(f"Customer account {user_id:.10s} has been locked with a reason")
+        print(f"Customer account {user_id:.10s}'s locked status & locked reason updated")
     
     # Update unlock request
-    if unlock_request:
+    if unlock_request != None:
         customer.set_unlock_request(unlock_request)
-        print(f"Customer account {user_id:.10s} has requested for unlock")
+        print(f"Customer account {user_id:.10s}'s unlock request updated")
     
+    # Update delete request
+    if delete_request != None:
+        customer.set_delete_request(delete_request)
+        print(f"Customer account {user_id:.10s}'s delete request updated")
+
     # Update last_online date
     if last_online:
         customer.set_last_online(last_online)
-        print(f"Customer account {user_id:.10s} has changed its last online date")
+        print(f"Customer account {user_id:.10s}'s last online date updated")
 
     # Update profile picture of admin
     if profile_pic_name:
@@ -147,11 +152,13 @@ def delete_customer(user_id):
 
 def delete_all_customers():
     db = shelve.open("user_accounts.db", "c")
+    print("All customer's data are deleted")
     db["Customers"] = {}
     db.close()
 
 
 # Testing
-# create_customer({"first_name": "Yeo", "last_name": "Jun Qi", "username": "Croxvore19", "email": "croxvore@gmail.com", "last_online": "13/01/2024"}, hashlib.sha256("Unitysec@2020".encode("utf-8")).hexdigest())
+for i in range(7):
+    create_customer({"first_name": "Yeo", "last_name": f"Jun Qi {i+1}", "username": f"Croxvore{i+1}", "email": f"croxvore{i+1}@gmail.com"}, generate_password_hash(f"Unitysec@202{i}", salt_length=8))
+
 # delete_all_customers()
-# delete_customer(user_id="4947aed0ff0962494b5bcddd6ef7f23b957742c5213e3a4455d7983a09f3ffe1386")

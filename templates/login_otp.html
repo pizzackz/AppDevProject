@@ -1,29 +1,27 @@
 <!DOCTYPE html>
-{% extends "login_base.html" %}
+{% extends "login_send_email.html" %}
 
 {% block form %}
 {% from "includes/_form_helper.html" import render_field %}
-<div id="form-box-fields">
-    <div style="text-align: left; margin-bottom: 1.019vw;">
-        <a href="/login?back=True" style="margin-bottom: 1.019vw;"><i class="bi bi-arrow-left-circle"></i>
-            Back</a>        
+<div id="back-link">
+    <a href="/login?back=True"><i class="bi bi-arrow-left-circle"></i>
+        Back</a>
+</div>
+
+<hr>
+
+<form method="POST" action="" id="verify-email-form">
+    <div class="form-group row">
+        {{ render_field(form.otp, class="form-control") }}
     </div>
 
-    <hr style="margin: 0;">
-
-    <form method="POST" action="" id="verify-email-form">
-        <div class="form-group row">
-            {{ render_field(form.otp, class="form-control") }}
-        </div>
-
-        <br>
-
-        <p style="text-align: left; margin-bottom: 0; padding-left: 0.382vw;">Please enter your one time pin above</p>
-        <input type="submit" value="VERIFY" class="btn btn-primary rounded-pill disabled" />
-    </form>
-
-    <div id="resend-otp-link">
-        <a href="/login/verify_email?resend_pin=True">Resend Pin</a>
+    <div id="extra-statement">
+        <p>Please enter your one time pin above</p>
     </div>
+    <input type="submit" value="VERIFY" class="btn btn-primary rounded-pill disabled" />
+</form>
+
+<div id="extra-details">
+    <a href="/login/verify_email?resend_pin=True">Resend Pin</a>
 </div>
 {% endblock %}

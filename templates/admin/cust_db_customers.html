@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+{% extends "admin/cust_db_base.html" %}
+{% block title %}Customer Database - List of Customers{% endblock %}
+
+{% block css %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/account_table.css') }}" />
+<style>
+    #back-link {
+        text-align: left;
+        margin-bottom: 1.2rem;
+        margin-top: 1rem;
+        margin-left: 1.2rem;
+    }
+
+    #back-link a {
+        font-size: 1.2rem;
+    }
+
+    #table {
+        width: 50vw;
+    }
+
+    #table-body {
+        max-height: 25rem;
+    }
+
+    tbody td:nth-last-child(1) {
+        text-align: center;
+    }
+
+    tbody td:nth-last-child(1) span {
+        display:block;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        width:5.8rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="back-link">
+    <a href="{{ url_for('admin.customer_database', id=id) }}"><i class="bi bi-arrow-left-circle"></i> Back
+        to Search</a>
+</div>
+
+<div class="container-fluid" id="content" style="margin-top:5rem">
+    <main id="table">
+        <section id="table-header">
+            <h3>Results containing '{{ form.username.data }}'</h3>
+            <p>Total: {{ count }}</p>
+        </section>
+
+        <section id="table-body">
+            <form method="POST" id="customerForm">
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="2">Username</th>
+                            <th>Display Name</th>
+                            <th>Email</th>
+                            <th>Locked Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for customer in cust_list %}
+                        <tr onclick="submitForm('{{ customer.get_user_id() }}')" style="cursor: pointer;">
+                            <td colspan="2">
+                                {% if customer.get_profile_pic_name() == "default" %}
+                                <img src="{{ url_for('static', filename='images/default_profile_pic.png') }}" />
+                                {% else %}
+                                <img
+                                    src="{{ url_for('static', filename='uploads/customer/profile_pictures/' + customer.get_user_id()) }}" />
+                                {% endif %}
+
+                                {{ customer.get_username() }}
+                            </td>
+                            <td>{{ customer.get_display_name() }}</td>
+                            <td>{{ customer.get_email() }}</td>
+                            <td>
+                                {% if customer.get_is_locked() %}
+                                <span style="background-color: red;">Locked</span>
+                                {% else %}
+                                <span style="background-color: #9acd32;">Unlocked</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </form>
+        </section>
+    </main>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    function submitForm(cust_id) {
+        var url = "{{ url_for('admin.retrieve_customer', id=id, cust_id='__CUST_ID__') }}";
+        url = url.replace('__CUST_ID__', cust_id);
+        document.getElementById("customerForm").action = url;
+        document.getElementById("customerForm").submit();
+    }
+</script>
+{% endblock %}

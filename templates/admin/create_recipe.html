@@ -10,7 +10,7 @@
 
 {% block scripts %}
   {{ super() }}
-  <script src="../../static/js/recipe_creator.js"></script>
+  <script src="{{ url_for('static', filename='js/recipe_creator.js' ) }}"></script>
 {% endblock %}
 
     {% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}

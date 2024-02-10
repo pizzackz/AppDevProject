@@ -15,29 +15,51 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <!-- Main pages -->
             <ul class="navbar-nav ms-auto" style="margin-right: 6rem;">
+                <!-- Home -->
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('customer.customer_home', id=id) }}">Home</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('customer.order', id=id) }}">Order</a>
+                <!-- Dropdown for Orders -->
+                <li class="nav-item active dropdown">
+                    <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Order</a>
+
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('customer.order', id=id) }}">Order</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('customer.order_history', id=id) }}">Order History</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('customer.current_delivery', id=id) }}">Current Delivery</a>
+                        </li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('customer.recipe_creator', id=id) }}">Recipe Creator</a>
+                <!-- Dropdown for Recipes -->
+                <li class="nav-item active dropdown">
+                    <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Recipes</a>
+
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('customer.recipe_database', id=id) }}">Recipe Database</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('customer.favourites', id=id) }}">Favourites</a>
+                        </li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('customer.favourites', id=id) }}">Favourites</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('customer.customer_articles', id=id) }}">Articles</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('customer.current_delivery', id=id) }}">Current Delivery</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('customer.feedback', id=id) }}">Feedback</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('customer.order_history', id=id) }}">Order History</a>
+                <!-- Dropdown for Others -->
+                <li class="nav-item active dropdown">
+                    <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Others</a>
+
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('customer.customer_articles', id=id) }}">Articles</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('customer.feedback', id=id) }}">Feedback</a>
+                        </li>
+                    </ul>
                 </li>
             </ul>
 

@@ -1,19 +1,18 @@
 from flask import current_app, Blueprint, render_template, request, redirect, session, flash, url_for
 from werkzeug.utils import secure_filename
-import hashlib
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
-from Forms import AccountDetailsForm, OTPForm2, ResetPasswordForm2, CreateAdminForm, UpdateAdminForm, SearchCustomerForm, FileForm
-from functions import generate_otp, send_email, get_user_object, is_unique_data, is_allowed_file, delete_file
+from Forms import AccountDetailsForm, OTPForm2, ResetPasswordForm2, CreateAdminForm, UpdateAdminForm, SearchCustomerForm, FileForm, AccountDetailsForm2, LockCustomerAccountForm, CreateRecipeForm, createArticle
+from functions import generate_otp, send_email, is_unique_data, is_allowed_file, delete_file
 from admin_acc_functions import create_admin, retrieve_admin_details, retrieve_all_admins, update_admin_details, delete_admin
-from cust_acc_functions import retrieve_all_customers, retrieve_cust_details
+from cust_acc_functions import retrieve_all_customers, retrieve_cust_details, update_cust_details, delete_customer
 import shelve
+from functools import wraps
 
 # Modules for Recipe
-from form_recipe import *
 from recipe import *
 
 # Modules for Articles
-from article_form import *
 from article import *
 
 # Modules for Menu
@@ -22,9 +21,19 @@ from menuForm import *
 
 admin_bp = Blueprint("admin", __name__)
 
+# Decorator function to check admin login status
+def admin_login_required(func):
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        if not (session.get("admin") and session.get("admin").get("user_id")):
+            flash('Please log in as admin to access the page.', 'error')
+            return redirect(url_for("login"))
+        return func(*args, **kwargs)
+    return decorated_function
 
 # Home page (Admin)
 @admin_bp.route("/<string:id>/admin")
+@admin_login_required
 def admin_home(id):
     print(f"data = {session.get('admin')}")
     return render_template("admin/home.html", id=id)
@@ -32,89 +41,173 @@ def admin_home(id):
 
 # Customer Database page (Admin)
 @admin_bp.route("/<string:id>/admin/customer_database", methods=["GET", "POST"])
+@admin_login_required
 def customer_database(id):
-    # print(f"data = {session.get('admin')}")
-    # Redirect to customer_database_profile if clicked on any customer shown
-    if request.args.get("username"):
-        username = request.args.get("username")
-        user_id = get_user_object(username=username).get_user_id()
-        cust_data = retrieve_cust_details(user_id)
-
-        # Store cust_data in session
-        session["cust_data"] = cust_data
-
-        return redirect(f"/{id}/admin/customer_database_profile")
-
+    form = SearchCustomerForm(request.form)
 
     # Handle POST request
-    if request.method == "POST":
-        form = SearchCustomerForm(request.form)
-        if form.validate():
-            # Retrieve all customer data
-            customers_list = retrieve_all_customers()
-            wanted_cust_list = []
+    if request.method == "POST" and form.validate():
+        # Retrieve all customer data
+        customers_list = retrieve_all_customers()
+        wanted_cust_list = []
 
-            # Check whether have customers
-            if not customers_list:
-                flash("Currently no customers' data stored", "info")
-                print("no customers stored")
-                return render_template("admin/customer_database.html", id=id , form=form)
+        # Check whether have customers
+        if not customers_list:
+            flash("Currently no customers' data stored", "info")
+            print("no customers stored")
+            return render_template("admin/cust_db_base.html", id=id, form=form)
 
-            search_term = form.username.data.lower()
+        search_term = form.username.data.lower()
 
-            # If customer's username contains all characters in search_term w/o caring for order, add to list
-            wanted_cust_list = [
-                customer
-                for customer in customers_list
-                if all(char in customer.get_username().lower() for char in search_term.lower())
-            ]
+        # If customer's username contains all characters in search_term w/o caring for order, add to list
+        wanted_cust_list = [
+            customer
+            for customer in customers_list
+            if all(char in customer.get_username().lower() for char in search_term.lower())
+        ]
 
-            # Display appropriate messages
-            if not wanted_cust_list:
-                print("no customers found")
-                flash(f"No customer account with username containing '{form.username.data}'", "error")
-                return render_template("admin/customer_database.html", id=id, form=form)
-            else:
-                return render_template("admin/customer_database.html", id=id, form=form, cust_list=wanted_cust_list)
+        # Display appropriate messages
+        if not wanted_cust_list:
+            print("no customers found")
+            flash(f"No customer account with username containing '{form.username.data}'", "error")
+            return render_template("admin/cust_db_base.html", id=id, form=form)
 
-        else:
-            print("form was not validated")
-            return render_template("admin/customer_database.html", id=id, form=form)
+        return render_template("admin/cust_db_customers.html", id=id, form=form, count=len(wanted_cust_list),
+                               cust_list=wanted_cust_list)
 
     # Handle GET request
-    if request.method == "GET":
-        form = SearchCustomerForm(request.form)
-        return render_template("admin/customer_database.html", id=id, form=form)
+    return render_template("admin/cust_db_base.html", id=id, form=form)
 
 
-# Customer Database - Profile page (Admin)
-@admin_bp.route("/<string:id>/admin/customer_database_profile", methods=["GET", "POST"])
-def customer_database_profile(id):    
+# Customer Database page - Table of Customers (Admin)
+@admin_bp.route("/<string:id>/admin/customer_database/retrieve_customer", methods=["GET", "POST"])
+@admin_login_required
+def retrieve_customer(id):
+    cust_id = request.args.get("cust_id")
+    cust_data = retrieve_cust_details(cust_id)
+    print(cust_data)
+
+    # Reset locked details when clicked on 'unlock' button
+    if request.form.get("button") == "unlock_button":
+        # Send email about unlocking account
+        recipient = cust_data.get("email")
+        with current_app.app_context():
+            mail = current_app.extensions.get("mail")
+            send_email(
+                mail,
+                "Account Unlocked",
+                "itastefully@gmail.com",
+                [recipient],
+                body=f"Your account has been unlocked! Please feel free to login to your account anytime!"
+            )
+
+        # Update customer details, Display unlocked account message
+        update_cust_details(cust_id, is_locked=False, locked_reason="", unlock_request=False, delete_request=False)
+        flash(f"{cust_data.get('username')}'s account has been unlocked!", "success")
+
+        return redirect(url_for("admin.retrieve_customer", id=id, cust_id=cust_id))
+
+    # Redirect to lock_account when clicked on 'lock' button
+    if request.form.get("button") == "lock_button":
+        return redirect(url_for("admin.lock_customer_account", id=id, cust_id=cust_id))
+
+    # edirect to delete_customer_account when clicked on 'delete' button
+    if request.form.get("button") == "delete_button":
+        return redirect(url_for("admin.delete_customer_account", id=id, cust_id=cust_id))
+
+    # Handle getting all retrieved customer data
+    form = AccountDetailsForm2(request.form)
+    # Display customer account details from cust_data
+    form.first_name.data = cust_data.get("first_name")
+    form.last_name.data = cust_data.get("last_name")
+    form.display_name.data = cust_data.get("display_name")
+    form.email.data = cust_data.get("email")
+
+    return render_template("admin/cust_db_cust_profile.html", id=id, form=form, cust_details=cust_data)
+
+# Customer Database - Lock Account Popup (Admin)
+@admin_bp.route("/<string:id>/admin/customer_database/lock_customer", methods=["GET", "POST"])
+@admin_login_required
+def lock_customer_account(id):
+    form = LockCustomerAccountForm(request.form)
+    cust_id = request.args.get("cust_id")
+    cust_data = retrieve_cust_details(cust_id)
+
+    # Redirect to retrieve_customer when clicked on close/ cancel button
+    if request.form.get("button") in ("close", "cancel"):
+        return redirect(url_for("admin.retrieve_customer", id=id, cust_id=cust_id))
+
     # Handle POST request
-    if request.method == "POST":
-        pass
+    if request.method == "POST" and form.validate():
+        # Send email about locked reason
+        recipient = cust_data.get("email")
+        with current_app.app_context():
+            mail = current_app.extensions.get("mail")
+            send_email(
+                mail,
+                "Reason for Locking Your Account",
+                "itastefully@gmail.com",
+                [recipient],
+                body=f"Your account has been locked because: {form.reason.data}"
+            )
+
+        # Update locked reason for customer
+        update_cust_details(cust_id, is_locked=True, locked_reason=form.reason.data)
+
+        # Display email sent message
+        flash(f"Reason for locking {cust_data.get('username')}'s account has been sent!", "success")
+
+        return redirect(url_for("admin.retrieve_customer", id=id, cust_id=cust_id))
 
     # Handle GET request
-    if request.method == "GET":
-        print(session.get("cust_data", "Piglet"))
-        return render_template("admin/cust_db_profile.html", id=id)
+    return render_template("admin/cust_db_lock_account.html", id=id, cust_id=cust_id, form=form, cust_details=cust_data)
+
+
+# Customer Database - Delete Account Popup (Admin)
+@admin_bp.route("/<string:id>/admin/customer_database/delete_customer", methods=["GET", "POST"])
+@admin_login_required
+def delete_customer_account(id):
+    cust_id = request.args.get("cust_id")
+    cust_data = retrieve_cust_details(cust_id)
+
+    # Redirect to retrieve_customer when clicked on close/ cancel button
+    if request.form.get("button") in ("close", "cancel"):
+        return redirect(url_for("admin.retrieve_customer", id=id, cust_id=cust_id))
+
+    # Handle deleting of account
+    if request.form.get("button") == "delete":
+        # Send email about deleting account
+        recipient = cust_data.get("email")
+        with current_app.app_context():
+            mail = current_app.extensions.get("mail")
+            send_email(
+                mail,
+                "Account Deleted",
+                "itastefully@gmail.com",
+                [recipient],
+                body=f"Your account has been deleted! We hope to see you again soon!"
+            )
+
+        # Delete customer account, Display deleted account message
+        delete_customer(cust_id)
+        flash(f"{cust_data.get('username')}'s account has been deleted!", "success")
+
+        return redirect(url_for("admin.customer_database", id=id))
+
+    return render_template("admin/cust_db_delete_account.html", id=id, cust_id=cust_id, cust_details=cust_data)
+
 
 # Menu Database page (Admin)
 @admin_bp.route("/<string:id>/admin/menu_database")
+@admin_login_required
 def menu_database(id):
     print(f"data = {session.get('admin')}")
     return render_template("admin/menu_database.html", id=id)
 
 
-# Articles Database page (Admin)
-# @admin_bp.route("/<string:id>/admin/articles_database")
-# def articles_database(id):
-#     print(f"data = {session.get('admin')}")
-#     return render_template("admin/articles_database.html", id=id)
-
-
 # Customer Feedback page (Admin)
 @admin_bp.route("/<string:id>/admin/customer_feedback")
+@admin_login_required
 def customer_feedback(id):
     print(f"data = {session.get('admin')}")
     return render_template("admin/customer_feedback.html", id=id)
@@ -122,111 +215,98 @@ def customer_feedback(id):
 
 # Edit Profile page (Admin)
 @admin_bp.route("/<string:id>/admin/edit_profile", methods=["GET", "POST"])
+@admin_login_required
 def edit_admin_profile(id):
-    # session.pop("new_data", None)
-    # session.pop("new_email_otp", None)
-
-    print("session keys = " + str(session.keys()) + ", admin data = " + str(session.get("admin")) + ", new data = " + str(session.get("new_data", {})))
+    print(
+        "session keys = " + str(session.keys())
+        + ", admin data = " + str(session.get("admin"))
+        + ", new data = " + str(session.get("new_data", {}))
+    )
 
     # Clear new_data in session, redirect to reset password if user clicked 'Forgot Password'
     if request.args.get("reset_password"):
         session.pop("new_data", None)
-        return redirect(f"/{id}/admin/edit_profile/reset_password")
+        return redirect(url_for("admin.reset_password", id=id))
+
+    # Redirect to 'edit_profile_picture' if clicked on "edit profile picture"
+    if request.form.get("button") == "edit_profile_pic":
+        # Clear possible session data
+        session.pop("new_data", None)
+        session.pop("new_email_otp", None)
+        return redirect(url_for("admin.edit_profile_picture", id=id))
+
+    if request.form.get("button") == "revert":
+        # Clear possible session data
+        session.pop("new_data", None)
+        session.pop("new_email_otp", None)
+        flash("Changes made are cleared!", "success")
+        return redirect(url_for("admin.edit_admin_profile", id=id))
 
     # Render appropriate templates based on request methods
-    if request.method == "POST":
-        form = AccountDetailsForm(request.form)
+    form = AccountDetailsForm(request.form)
 
-        print(request.form.get("button"))
-        print("admin in session = " + str(session["admin"]))
+    if request.method == "POST" and form.validate():
+        if request.form.get("button") == "save":
+            admin_data = session.get("admin")
+            session["new_data"] = {}
 
-        # Redirect to 'edit_profile_picture' if clicked on "edit profile picture"
-        if request.form.get("button") == "edit_profile_pic":
-            # Clear possible session data
-            session.pop("new_data", None)
-            session.pop("new_email_otp", None)
-            print("ran")
+            # Store first name in session
+            if form.first_name.data != admin_data.get("first_name"):
+                session["new_data"]["first_name"] = form.first_name.data
 
-            return redirect(f"/{id}/admin/edit_profile_picture")
+            # Store last name in session
+            if form.last_name.data != admin_data.get("last_name"):
+                session["new_data"]["last_name"] = form.last_name.data
 
-        if request.form.get("button") == "revert":
-            # Clear possible session data
-            session.pop("new_data", None)
-            session.pop("new_email_otp", None)
+            # Store display name in session
+            if form.display_name.data != admin_data.get("display_name"):
+                session["new_data"]["display_name"] = form.display_name.data
 
-            flash("Changes made are cleared!", "success")
+            # Redirect to another route when email changes
+            if form.email.data != admin_data.get("email"):
+                # Generate and send OTP
+                with current_app.app_context():
+                    mail = current_app.extensions.get("mail")
 
-            # Force reload by using redirect to clear all previously made changes
-            return redirect(f"/{id}/admin/edit_profile")
+                    otp = generate_otp(6)
+                    send_email(
+                        mail,
+                        "Your Verification Code",
+                        "itastefully@gmail.com",
+                        [form.email.data],
+                        body=f"Your verification code is {otp}",
+                    )
+                flash("An OTP has been sent to your email!", "info")
 
-        if form.validate():
-            if request.form.get("button") == "save":
-                admin_data = session.get("admin")
+                # Store otp in session, email in new_data in session
+                session["new_email_otp"] = otp
+                session["new_data"]["email"] = form.email.data
 
-                # Store new data in temporary new data in session for when redirecting to verify email page
-                session["new_data"] = {}
+                return redirect(url_for("admin.verify_new_email", id=id))
 
-                # Store first name in session
-                if form.first_name.data != admin_data.get("first_name"):
-                    session["new_data"]["first_name"] = form.first_name.data
+            # Immediately save the changed data when no changes to email
+            new_data = session.get("new_data")
+            user_id = session.get("admin").get("user_id")
 
-                # Store last name in session
-                if form.last_name.data != admin_data.get("last_name"):
-                    session["new_data"]["last_name"] = form.last_name.data
+            # Update admin data
+            update_admin_details(
+                user_id=user_id,
+                first_name=new_data.get("first_name", None),
+                last_name=new_data.get("last_name", None),
+                display_name=new_data.get("display_name", None),
+            )
+            flash("Details saved!", "success")
 
-                # Store display name in session
-                if form.display_name.data != admin_data.get("display_name"):
-                    session["new_data"]["display_name"] = form.display_name.data
+            # Update admin in session, Clear new_data in session
+            session["admin"] = retrieve_admin_details(user_id)
+            session.pop("new_data")
 
-                # Redirect to another route when email changes
-                if form.email.data != admin_data.get("email"):
-                    # Generate and send OTP
-                    with current_app.app_context():
-                        mail = current_app.extensions.get("mail")
-
-                        otp = generate_otp(6)
-                        send_email(mail, "Your Verification Code", "itastefully@gmail.com", [form.email.data], body=f"Your verification code is {otp}")
-
-                    # Display otp sent msg
-                    flash("An OTP has been sent to your email!", "info")
-
-                    # Store otp in session, email in new_data in session
-                    session["new_email_otp"] = otp
-                    session["new_data"]["email"] = form.email.data
-
-                    return redirect(f"/{id}/admin/edit_profile/verify_new_email")
-                # Immediately save the changed data when no changes to email
-                else:
-                    print("saving new data")
-                    new_data = session.get("new_data")
-                    user_id = session.get("admin").get("user_id")
-
-                    # Update admin data
-                    update_admin_details(
-                        user_id=user_id,
-                        first_name=new_data.get("first_name", None),
-                        last_name=new_data.get("last_name", None),
-                        display_name=new_data.get("display_name", None)
-                        )
-
-                    # Flash details saved msg
-                    flash("Details saved!", "success")
-
-                    # Update admin in session, Clear new_data in session
-                    session["admin"] = retrieve_admin_details(user_id)
-                    session.pop("new_data")
-
-                    print("new admin in session = " + str(session.get("admin")))
-
-                    return redirect(f"/{id}/admin/edit_profile")
-        else:
-            print("Form data is invalidated")
-            return render_template("admin/edit_profile.html", id=id, form=form)
+            return redirect(url_for("admin.edit_admin_profile", id=id))
 
     # Clear "new_data" in session if no actual new data is needed to be saved
     if "new_data" in session and session.get("new_data", None) == {}:
         session.pop("new_data", None)
-        return redirect(f"/{id}/admin/edit_profile")
+        return redirect(url_for("admin.edit_admin_profile", id=id))
 
     # Save new data to db when redirected from verify_new_email
     if "new_data" in session and session.get("new_data", None) != {}:
@@ -240,8 +320,8 @@ def edit_admin_profile(id):
             first_name=new_data.get("first_name", None),
             last_name=new_data.get("last_name", None),
             display_name=new_data.get("display_name", None),
-            email=new_data.get("email", None)
-            )
+            email=new_data.get("email", None),
+        )
 
         # Flash details saved msg
         flash("Details saved!", "success")
@@ -250,11 +330,10 @@ def edit_admin_profile(id):
         session["admin"] = retrieve_admin_details(user_id)
         session.pop("new_data", None)
 
+    # Handle GET request
     if request.method == "GET":
-        form = AccountDetailsForm()
-
         # Display admin account details from new_data in session, else from admin in session
-        form.first_name.data =  session.get("admin").get("first_name")
+        form.first_name.data = session.get("admin").get("first_name")
         form.last_name.data = session.get("admin").get("last_name")
         form.display_name.data = session.get("admin").get("display_name")
         form.email.data = session.get("admin").get("email")
@@ -269,17 +348,18 @@ def edit_admin_profile(id):
             if "email" in session.get("new_data"):
                 form.email.data = session.get("new_data").get("email")
 
-        return render_template("admin/edit_profile.html", id=id, form=form)
+    return render_template("admin/edit_profile.html", id=id, form=form)
 
 
 # Edit Profile page - Verify Email Popup (Admin)
 @admin_bp.route("/<string:id>/admin/edit_profile/verify_new_email", methods=["GET", "POST"])
+@admin_login_required
 def verify_new_email(id):
     print("admin data = " + str(session.get("admin")))
     print("session keys = " + str(session.keys()))
 
     # Retrieve admin account details from new_data in session, else from admin in session (Include profile image later)
-    first_name =  session.get("admin").get("first_name")
+    first_name = session.get("admin").get("first_name")
     last_name = session.get("admin").get("last_name")
     display_name = session.get("admin").get("display_name")
     email = session.get("admin").get("email")
@@ -293,7 +373,7 @@ def verify_new_email(id):
             display_name = session.get("new_data").get("display_name")
         if "email" in session.get("new_data"):
             email = session.get("new_data").get("email")
-    
+
     # Pass admin details as tuple then manually display each of them as though they are form fields & labels
     admin_details = (first_name, last_name, display_name, email)
 
@@ -303,8 +383,8 @@ def verify_new_email(id):
         if "new_data" in session:
             session.get("new_data").pop("email")
 
-        return redirect(f"/{id}/admin/edit_profile")
-    
+        return redirect(url_for("admin.edit_admin_profile", id=id))
+
     # Resend otp if user clicked 'Resend PIN'
     if request.args.get("resend_pin"):
         # Generate and send OTP
@@ -312,7 +392,13 @@ def verify_new_email(id):
             mail = current_app.extensions.get("mail")
 
             otp = generate_otp(6)
-            send_email(mail, "Your Verification Code", "itastefully@gmail.com", [session.get("new_data").get("email")], body=f"Your verification code is {otp}")
+            send_email(
+                mail,
+                "Your Verification Code",
+                "itastefully@gmail.com",
+                [session.get("new_data").get("email")],
+                body=f"Your verification code is {otp}",
+            )
 
         # Store otp in session
         session["new_email_otp"] = otp
@@ -320,38 +406,39 @@ def verify_new_email(id):
         # Display otp sent msg
         flash("An OTP has been resent to your email!", "info")
 
-        return redirect(f"/{id}/admin/edit_profile/verify_new_email")
+        return redirect(url_for("admin.verify_new_email", id=id))
 
-    if request.method == "POST":
-        otp_form = OTPForm2(request.form)
+    otp_form = OTPForm2(request.form)
 
-        if otp_form.validate():
-            # Check correct otp
-            if otp_form.otp.data != session.get("new_email_otp"):
-                # Display invalid otp msg
-                flash("Invalid OTP, please try again!", "error")
-                return redirect(f"/{id}/admin/edit_profile/verify_new_email")
-            else:
-                # Clear new_email_otp in session
-                session.pop("new_email_otp")
+    # Handle POST request
+    if request.method == "POST" and otp_form.validate():
+        # Check correct otp
+        if otp_form.otp.data != session.get("new_email_otp"):
+            # Display invalid otp msg
+            flash("Invalid OTP, please try again!", "error")
+            return redirect(url_for("admin.verify_new_email", id=id))
+        # Clear new_email_otp in session
+        session.pop("new_email_otp")
+        return redirect(url_for("admin.edit_admin_profile", id=id))
 
-                return redirect(f"/{id}/admin/edit_profile")
-        else:
-            return render_template("admin/edit_profile_otp.html", admin_details=admin_details, otp_form=otp_form)
-
-    if request.method == "GET":
-        otp_form = OTPForm2()
-        return render_template("admin/edit_profile_otp.html", id=id, admin_details=admin_details, otp_form=otp_form)
+    # Handle GET request
+    return render_template(
+        "admin/edit_profile_otp.html",
+        id=id,
+        admin_details=admin_details,
+        otp_form=otp_form,
+    )
 
 
 # Edit Profile page - Reset Password popup (Admin)
 @admin_bp.route("/<string:id>/admin/edit_profile/reset_password", methods=["GET", "POST"])
+@admin_login_required
 def reset_password(id):
     print("session keys = " + str(session.keys()))
     print("admin data = " + str(session.get("admin")))
 
     # Retrieve admin account details from admin in session
-    first_name =  session.get("admin").get("first_name")
+    first_name = session.get("admin").get("first_name")
     last_name = session.get("admin").get("last_name")
     display_name = session.get("admin").get("display_name")
     email = session.get("admin").get("email")
@@ -361,54 +448,63 @@ def reset_password(id):
 
     # Redirect user to edit_admin_profile if user clicked on close symbol
     if request.form.get("button") == "close":
-        return redirect(f"/{id}/admin/edit_profile")
+        return redirect(url_for("admin.edit_admin_profile", id=id))
+
+    password_form = ResetPasswordForm2(request.form)
 
     # Handle POST request
-    if request.method == "POST":
-        password_form = ResetPasswordForm2(request.form)
+    if request.method == "POST" and password_form.validate():
+        # Check whether password is the same as existing password for admin
+        if check_password_hash(session.get("admin").get("password"), password_form.password.data):
+            flash(
+                "Cannot set new password to be the same as current password",
+                "error"
+            )
+            return render_template(
+                "admin/edit_profile_reset_pass.html",
+                id=id,
+                admin_details=admin_details,
+                password_form=password_form
+            )
 
-        if password_form.validate():
-            # Hash password
-            password = password_form.password.data
-            hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
+        # Check whether passwords match
+        if password_form.password.data != password_form.confirm_password.data:
+            flash("Passwords do not match!", "error")
+            return render_template(
+                "admin/edit_profile_reset_pass.html",
+                id=id,
+                admin_details=admin_details,
+                password_form=password_form,
+            )
 
-            # Check whether password is the same as existing password for admin
-            if session.get("admin").get("password") == hashed_password:
-                flash("Cannot set new password to be the same as current password", "error")
-                return render_template("admin/edit_profile_reset_pass.html", id=id, admin_details=admin_details, password_form=password_form)
+        # Update user password data in shelve db, Update admin in session
+        user_id = session.get("admin").get("user_id")
+        update_admin_details(user_id, password=generate_password_hash(password_form.password.data, salt_length=8))
+        session["admin"] = retrieve_admin_details(user_id)
 
-            # Check whether passwords match
-            if password_form.password.data != password_form.confirm_password.data:
-                flash("Passwords do not match!", "error")
-                return render_template("admin/edit_profile_reset_pass.html", id=id, admin_details=admin_details, password_form=password_form)
+        # Display successful password reset msg
+        flash("Password has been reset!", "success")
 
-            # Update user password data in shelve db, Update admin in session
-            user_id = session.get("admin").get("user_id")
-            update_admin_details(user_id, password=hashed_password)
-            session["admin"] = retrieve_admin_details(user_id)
-
-            # Display successful password reset msg
-            flash("Password has been reset!", "success")
-
-            return redirect(f"/{id}/admin/edit_profile")
-        else:
-            print("Form invalidated!")
-            return render_template("admin/edit_profile_reset_pass.html", id=id, admin_details=admin_details, password_form=password_form)
+        return redirect(url_for("admin.edit_admin_profile", id=id))
 
     # Handle GET request
-    if request.method == "GET":
-        password_form = ResetPasswordForm2()
-        return render_template("admin/edit_profile_reset_pass.html", id=id, admin_details=admin_details, password_form=password_form)
+    return render_template(
+        "admin/edit_profile_reset_pass.html",
+        id=id,
+        admin_details=admin_details,
+        password_form=password_form,
+    )
 
 
 # Edit Profile page - Edit Profile Picture poup (Admin)
 @admin_bp.route("/<string:id>/admin/edit_profile_picture", methods=["GET", "POST"])
+@admin_login_required
 def edit_profile_picture(id):
     print("session keys = " + str(session.keys()))
     print("admin data = " + str(session.get("admin")))
 
     # Retrieve admin account details from admin in session
-    first_name =  session.get("admin").get("first_name")
+    first_name = session.get("admin").get("first_name")
     last_name = session.get("admin").get("last_name")
     display_name = session.get("admin").get("display_name")
     email = session.get("admin").get("email")
@@ -418,12 +514,12 @@ def edit_profile_picture(id):
 
     # Redirect user to edit_admin_profile if user clicked on close symbol
     if request.form.get("button") == "close":
-        return redirect(f"/{id}/admin/edit_profile")
+        return redirect(url_for("admin.edit_admin_profile", id=id))
+
+    form = FileForm(request.form)
 
     # Handle POST request
     if request.method == "POST":
-        form = FileForm(request.form)
-
         # Retrieve file object, retrieve user data
         file_item = request.files["file"]
         user_data = session.get("admin")
@@ -433,12 +529,22 @@ def edit_profile_picture(id):
             filename = user_data.get("profile_pic")
 
             # Delete current local stored image file if have existing file saved
-            existing_file_path = delete_file("admin", "profile_pictures", f"{id}", current_app.config["ALLOWED_IMAGE_FILE_EXTENSIONS"])
+            existing_file_path = delete_file(
+                "admin",
+                "profile_pictures",
+                f"{id}",
+                current_app.config["ALLOWED_IMAGE_FILE_EXTENSIONS"],
+            )
 
             # Flash no profile picture set message
             if not existing_file_path:
                 flash("Please set a profile picture first before removing it!", "error")
-                return render_template("admin/edit_profile_picture.html", id=id, admin_details=admin_details, form=form)
+                return render_template(
+                    "admin/edit_profile_picture.html",
+                    id=id,
+                    admin_details=admin_details,
+                    form=form,
+                )
 
             # Set 'default' to user's profile_picture, Update admin in session
             user_id = user_data.get("user_id")
@@ -448,7 +554,7 @@ def edit_profile_picture(id):
             # Display removed profile image msg
             flash("Profile picture successfully removed!", "success")
 
-            return redirect(f"/{id}/admin/edit_profile")
+            return redirect(url_for("admin.edit_admin_profile", id=id))
 
         # Save profile image when clicked on 'change'
         # Check whether file allowed
@@ -457,10 +563,17 @@ def edit_profile_picture(id):
             filename = secure_filename(f"{id}.{file_item.filename.rsplit('.', 1)[1]}")
 
             # Delete current local stored image file if have existing file saved
-            existing_file_path = delete_file("admin", "profile_pictures", f"{id}", current_app.config["ALLOWED_IMAGE_FILE_EXTENSIONS"])
+            existing_file_path = delete_file(
+                "admin",
+                "profile_pictures",
+                f"{id}",
+                current_app.config["ALLOWED_IMAGE_FILE_EXTENSIONS"],
+            )
 
             # Save image in local storage
-            file_item.save(os.path.join("static", "uploads", "admin", "profile_pictures", filename))
+            file_item.save(
+                os.path.join("static", "uploads", "admin", "profile_pictures", filename)
+            )
 
             # Update user profile picture in shelve db, Update admin in session
             user_id = session.get("admin").get("user_id")
@@ -470,16 +583,22 @@ def edit_profile_picture(id):
             # Display successful profile picture saved msg
             flash("Your profile picture has been saved!", "success")
 
-            return redirect(f"/{id}/admin/edit_profile")
-        else:
-            flash(f"You can only upload files with extension that are in the following list: {current_app.config['ALLOWED_IMAGE_FILE_EXTENSIONS']}", "error")
-            print("Invalid file submitted!")
-            return render_template("admin/edit_profile_picture.html", id=id, admin_details=admin_details, form=form)
+            return redirect(url_for("admin.edit_admin_profile", id=id))
+
+        # Handle invalid file submission
+        flash(
+            f"You can only upload files with extension that are in the following list: {current_app.config['ALLOWED_IMAGE_FILE_EXTENSIONS']}",
+            "error",
+        )
+        print("Invalid file submitted!")
 
     # Handle GET request
-    if request.method == "GET":
-        form = FileForm()
-        return render_template("admin/edit_profile_picture.html", id=id, admin_details=admin_details, form=form)
+    return render_template(
+        "admin/edit_profile_picture.html",
+        id=id,
+        admin_details=admin_details,
+        form=form,
+    )
 
 # Additional admin pages
 # Create Admin page
@@ -490,31 +609,30 @@ def create_admin_account():
     for key in ("customer", "admin"):
         session.pop(key, None)
 
+    form = CreateAdminForm(request.form)
+
     # Handle POST request
-    if request.method == "POST":
-        form = CreateAdminForm(request.form)
-        
-        if form.validate():
-            # Check whether passwords match
-            if form.password.data != form.confirm_password.data:
-                flash("Passwords do not match!", "error")
-                return render_template("admin/create_admin.html", form=form)
+    if request.method == "POST" and form.validate():
+        # Check whether passwords match
+        if form.password.data != form.confirm_password.data:
+            flash("Passwords do not match!", "error")
+            return render_template("admin/create_admin.html", form=form)
 
-            # Store ALL admin data in shelve db
-            create_admin(form.first_name.data, form.last_name.data, form.username.data, form.email.data, form.password.data)
+        # Store ALL admin data in shelve db
+        create_admin(
+            form.first_name.data,
+            form.last_name.data,
+            form.username.data,
+            form.email.data,
+            form.password.data,
+        )
 
-            # Display account created message
-            flash(f"Admin {form.username.data} was created!", "success")
-
-            return redirect("/05010999/retrieve")
-        else:
-            print("Form was invalidated!")
-            return render_template("/admin/create_admin.html", form=form)
+        # Display account created message
+        flash(f"Admin {form.username.data} was created!", "success")
+        return redirect(url_for("admin.retrieve_admin"))
 
     # Handle GET request
-    if request.method == "GET":
-        form = CreateAdminForm()
-        return render_template("admin/create_admin.html", form=form)
+    return render_template("admin/create_admin.html", form=form)
 
 
 # Retrieve Admin page
@@ -526,7 +644,9 @@ def retrieve_admin():
 
     admins_list = retrieve_all_admins()
 
-    return render_template("admin/retrieve_admin.html", count=len(admins_list), admins_list=admins_list)
+    return render_template(
+        "admin/retrieve_admin.html", count=len(admins_list), admins_list=admins_list
+    )
 
 
 # Update Admin page
@@ -540,63 +660,56 @@ def update_admin():
 
     # Redirect to reset password 2 if user clicked 'reset your password here'
     if request.args.get("reset_password"):
-        return redirect(f"/05010999/reset_password?id={id}")
+        return redirect(url_for("admin.reset_password2", id=id))
+
+    # Force reload by using redirect to clear all previously made changes
+    if request.form.get("button") == "revert":
+        return redirect(url_for("admin.update_admin", id=id))
+
+    form = UpdateAdminForm(request.form)
 
     # Handle POST request
-    if request.method == "POST":
-        form = UpdateAdminForm(request.form)
+    if request.method == "POST" and form.validate():
+        if request.form.get("button") == "save":
+            user_data = retrieve_admin_details(user_id=id)
 
-        if request.form.get("button") == "revert":
-            # Force reload by using redirect to clear all previously made changes
-            return redirect(f"/05010999/update?id={id}")
+            # Check whether email changed
+            if form.email.data != user_data.get("email"):
+                # Check whether email is unique
+                if not is_unique_data(email=form.email.data):
+                    # Display invalid email message
+                    flash("Please use another Email")
 
-        if form.validate():
-            if request.form.get("button") == "save":
-                user_data = retrieve_admin_details(user_id=id)
+                    return render_template(url_for("admin.update_admin", id=id))
 
-                # Check whether email changed
-                if form.email.data != user_data.get("email"):
-                    # Check whether email is unique
-                    if not is_unique_data(email=form.email.data):
-                        # Display invalid email message
-                        flash("Please use another Email")
+            # When email either not changed or (email changed & validated)
+            # Update admin data in db
+            update_admin_details(
+                id,
+                first_name=form.first_name.data,
+                last_name=form.last_name.data,
+                display_name=form.display_name.data,
+                email=form.email.data,
+            )
 
-                        return render_template(f"/05010999/update?id={id}")
+            # Display account updated message
+            username = user_data.get("username")
+            flash(f"Admin {username} was updated!", "success")
 
-                # When email either not changed or (email changed & validated)
-                # Update admin data in db
-                update_admin_details(
-                    id,
-                    first_name=form.first_name.data,
-                    last_name=form.last_name.data,
-                    display_name=form.display_name.data,
-                    email=form.email.data
-                )
-
-                # Display account updated message
-                username = user_data.get("username")
-                flash(f"Admin {username} was updated!", "success")
-
-                return redirect("/05010999/retrieve")
-            else:
-                return redirect()
+            return redirect(url_for("admin.retrieve_admin"))
         else:
-            print("Form was invalidated!")
-            return render_template("admin/update_admin.html", form=form, id=id)
+            return redirect(url_for("admin.update_admin", id=id))
 
     # Handle GET request
-    if request.method == "GET":
-        form = UpdateAdminForm()
+    # Retrieve and display admin details (except passwords)
+    admin_data = retrieve_admin_details(id)
 
-        # Retrieve and display admin details (except passwords)
-        admin_data = retrieve_admin_details(id)
+    form.first_name.data = admin_data.get("first_name")
+    form.last_name.data = admin_data.get("last_name")
+    form.display_name.data = admin_data.get("display_name")
+    form.email.data = admin_data.get("email")
 
-        form.first_name.data = admin_data.get("first_name")
-        form.last_name.data = admin_data.get("last_name")
-        form.display_name.data = admin_data.get("display_name")
-        form.email.data = admin_data.get("email")
-
-        return render_template("admin/update_admin.html", form=form, id=id)
+    return render_template("admin/update_admin.html", form=form, id=id)
 
 
 # Update Admin page - Reset Password Popup
@@ -621,42 +734,49 @@ def reset_password2():
 
     # Redirect user to retrieve admin if user clicked on close symbol
     if request.form.get("button") == "close":
-        return redirect(f"/05010999/update?id={id}")
+        return redirect(url_for("admin.update_admin", id=id))
+
+    password_form = ResetPasswordForm2(request.form)
 
     # Handle POST request
-    if request.method == "POST":
-        password_form = ResetPasswordForm2(request.form)
+    if request.method == "POST" and password_form.validate():
+        # Check whether password is the same as existing password for admin
+        if check_password_hash(admin_object.get("password"), password_form.password.data):
+            flash(
+                "Cannot set new password to be the same as current password",
+                "error",
+            )
+            return render_template(
+                "admin/reset_password.html",
+                id=id,
+                admin_details=admin_details,
+                password_form=password_form,
+            )
 
-        if password_form.validate():
-            # Hash password
-            password = password_form.password.data
-            hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
+        # Check whether passwords match
+        if password_form.password.data != password_form.confirm_password.data:
+            flash("Passwords do not match!", "error")
+            return render_template(
+                "admin/reset_password.html",
+                id=id,
+                admin_details=admin_details,
+                password_form=password_form,
+            )
 
-            # Check whether password is the same as existing password for admin
-            if admin_object.get("password") == hashed_password:
-                flash("Cannot set new password to be the same as current password", "error")
-                return render_template("admin/reset_password.html", id=id, admin_details=admin_details, password_form=password_form)
+        # Update user password data in shelve db, Update admin in session
+        update_admin_details(id, password=generate_password_hash(password_form.password.data, salt_length=8))
 
-            # Check whether passwords match
-            if password_form.password.data != password_form.confirm_password.data:
-                flash("Passwords do not match!", "error")
-                return render_template("admin/reset_password.html", id=id, admin_details=admin_details, password_form=password_form)
-
-            # Update user password data in shelve db, Update admin in session
-            update_admin_details(id, password=hashed_password)
-
-            # Display password reset msg
-            flash("Password has been reset!", "success")
-
-            return redirect(f"/05010999/retrieve")
-        else:
-            print("Form invalidated!")
-            return render_template("admin/reset_password.html", id=id, admin_details=admin_details, password_form=password_form)        
+        # Display password reset msg
+        flash("Password has been reset!", "success")
+        return redirect(url_for("admin.retrieve_admin"))
 
     # Handle GET request
-    if request.method == "GET":
-        password_form = ResetPasswordForm2()
-        return render_template("admin/reset_password.html", id=id, admin_details=admin_details, password_form=password_form)
+    return render_template(
+        "admin/reset_password.html",
+        id=id,
+        admin_details=admin_details,
+        password_form=password_form,
+    )
 
 
 # Delete Admin page
@@ -665,9 +785,14 @@ def delete_admin_account(id):
     # Clear all unrelated session data
     for key in ("customer", "admin"):
         session.pop(key, None)
-    
+
     # Delete current local stored image file if have existing file saved
-    delete_file("admin", "profile_pictures", f"{id[0:11]}", current_app.config["ALLOWED_IMAGE_FILE_EXTENSIONS"])
+    delete_file(
+        "admin",
+        "profile_pictures",
+        f"{id[0:11]}",
+        current_app.config["ALLOWED_IMAGE_FILE_EXTENSIONS"],
+    )
 
     # Delete admin data in db
     user_object = delete_admin(user_id=id)
@@ -675,12 +800,12 @@ def delete_admin_account(id):
 
     flash(f"Admin {username} was deleted!", "error")
 
-    return redirect("/05010999/retrieve")
+    return redirect(url_for("admin.retrieve_admin"))
 
 
 # Recipe Pages
-
 @admin_bp.route('/<string:id>/admin/recipe_database', methods=['GET', 'POST'])
+@admin_login_required
 def recipe_database(id):
     db = shelve.open('recipes.db', 'c')
 
@@ -719,6 +844,7 @@ def recipe_database(id):
 
 
 @admin_bp.route('/<string:id>/admin/create_recipe', methods=['GET', 'POST'])
+@admin_login_required
 def create_recipe(id):
     create_recipe_form = CreateRecipeForm(request.form)
     if request.method == 'POST':
@@ -774,6 +900,7 @@ def create_recipe(id):
 
 
 @admin_bp.route('/<string:id>/admin/view_recipe/<recipe_id>', methods=['GET', 'POST'])
+@admin_login_required
 def view_recipe(recipe_id, id):
     print(recipe_id)
     db = shelve.open('recipes.db', 'c')
@@ -785,6 +912,7 @@ def view_recipe(recipe_id, id):
 
 
 @admin_bp.route('/<string:id>/admin/edit_recipe/<recipe_id>', methods=['GET', 'POST'])
+@admin_login_required
 def edit_recipe(recipe_id, id):
     db = shelve.open('recipes.db', 'c')
     recipe_dict = db['recipes']
@@ -830,6 +958,7 @@ def edit_recipe(recipe_id, id):
 
 
 @admin_bp.route('/<string:id>/admin/delete_recipe/<recipe_id>')
+@admin_login_required
 def delete_recipe(recipe_id, id):
     db = shelve.open('recipes.db', 'c')
     recipe_dict = db['recipes']
@@ -867,6 +996,7 @@ def menu(id):
     return render_template('admin/admin_menu.html', menus=menus, id=id)
 
 @admin_bp.route('/<string:id>/admin/create_menu', methods=['GET', 'POST'])
+@admin_login_required
 def create_menu(id):
     create_menu = createMenu(request.form)
     if request.method == 'POST' and create_menu.validate():
@@ -903,7 +1033,8 @@ def create_menu(id):
     return render_template('admin/createMenu.html', form=create_menu, id=id)
 
 @admin_bp.route('/<string:id>/admin/delete_menu/<menu_id>')
-def delete_menu(menu_id):
+@admin_login_required
+def delete_menu(menu_id, id):
     db = shelve.open('menu.db', 'c')
     menu_dict = db['Menu']
 
@@ -920,6 +1051,7 @@ def delete_menu(menu_id):
 
 
 @admin_bp.route('/<string:id>/admin/update_menu/<menu_id>', methods=['GET', 'POST'])
+@admin_login_required
 def update_menu(menu_id, id):
     update_menu = createMenu(request.form)
     if request.method == 'POST' and update_menu.validate():
@@ -969,6 +1101,7 @@ def update_menu(menu_id, id):
 
 
 @admin_bp.route('/<string:id>/admin/view_menu/<menu_id>')
+@admin_login_required
 def view_menu(menu_id, id):
     db = shelve.open('menu.db', 'c')
     menu_dict = db['Menu']
@@ -981,6 +1114,7 @@ def view_menu(menu_id, id):
 
 # Articles
 @admin_bp.route('/<string:id>/admin/create_article', methods=['GET', 'POST'])
+@admin_login_required
 def create_article(id):
     create_article = createArticle(request.form)
     if request.method == 'POST' and create_article.validate():
@@ -1012,6 +1146,7 @@ def create_article(id):
     return render_template('admin/create_article.html', form=create_article, id=id)
 
 @admin_bp.route('/<string:id>/admin/view_article/<article_id>')
+@admin_login_required
 def view_article(article_id, id):
     db = shelve.open('article.db', 'c')
     article_dict = db['article_item']
@@ -1023,6 +1158,7 @@ def view_article(article_id, id):
     return render_template('admin/view_article.html', article_item=article_item, id=id)
 
 @admin_bp.route('/<string:id>/admin/article')
+@admin_login_required
 def article(id):
     db = shelve.open('article.db', 'c')
     try:
@@ -1040,6 +1176,7 @@ def article(id):
     return render_template('admin/admin_articles.html', form=createArticle, articles=articles, id=id)
 
 @admin_bp.route('/<string:id>/admin/update_article/<article_id>', methods=['GET', 'POST'])
+@admin_login_required
 def update_article(article_id, id):
     update_article = createArticle(request.form)
     if request.method == 'POST' and update_article.validate():
@@ -1093,6 +1230,7 @@ def update_article(article_id, id):
         return render_template('admin/update_article.html', form=update_article, id=id)
 
 @admin_bp.route('/<string:id>/admin/delete_article/<article_id>')
+@admin_login_required
 def delete_article(article_id, id):
     db=shelve.open('article.db', 'c')
     article_dict=db['article_item']
@@ -1109,6 +1247,7 @@ def delete_article(article_id, id):
     return redirect(url_for('admin.article', id=id))
 
 @admin_bp.route('/<string:id>/admin/customer_articles')
+@admin_login_required
 def customer_articles(id):
     db = shelve.open('article.db', 'c')
     try:

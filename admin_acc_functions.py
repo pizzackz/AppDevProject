@@ -1,3 +1,4 @@
+from werkzeug.security import generate_password_hash, check_password_hash
 import shelve
 import hashlib
 import random
@@ -9,11 +10,11 @@ from functions import get_user_object
 def create_admin(first_name, last_name, username, email, password):
     account_exists = False
     # Hash 1st 4 char of username & add random number in front to get user_id
-    hashed_username = hashlib.sha256(username[0:3].encode("utf-8")).hexdigest()
+    hashed_username = hashlib.sha256(username[0:3].encode("utf-8")).hexdigest()[0:9]
     user_id = f"{random.randint(501, 999)}{hashed_username}"
 
     # Hash password
-    hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
+    hashed_password = generate_password_hash(password, salt_length=8)
 
     # Access database to store admin account details
     admins_dict = {}
@@ -61,6 +62,8 @@ def retrieve_all_admins():
         admin = admins_dict.get(key)
         admins_list.append(admin) 
     
+    print(admins_list)
+
     return admins_list
 
 

@@ -1,72 +1,65 @@
 <!DOCTYPE html>
 {% extends "login_base.html" %}
 
-{% block css %}
-    {{ super() }}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/modal_popup.css') }}" />
-{% endblock %}
+{% block form %}
+<h3>Login</h3>
 
-{% block content %}
-    <h1 class="display-4">Login</h1>
-    <!-- Replace with logo of our business -->
-    <h1>Tastefully Logo</h1>
+<hr>
 
-    <form method="POST" action="" id="login-base">
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input class="form-control" id="username" name="username" type="text" placeholder="Username" disabled />
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input class="form-control" id="password" name="username" type="text" placeholder="Password" disabled />
-        </div>
-        <input type="submit" value="LOGIN" class="btn btn-primary" disabled />
-    </form>
+<form method="POST" action="">
+    <div class="form-group row">
+        <label for="username">Username</label>
+        <input class="form-control" id="username" name="username" placeholder="Username" type="text" />
+    </div>
+    <div class="form-group row">
+        <label for="password">Password</label>
+        <input class="form-control" id="password" name="password" placeholder="Password" type="password" />
+    </div>
+</form>
 
-    <a href="">Forgot Password</a>
-    
-    <hr>
+<div id="extra-details">
+    <a href="#">Forgot Password</a>
+</div>
 
-    <p>New to tastefully? Sign up <a href="">here</a></p>
-    <p>Just browsing? Our menu is <a href="">here</a></p>
+<div class="modal-backdrop fade show"></div>
 
-    <div class="modal-backdrop fade show"></div>
+<!-- Locked account popup -->
+<form method="POST" action="/login/locked_account?user_id={{ user_id }}">
+    <div class="modal fade show" id="myModal" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
 
-    <!-- Locked account popup -->
-    <form method="POST" action="/login/locked_account?user_id={{ user_id }}">
-        <div class="modal fade show" id="myModal" tabindex="-1" data-bs-backdrop="false" data-bs-keyboard="false">
-            <div class="modal-dialog">
-                <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Account Locked</h4>
+                    <button type="submit" name="button" value="close" class="btn-close bypass-disable"></button>
+                </div>
 
-                    <!-- Modal Header -->
-                    <div class="modal-header">
-                        <h4 class="modal-title">Account Locked</h4>
-                        <button type="submit" name="button" value="close" class="btn-close bypass-disable"></button>
-                    </div>
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <p>Your account has been locked due to the following reason:</p>
+                    <p class="text-danger">{{ user_data.get("locked_reason") }}</p>
+                    <p>You can either request to unlock your account or completely delete it</p>
+                </div>
 
-                    <!-- Modal Body -->
-                    <div class="modal-body">
-                        <p>Your account has been locked due to the following reason:</p>
-                        <p class="text-danger">{{ user_data.get("locked_reason") }}</p>
-                        <p>You can either request to unlock your account or completely delete it</p>
-                    </div>
-
-                    <!-- Modal Footer -->
-                    <div class="modal-footer">
-                        <button type="submit" name="button" value="unlock" class="btn btn-primary bypass-disable">Unlock</button>
-                        <button type="submit" name="button" value="delete" class="btn btn-danger bypass-disable">Delete</button>
-                    </div>
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="submit" name="button" value="unlock"
+                        class="btn btn-primary bypass-disable">Unlock</button>
+                    <button type="submit" name="button" value="delete"
+                        class="btn btn-danger bypass-disable">Delete</button>
                 </div>
             </div>
         </div>
-    </form>
+    </div>
+</form>
 {% endblock %}
 
 {% block scripts %}
-    {{ super() }}
-    <script>
-        const myModalElement = document.getElementById("myModal");
-        const myModalInstance = new bootstrap.Modal(myModalElement, {});
-        myModalInstance.show();
-    </script>
+{{ super() }}
+<script>
+    const myModalElement = document.getElementById("myModal");
+    const myModalInstance = new bootstrap.Modal(myModalElement, {});
+    myModalInstance.show();
+</script>
 {% endblock %}

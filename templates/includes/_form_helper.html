@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 {% macro render_field(field, class) %}
 {{ field.label }}
+{{ field(class_=class, **kwargs) | safe }}
 {% if field.errors %}
 {% for error in field.errors %}
-<p class="text-danger" style=" display: inline; margin-left: 0.573vw; margin-bottom: 0; text-align: left;">{{ error }}</p>
+<p style="margin-bottom: 0;" class="text-danger">{{ error }}</p>
 {% endfor %}
 {% endif %}
-{{ field(class_=class, **kwargs) | safe }}
 {% endmacro %}
+
 {% macro render_field_picture(field, class) %}
     {{ field(class_=class, **kwargs) | safe }}
     <!-- Validation error messages from Forms.py fields -->

@@ -1,10 +1,10 @@
 import string
 import random
 import shelve
-import hashlib
 import os
 from flask import current_app
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Message
 
 from Customer import Customer
@@ -93,19 +93,17 @@ def get_account_type(user_object=None, user_id=None):
 
 # Compare passwords
 def compare_passwords(account_type, user_id, password):
-    actual_password = ""
-    # Hash given password
-    hashed_password = hashlib.sha256(password.encode("utf-8")).hexdigest()
-
     # Retrieve stored hashed password
     db = shelve.open("user_accounts.db", "c")
     if account_type == "customer":
-        actual_password = db["Customers"][user_id].get_password()
+        stored_password = db["Customers"][user_id].get_password()
     elif account_type == "admin":
-        actual_password = db["Admins"][user_id].get_password()
+        stored_password = db["Admins"][user_id].get_password()
 
-    print("actual pass = " + str(actual_password) + ", hashed pass = " + str(hashed_password))
-    return hashed_password == actual_password
+    db.close()
+
+    # Check if the provided password matches the stored hashed password
+    return check_password_hash(stored_password, password)
 
 
 # Unique data function (for username, email)

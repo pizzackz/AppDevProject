@@ -34,13 +34,12 @@
         </div>
       </div>
     </div>
+      <div class="recipe-details" style="background-color:white;margin-top:1rem;text-align:left;">
+        <h3 style="text-align:center;font-size:2rem;">Instructions</h3>
+        <p style="margin-top:2rem;text-align:left;">{{ recipe.get_instructions()|safe }}</p>
+        </div>
   </div>
 
-    <hr>
-    <div class="recipe-details">
-        <h3 style="text-align:center;font-size:2rem;">Instructions</h3>
-        <p style="margin-top:2rem;">{{ recipe.get_instructions()|safe }}</p>
-    </div>
 
 
 <div style="text-align:center;">

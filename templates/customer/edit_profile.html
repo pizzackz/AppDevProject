@@ -10,68 +10,69 @@
 {% block content %}
 {% from "includes/_form_helper.html" import render_field %}
 
-<form method="POST" action="" id="customer_details">
-    <div class="profile-image">
-        <div class="container-fluid row g-0">
-            <div class="col-sm-3 col-md-3 col-lg-3" id="profile-image-half">
-                <div id="profile-image">
-                    {% if session.get("customer").get("profile_pic") == "default" %}
-                    <img class="rounded-circle" src="{{ url_for('static', filename='images/default_profile_pic.png') }}" />
-                    {% else %}
-                    <img class="rounded-circle"
-                        src="{{url_for('static', filename='uploads/customer/profile_pictures/' + session.get('customer').get('profile_pic')) }}" />
-                    {% endif %}
-                    <button type="submit" name="button" value="edit_profile_pic"
-                        class="btn btn-primary bypass-disable">EDIT
-                    </button>
-                </div>
+<div class="container-fluid row g-0" id="container">
+    <div class="col-3" id="left">
+        <form method="POST" action="" id="customer_details_profile_pic">
+            <div id="profile-image">
+                {% if session.get("customer").get("profile_pic") == "default" %}
+                <img class="rounded-circle" src="{{ url_for('static', filename='images/default_profile_pic.png') }}" />
+                {% else %}
+                <img class="rounded-circle"
+                    src="{{ url_for('static', filename='uploads/customer/profile_pictures/' + session.get('customer').get('profile_pic')) }}" />
+                {% endif %}
             </div>
+            <div id="edit-image-button">
+                <button type="submit" name="button" value="edit_profile_pic" class="btn btn-primary bypass-disable">EDIT
+                </button>
+            </div>
+        </form>
+    </div>
 
-            <div class="col-sm-9 col-md-9 col-lg-9" id="main-details-half">
-                <div id="top-row" class="row">
-                    <h3 class="col">Account Details</h3>
-                    <div id="revert-button" class="col">
-                        <button type="submit" name="button" value="revert" class="btn btn-primary bypass-disable">REVERT
-                        </button>
-                    </div>
-                </div>
-
-                <div class="form-group row">
-                    <div class="col">
-                        {{ render_field(form.first_name, class="form-control", data_original_value=form.first_name.data)
-                        }}
-                    </div>
-                    <div class="col">
-                        {{ render_field(form.last_name, class="form-control", data_original_value=form.last_name.data)
-                        }}
-                    </div>
+    <div class="col" id="right">
+        <div id="content">
+            <form method="POST" action="" id="customer_details">
+                <div id="content-header">
+                    <h1>Account Details</h1>
+                    <p>Account Created on: <span>{{ session.get("customer").get("joined_date") }}</span></p>
                 </div>
                 <div class="form-group row">
                     <div class="col">
-                        {{ render_field(form.display_name, class="form-control",
-                        data_original_value=form.display_name.data) }}
+                        {{ render_field(form.first_name, class="form-control", data_original_value=form.first_name.data) }}
+                    </div>
+                    <div class="col">
+                        {{ render_field(form.last_name, class="form-control", data_original_value=form.last_name.data) }}
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col">
+                        {{ render_field(form.display_name, class="form-control", data_original_value=form.display_name.data)
+                        }}
                     </div>
                     <div class="col">
                         {{ render_field(form.email, class="form-control", data_original_value=form.email.data) }}
                     </div>
                 </div>
-
-                <div id="extra-links">
-                    <p>Reset your password <a href="/{{ id }}/edit_profile/reset_password?reset_password=True">here</a>
+    
+                <div id="extra-details">
+                    <p>Reset your password <a href="{{ url_for('customer.edit_cust_profile', id=id, reset_password=True) }}">here</a>
                     </p>
                     <p>If you entered a different email address, we'll send you a verification code before letting you
-                        save
-                        your details
+                        save your details
                     </p>
                 </div>
-
-                <div id="save-button">
-                    <button type="submit" name="button" value="save" class="btn btn-primary rounded-pill">SAVE</button>
+    
+                <div id="buttons" class="row">
+                    <div id="revert-button" class="col">
+                        <button type="submit" name="button" value="revert" class="btn btn-primary rounded-pill bypass-disable">REVERT</button>
+                    </div>
+                    <div id="save-button" class="col">
+                        <button type="submit" name="button" value="save" class="btn btn-primary rounded-pill">SAVE</button>
+                    </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
-</form>
+</div>
 
 {% endblock %}
 

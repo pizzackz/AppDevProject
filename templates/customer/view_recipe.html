@@ -34,17 +34,16 @@
         </div>
       </div>
     </div>
-  </div>
-
-    <hr>
-    <div class="recipe-details">
+      <div class="recipe-details" style="background-color:white;margin-top:1rem;text-align:left;">
         <h3 style="text-align:center;font-size:2rem;">Instructions</h3>
-        <p style="margin-top:2rem;">{{ recipe.get_instructions()|safe }}</p>
-    </div>
+        <p style="margin-top:2rem;text-align:left;">{{ recipe.get_instructions()|safe }}</p>
+        </div>
+  </div>
 
 
 <div style="text-align:center;">
     <a href="{{ url_for('customer.recipe_database', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
+    <a href="{{ url_for('customer.add_favourite', recipe_id=recipe.get_id(), id=id ) }}" class="btn btn-warning mt-3 mb-4">Add to Favourites</a>
 </div>
 </div>
 

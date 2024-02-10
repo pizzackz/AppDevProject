@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+{% extends "admin/cust_db_cust_profile.html" %}
+{% block title %}Customer Database - Lock Account{% endblock %}
+
+{% block css %}
+{{ super() }}
+<style>
+    #myModal .modal-dialog-centered {
+        min-height: 85vh;
+    }
+
+    #myModal .modal-body {
+        margin: 0;
+        padding-top: 0;
+    }
+
+    #myModal .modal-body .form-group {
+        font-size: 1.2rem;
+    }
+
+    #myModal .modal-body textarea {
+        resize: vertical;
+        text-align: left;
+        margin-top: 0.6rem;
+        max-height: 20rem;
+        overflow-y: auto;
+    }
+
+    #myModal .modal-body textarea::placeholder {
+        text-align: center;
+    }
+
+    textarea::-webkit-scrollbar {
+        width: 0.5rem;
+        height: 0.5rem;
+    }
+    
+    textarea::-webkit-scrollbar-thumb {
+        border-radius: 0.5rem;
+        background-color: #0004;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% from "includes/_form_helper.html" import render_field %}
+<!-- Manually display data -->
+<div class="container-fluid row g-0" id="container">
+    <div class="col-3" id="left">
+        <form method="POST" action="" id="admin_details_profile_pic">
+            <div id="profile-image">
+                {% if cust_details.get("profile_pic") == "default" %}
+                <img class="rounded-circle" src="{{ url_for('static', filename='images/default_profile_pic.png') }}" />
+                {% else %}
+                <img class="rounded-circle"
+                    src="{{ url_for('static', filename='uploads/customer/profile_pictures/' + cust_details.get('profile_pic')) }}" />
+                {% endif %}
+            </div>
+            <div id="buttons">
+                {% if cust_details.get("is_locked") %}
+                <button type="submit" name="button" value="unlock_button"
+                    class="btn btn-warning rounded-pill bypass-disable">UNLOCK</button>
+                {% else %}
+                <button type="submit" name="button" value="lock_button"
+                    class="btn btn-danger rounded-pill bypass-disable">LOCK</button>
+                {% endif %}
+                <button type="submit" name="button" value="delete_button"
+                    class="btn btn-danger rounded-pill bypass-disable">DELETE</button>
+            </div>
+            <div id="order-history-button">
+                <button type="submit" name="button" value="order_history_button"
+                    class="btn btn-primary bypass-disable">ORDER HISTORY</button>
+            </div>
+            {% if cust_details.get("is_locked") and cust_details.get("has_request") %}
+            <div id="requests">
+                {% if cust_details.get("has_request") %}
+                <h4>Requested to:</h4>
+                <ul class="list-group">
+                    {% if cust_details.get("unlock_request") %}
+                    <li>Unlock Account</li>
+                    {% endif %}
+                    {% if cust_details.get("delete_request") %}
+                    <li>Delete Account</li>
+                    {% endif %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="col" id="right">
+        <div id="content">
+            <form method="POST" action="" id="customer_details">
+                <div id="content-header">
+                    <div id="back-link" style="display: flex; align-items: center;">
+                        <a href="{{ url_for('admin.customer_database', id=id) }}"><i
+                                class="bi bi-arrow-left-circle"></i>
+                            Back to Search</a>
+                    </div>
+                    <div id="brief-cust-info">
+                        <table>
+                            <tr>
+                                <td>Current Customer: </td>
+                                <td>{{ cust_details.get("username") }}</td>
+                            </tr>
+                            <tr>
+                                <td>Account Created on: </td>
+                                <td>{{ cust_details.get("joined_date") }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="content-body">
+                    <div class="form-group row">
+                        <div class="col">
+                            <label for="first_name">First Name</label>
+                            <input class="form-control" id="first_name" name="first_name" type="text"
+                                value="{{ cust_details.get('first_name') }}" />
+                        </div>
+                        <div class="col">
+                            <label for="lastt_name">Last Name</label>
+                            <input class="form-control" id="last_name" name="last_name" type="text"
+                                value="{{ cust_details.get('last_name') }}" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col">
+                            <label for="display_name">Display Name</label>
+                            <input class="form-control" id="display_name" name="display_name" type="text"
+                                value="{{ cust_details.get('display_name') }}" />
+                        </div>
+                        <div class="col">
+                            <label for="email">Email</label>
+                            <input class="form-control" id="email" name="email" type="text"
+                                value="{{ cust_details.get('email') }}" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col">
+                            <label for="locked_status">Locked Status</label>
+                            {% if cust_details.get("is_locked") %}
+                            <input class="form-control" id="locked-status-true" name="locked-status" type="text"
+                                value="Locked" style="background-color: #ff6f61;" disabled />
+                            {% else %}
+                            <input class="form-control" id="locked-status-false" name="locked-status" type="text"
+                                value="Unlocked" style="background-color: #9acd32;" disabled />
+                            {% endif %}
+                        </div>
+                        <div class="col">
+                            <label for="last_online">Last Online</label>
+                            <input class="form-control" id="last-online" name="last-online" type="text"
+                                value="{{ cust_details.get('last_online') }}" disabled />
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop fade show"></div>
+
+<!-- Lock Account popup -->
+<form method="POST" action="{{ url_for('admin.lock_customer_account', id=id, cust_id=cust_id) }}"
+    id="lock-account-form">
+    <div class="modal fade show" id="myModal" data-bs-backdrop="false" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Lock Account</h4>
+                    <button type="submit" name="button" value="close" class="btn-close bypass-disable"></button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <div class="form-group">
+                        {{ render_field(form.reason, class="form-control") }}
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <input type="submit" value="LOCK" class="btn btn-danger" />
+                    <button type="submit" name="button" value="cancel" class="btn btn-secondary bypass-disable">CANCEL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/disable_enable_submit.js') }}"></script>
+<script>
+    const myModalElement = document.getElementById("myModal");
+    const myModalInstance = new bootstrap.Modal(myModalElement, {});
+    myModalInstance.show();
+</script>
+{% endblock %}

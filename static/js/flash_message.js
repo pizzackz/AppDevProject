@@ -41,6 +41,17 @@ function display_popup(message, status) {
        popup.style.backgroundColor = "rgb(135,41,41)";
 
     }
+    else if (status == 'warning') {
+      popup.innerHTML = `
+      <span class="bi bi-exclamation-circle" id="exclamation"></span>
+      <span class="msg">Error: ` + message + `</span>
+      <div id="close-btn">
+        <span class="bi bi-x"></span>
+      </div>
+    `;
+       popup.style.backgroundColor = "rgb(255, 255, 0)";
+
+    }
 
     else if (status == 'success') {
       popup.innerHTML = `

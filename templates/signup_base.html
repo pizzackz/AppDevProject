@@ -8,50 +8,47 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid row g-0">
-    <div class="col-sm-6 col-md-6 col-lg-6" id="left-half">
-        <img class="mx-auto img-fluid" id="logo" src="{{ url_for('static', filename='images/logo.png') }}" />
+<div class="container-fluid row g-0" id="container">
+    <div id="left-half">
+        <img id="logo" src="{{ url_for('static', filename='images/logo.png') }}" />
     </div>
 
-    <div class="col-sm-6 col-md-6 col-lg-6" id="right-half">
-        <div id="content-box" class="text-center">
-
-            <div id="form-box">
-                <div class="card-body">
+    <div id="right-half">
+        <div id="content">
+            <div id="content-body">
+                <div id="main-content">
                     {% block form %}
                     {% from "includes/_form_helper.html" import render_field %}
-                    <div id="form-box-fields">
-                        <h4>Signup</h4>
+                    <h3>Signup</h3>
 
-                        <hr style="margin: 0;">
+                    <hr>
 
-                        <form method="POST" action="" id="signup-base">
-                            <div class="form-group row">
-                                {{ render_field(form.first_name, class="form-control") }}
-                            </div>
-                            <div class="form-group row">
-                                {{ render_field(form.last_name, class="form-control") }}
-                            </div>
-                            <div class="form-group row">
-                                {{ render_field(form.username, class="form-control") }}
-                            </div>
-                            <div class="form-group row">
-                                {{ render_field(form.email, class="form-control") }}
-                            </div>
-                            
-                            <br>
+                    <form method="POST" action="" id="signup-base">
+                        <div class="form-group row">
+                            {{ render_field(form.first_name, class="form-control") }}
+                        </div>
+                        <div class="form-group row">
+                            {{ render_field(form.last_name, class="form-control") }}
+                        </div>
+                        <div class="form-group row">
+                            {{ render_field(form.username, class="form-control") }}
+                        </div>
+                        <div class="form-group row">
+                            {{ render_field(form.email, class="form-control") }}
+                        </div>
 
-                            <p style="text-align: left; padding-left: 0.382vw;">We'll send you a verification code to verify your email before
-                                letting you set your password</p>
-                            <input type="submit" value="SEND" class="btn btn-primary rounded-pill disabled" />
-                        </form>
-                    </div>
+                        <div id="extra-statement">
+                            <p>We'll send you a verification code to verify your email before letting you set your
+                                password</p>
+                        </div>
+                        <input type="submit" value="SEND" class="btn btn-primary rounded-pill disabled" />
+                    </form>
 
                     {% endblock %}
 
                     <hr>
 
-                    <div id="form-box-extra-links">
+                    <div id="links">
                         <p>Already have an account? Log in <a href="/login">here</a></p>
                         <p>Just browsing? Our menu is <a href="/menu">here</a></p>
                     </div>

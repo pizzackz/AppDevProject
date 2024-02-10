@@ -1,10 +1,10 @@
 from User import User
 
+
 class Admin(User):
     # Constructor
     def __init__(self, user_id, first_name, last_name, username, email, password):
         super().__init__(user_id, first_name, last_name, username, email, password)
-    
 
     # Methods
     def get_admin_data(self):
@@ -16,6 +16,8 @@ class Admin(User):
             "username": self.get_username(),
             "email": self.get_email(),
             "password": self.get_password(),
-            "profile_pic": self.get_profile_pic_name()
+            "profile_pic": self.get_profile_pic_name(),
+            "last_online": self.get_last_online(),
+            "joined_date": self.get_joined_date()
         }
         return admin_dict

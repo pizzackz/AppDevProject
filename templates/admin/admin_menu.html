@@ -21,5 +21,5 @@
 
 {% block scripts %}
     {{ super() }}
-    <script src="../../static/css/menu_delete.js"></script>
+    <script src="{{ url_for('static', filename='css/menu_delete.js') }}"></script>
 {% endblock %}
