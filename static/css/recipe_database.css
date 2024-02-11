@@ -27,10 +27,41 @@
     display:inline-block;
     max-width: fit-content;
 }
+.input_ingredient {
+    margin:auto;
+    position:relative;
+    width:fit-content
+}
+
 .input_ingredient input {
     margin:1px;
     text-align: left;
 }
+
+.autocomplete {
+    position: absolute;
+    margin: 0.1rem;
+    z-index: 1000;
+    list-style-type: none;
+    margin-top: -0.67rem;
+    width: 19.7rem;
+}
+.autocomplete ul {
+    border-radius: 5px;
+    list-style-type: none;
+    background-color: white;
+    text-align: left;
+    padding-left: 0rem;
+}
+.autocomplete ul li {
+    padding: 0.5rem;
+    padding-left:1rem;
+}
+.autocomplete ul li:hover {
+    background-color: #f2f2f2;
+}
+
+
 #ingredient_items_list {
     height: 13rem;
     width: 23rem;

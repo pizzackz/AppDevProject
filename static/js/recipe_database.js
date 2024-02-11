@@ -64,6 +64,71 @@ document.addEventListener("DOMContentLoaded", function() {
     search.addEventListener('click', search_ingredients);
 })
 
+// Ingredient input autocomplete
+var ingredient_input = document.getElementById('ingredient');
+
+function autocompletion() {
+    var ingredient = ingredient_input.value;
+    ingredient = ingredient.toLowerCase();
+    console.log(ingredient);
+
+    // generate wordList of ingredients
+    var wordList = [
+        'apple', 'banana', 'chicken', 'carrot', 'tomato', 'potato', 'beef', 'pork', 'onion', 'garlic', 'pepper', 'cucumber', 'lettuce', 'spinach', 'mushroom', 'broccoli', 'peas', 'corn', 'rice', 'pasta', 'noodles', 'bread', 'flour', 'sugar', 'salt', 'pepper', 'cinnamon', 'paprika', 'cumin', 'curry', 'thyme', 'basil', 'oregano', 'parsley', 'sage', 'rosemary', 'cilantro', 'coriander', 'ginger', 'turmeric', 'saffron', 'cinnamon', 'nutmeg', 'vanilla', 'chocolate', 'cocoa', 'honey', 'maple', 'syrup', 'milk', 'cream', 'butter', 'cheese', 'yogurt', 'egg', 'mayo', 'ketchup', 'mustard', 'soy', 'sauce', 'vinegar', 'oil', 'water', 'juice', 'soda', 'beer', 'wine', 'whiskey', 'vodka', 'rum', 'tequila', 'gin', 'brandy', 'cognac', 'liqueur', 'vermouth', 'champagne', 'sparkling', 'wine', 'prosecco', 'sake', 'soju', 'baijiu', 'baiju', 'baijiu', 'baiju'];
+
+    var matchingWords = [];
+
+    for (var i = 0; i < wordList.length; i++) {
+
+        var list_word = wordList[i];
+        // Check if the first letter matches the first letter of the given word
+        if (list_word.startsWith(ingredient)) {
+            // If there is a match, add the word to the matchingWords array
+            if (matchingWords.length < 5) {
+                if (list_word != ingredient) {
+                    matchingWords.push(wordList[i]);
+                }
+            }
+        }
+    }
+
+    var autoCompleteHTML = "<ul>"
+    for (i=0;i<matchingWords.length;i++) {
+        autoCompleteHTML += "<li onclick=" + '"' + "select_autocomplete('" + matchingWords[i]  + "')" + '">' + matchingWords[i] + '</li>'
+        // <li onclick="select_autocomplete('chicken')">chicken</li>
+        console.log(matchingWords[i]);
+    }
+    autoCompleteHTML += "</ul>"
+    console.log(autoCompleteHTML);
+    // Filling up the list
+    document.getElementById('autocomplete').innerHTML = autoCompleteHTML;
+}
+
+// Allowing user to select the autocomplete function
+function select_autocomplete(word) {
+    document.getElementById('ingredient').value = word;
+    console.log('clicked selected');
+    autocompletion();
+}
+
+ingredient_input.addEventListener('input', autocompletion);
+
+// Close all lists when not targeted
+function close_list(){
+    document.getElementById('autocomplete').innerHTML = '';
+}
+document.addEventListener("click", function(e){
+    if (e.target.id == 'ingredient') {
+        autocompletion();
+    }
+    else {
+        close_list();
+    }
+})
+
+
+
+
 // Display popup
 
 function hide_popup() {

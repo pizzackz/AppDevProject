@@ -492,6 +492,8 @@ def recipe_database(id):
         # For debugging
         print(recipe.get_name(), recipe.get_id())
 
+    recipes.sort(key=lambda x: x.get_name())
+
     print(recipes)
     if request.method == 'POST':
         ingredients = request.form.get('ingredient')
@@ -505,6 +507,9 @@ def recipe_database(id):
                 if ingredients[i] in (recipes[s]).get_ingredients() or ingredients[i] in name:
                     if recipes[s] not in recipe2:
                         recipe2.append(recipes[s])
+
+        # Sort the recipes by the number of ingredients the user has in descending order
+        recipe2.sort(key=lambda x: len(set(x.get_ingredients()).intersection(ingredients)), reverse=True)
 
         db.close()
         return render_template('customer/recipe_database.html', recipes=recipe2, id=id)
