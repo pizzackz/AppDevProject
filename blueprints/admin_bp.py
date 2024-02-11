@@ -1262,4 +1262,4 @@ def customer_articles(id):
     print(articles)
     db.close()
 
-    return render_template('customer/customer_articles.html', articles=articles, id=id)
+    return render_template('customer/guest_articles.html', articles=articles, id=id)

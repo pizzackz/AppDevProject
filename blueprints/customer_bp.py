@@ -512,6 +512,45 @@ def recipe_database(id):
     db.close()
     return render_template('customer/recipe_database.html', recipes=recipes, id=id)
 
+# Allow the sending of email of recipe to the user
+@customer_bp.route('/<string:id>/customer/send_recipe/<recipe_id>', methods=['GET', 'POST'])
+@customer_login_required
+def share_recipe(recipe_id, id):
+    db = shelve.open('recipes.db', 'c')
+    recipe_dict = db['recipes']
+    recipe = recipe_dict.get(recipe_id)
+    cust_data = session.get("customer")
+
+    ingredient = ''
+    for i in recipe.get_ingredients():
+        ingredient += f'- {i}'
+        ingredient += '\n'
+
+    with current_app.app_context():
+        mail = current_app.extensions.get('mail')
+        send_email(
+            mail,
+            "Recipe!",
+            "itastefully@gmail.com",
+            cust_data.get("email"),
+            body=f"""
+            Name of Recipe: {recipe.get_name()}
+            Ingredients:
+            {ingredient}
+            Instructions:
+            {recipe.get_instructions()}
+            """,
+        )
+    print(f"""
+    Name of Recipe: {recipe.get_name()}
+    Ingredients:
+    {ingredient}
+    Instructions:
+    {recipe.get_instructions()}
+     """)
+    flash("Recipe has been sent to your email!", "success")
+    return redirect(url_for('customer.view_recipe', recipe_id=recipe.get_id(), id=id ))
+
 @customer_bp.route('/<string:id>/customer/view_recipe/<recipe_id>', methods=['GET', 'POST'])
 @customer_login_required
 def view_recipe(recipe_id, id):
@@ -650,7 +689,7 @@ def article(id):
     print(articles)
     db.close()
 
-    return render_template('customer/customer_articles.html', form=createArticle, articles=articles, id=id)
+    return render_template('customer/guest_articles.html', form=createArticle, articles=articles, id=id)
 @customer_bp.route('/<string:id>/customer/view_article/<article_id>')
 @customer_login_required
 def view_article(article_id, id):

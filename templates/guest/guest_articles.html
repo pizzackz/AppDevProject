@@ -1,19 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Article Database{% endblock %}
 
-{% block navbar %} {% include "includes/_customer_navbar.html" %} {% endblock %}
+    {% block navbar %} {% include "includes/_customer_navbar.html" %} {% endblock %}
 
 {% block content %}
-<script>
-    // Confirmation button
-function confirmdelete(content, id) {
-    console.log(content);
-    document.getElementById('modal-body').innerHTML = 'Are you sure you want to delete ' + content + '?';
-    document.getElementById('delete').onclick = function() {
-        window.location.href = "delete_article/" + id;
-    }
-}
-</script>
+
+
+
     <header class="py-5">
         <div style="background-color:#ffffff" class="py-5">
             <div class="text-center text-white">
@@ -23,6 +16,7 @@ function confirmdelete(content, id) {
             </div>
         </div>
     </header>
+    <div style=""></div>
     <div id="article_item">
     <div class="container px-4 px-lg-5 mt-5">
         <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
@@ -30,16 +24,14 @@ function confirmdelete(content, id) {
             <div class="col mb-5">
                 <div class="card h-100">
                     <!-- Product image-->
-                    <figure class="mb-4"><img class="img-fluid rounded" src="{{ url_for('static', filename='images_articles/' + article_item.get_image()) }}" class="card-img-top" alt="..."></figure>
+                    <figure><img src="{{ url_for('static', filename='image/' + article_item.get_image()) }}" class="card-img-top" alt="..."></figure>
                     <!-- Product details-->
                     <div class="card-body p-4">
                         <div class="text-center">
                             <!-- Product name-->
                             <h5 class="card-title">{{ article_item.get_title() }}</h5>
                             <!-- Product price-->
-                            <a href="{{ url_for('admin.view_article', article_id=article_item.get_id(), id=id ) }}" class="view btn btn-success m-1">View</a>
-                            <a href="{{ url_for('admin.update_article', article_id=article_item.get_id(), id=id ) }}" class="update btn btn-primary m-1">Update</a>
-                            <a onclick="confirmdelete('{{ article_item.get_title() }}', '{{ article_item.get_id() }}')" class="btn btn-danger m-2" data-bs-toggle="modal" data-bs-target="#exampleModal">Delete</a>
+                            <a href="{{ url_for('view_article', article_id=article_item.get_id() ) }}" class="view btn btn-success m-1">Read more</a>
                         </div>
                     </div>
                 </div>
@@ -48,8 +40,4 @@ function confirmdelete(content, id) {
         </div>
     </div>
     </div>
-{% endblock %}
-
-{% block scripts %}
-    {{ super() }}
-{% endblock %}
+{% endblock %}}
