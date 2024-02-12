@@ -34,11 +34,35 @@ h1 {
     margin:2px;
 }
 .input_ingredient {
-    margin-bottom:0.5rem;
+    margin:auto;
+    position:relative;
+    width:fit-content
 }
 label {
     margin-bottom:0.3rem;
     margin-left:0.1rem;
+}
+
+.autocomplete {
+    position: absolute;
+    margin: 0.1rem;
+    z-index: 1000;
+    list-style-type: none;
+    width: 20.7rem;
+}
+.autocomplete ul {
+    border-radius: 5px;
+    list-style-type: none;
+    background-color: white;
+    text-align: left;
+    padding-left: 0rem;
+}
+.autocomplete ul li {
+    padding: 0.5rem;
+    padding-left:1rem;
+}
+.autocomplete ul li:hover {
+    background-color: #f2f2f2;
 }
 
 

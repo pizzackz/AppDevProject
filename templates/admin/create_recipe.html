@@ -35,9 +35,11 @@
 
         <div id="control_panel" class="text-center form-group">
             <h1 style="font-size:2rem;margin-bottom:-0.5rem;margin-top:1rem;">Ingredients</h1><br>
-            <div class="input_ingredient row">
+            <div class="input_ingredient">
                 <input type="text" class="form-control form-control-lg col-auto" name="ingredient" id="ingredient" placeholder="chicken, tomato" required>
-                <input type="button" value="Add Item" id="add_ingredient" class="btn btn-success btn-lg col">
+                 <div id="autocomplete" class="autocomplete">
+                </div>
+                <input type="button" value="+" id="add_ingredient" class="btn btn-success btn-lg col">
             </div>
             <div id="ingredient_items_list">
             </div>

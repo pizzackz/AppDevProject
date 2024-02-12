@@ -22,13 +22,21 @@ function display_ingredient() {
         <span class="item">` + ingredient_list[i] + "</span></div>";
     }
     document.getElementById('ingredient_items_list').innerHTML = ingredient_itemHTML;
-    
+    remove_all.classList.remove('disabled')
+    search.classList.remove('disabled')
+    if (ingredient_itemHTML == "") {
+        const remove_all = document.getElementById('remove_all');
+        const search = document.getElementById('search');
+        remove_all.classList.add('disabled');
+        search.classList.add('disabled');
+    }
 }
 
 // Add event listeners to buttons
 document.addEventListener("DOMContentLoaded", function() {
     const form1 = document.getElementById('form1');
     const add_item = document.getElementById("add_ingredient");
+    autocompletion();
     display_ingredient();
     add_item.addEventListener('click', function() { // Add event listener to adding ingredient button
         var ingredient = document.getElementById('ingredient').value;
@@ -71,7 +79,15 @@ function autocompletion() {
     var ingredient = ingredient_input.value;
     ingredient = ingredient.toLowerCase();
     console.log(ingredient);
+<<<<<<< Updated upstream
 
+=======
+    const add_item = document.getElementById("add_ingredient");
+    add_item.classList.remove('disabled');
+    if (ingredient == "") {
+        add_item.classList.add('disabled');
+    }
+>>>>>>> Stashed changes
     // generate wordList of ingredients
     var wordList = [
         'apple', 'banana', 'chicken', 'carrot', 'tomato', 'potato', 'beef', 'pork', 'onion', 'garlic', 'pepper', 'cucumber', 'lettuce', 'spinach', 'mushroom', 'broccoli', 'peas', 'corn', 'rice', 'pasta', 'noodles', 'bread', 'flour', 'sugar', 'salt', 'pepper', 'cinnamon', 'paprika', 'cumin', 'curry', 'thyme', 'basil', 'oregano', 'parsley', 'sage', 'rosemary', 'cilantro', 'coriander', 'ginger', 'turmeric', 'saffron', 'cinnamon', 'nutmeg', 'vanilla', 'chocolate', 'cocoa', 'honey', 'maple', 'syrup', 'milk', 'cream', 'butter', 'cheese', 'yogurt', 'egg', 'mayo', 'ketchup', 'mustard', 'soy', 'sauce', 'vinegar', 'oil', 'water', 'juice', 'soda', 'beer', 'wine', 'whiskey', 'vodka', 'rum', 'tequila', 'gin', 'brandy', 'cognac', 'liqueur', 'vermouth', 'champagne', 'sparkling', 'wine', 'prosecco', 'sake', 'soju', 'baijiu', 'baiju', 'baijiu', 'baiju'];
@@ -102,6 +118,12 @@ function autocompletion() {
     console.log(autoCompleteHTML);
     // Filling up the list
     document.getElementById('autocomplete').innerHTML = autoCompleteHTML;
+<<<<<<< Updated upstream
+=======
+    if (ingredient == "") {
+        close_list();
+    }
+>>>>>>> Stashed changes
 }
 
 // Allowing user to select the autocomplete function
@@ -126,9 +148,12 @@ document.addEventListener("click", function(e){
     }
 })
 
+<<<<<<< Updated upstream
 
 
 
+=======
+>>>>>>> Stashed changes
 // Display popup
 
 function hide_popup() {

@@ -5,6 +5,19 @@
 {% block css %}
     {{ super() }}
   <link rel="stylesheet" href="{{ url_for('static', filename='css/create_recipe.css') }}">
+<<<<<<< Updated upstream
+=======
+<style>
+    .autocomplete {
+    position: absolute;
+    margin: 0.1rem;
+    z-index: 1000;
+    list-style-type: none;
+    margin-top: 3rem;
+    width: 20.7rem;
+}
+</style>
+>>>>>>> Stashed changes
 {% endblock %}
 
 {% block scripts %}
@@ -37,7 +50,9 @@
             <h1 style="font-size:2rem;margin-bottom:-0.5rem;margin-top:1rem;">Ingredients</h1><br>
             <div class="input_ingredient row">
                 <input type="text" class="form-control form-control-lg col-auto" name="ingredient" id="ingredient" placeholder="chicken, tomato" required>
-                <input type="button" value="Add Item" id="add_ingredient" class="btn btn-success btn-lg col">
+                <div id="autocomplete" class="autocomplete">
+                  </div>
+                <input type="button" value="+" id="add_ingredient" class="btn btn-success btn-lg col">
             </div>
             <div id="ingredient_items_list">
             {% for ingredient in ingredients %}
