@@ -571,18 +571,21 @@ def view_recipe(recipe_id, id):
 @customer_login_required
 def favourites(id):
     db = shelve.open('favourites.db', 'c')
+    db_recipe = shelve.open('recipes.db', 'c')
+    recipe_dict_0 = db_recipe['recipes']
     try:
-        recipe_dict = db[str(id)]
+        recipe_list = db[str(id)]
     except:
         print('Error in retrieving recipes')
-        recipe_dict = {}
+        recipe_list = {}
 
     recipes = []
-    for key in recipe_dict:
-        recipe = recipe_dict.get(key)
-        recipes.append(recipe)
-        # For debugging
-        print(recipe.get_name(), recipe.get_id())
+    for i in recipe_list:
+        if i in recipe_dict_0:
+            recipe = recipe_dict_0.get(i)
+            recipes.append(recipe)
+            # For debugging
+            print(recipe.get_name(), recipe.get_id())
 
     print(recipes)
 
@@ -592,29 +595,31 @@ def favourites(id):
 @customer_bp.route('/<string:id>/customer/add_favourite/<recipe_id>', methods=['GET', 'POST'])
 @customer_login_required
 def add_favourite(recipe_id, id):
-    db = shelve.open('recipes.db', 'c')
-    recipe_dict = db['recipes']
+    recipe_db = shelve.open('recipes.db', 'c')
+    recipe_dict = recipe_db['recipes']
     favourite_db = shelve.open('favourites.db', 'c')
     try:
-        user_favourite_dict = favourite_db[str(id)]
+        user_favourite_list = favourite_db[str(id)]
     except:
         print('Error in retrieving recipes')
-        user_favourite_dict = {}
+        user_favourite_list = []
 
     favourite_recipe = recipe_dict.get(recipe_id)
     print(favourite_recipe.get_name())
 
-    for key in user_favourite_dict:
-        recipe = recipe_dict.get(key)
+    for i in user_favourite_list:
+        recipe = recipe_dict.get(i)
         if recipe_id == recipe.get_id():
             flash(f'{recipe.get_name()} is already in favourites', 'error')
             return redirect(url_for('customer.recipe_database', id=id))
 
-    user_favourite_dict[recipe_id] = favourite_recipe
+    user_favourite_list.append(recipe_id)
+
     print(f'Added {favourite_recipe.get_name()}')
-    favourite_db[str(id)] = user_favourite_dict
+
+    favourite_db[str(id)] = user_favourite_list
     favourite_db.close()
-    db.close()
+    recipe_db.close()
 
     flash(f'{favourite_recipe.get_name()} has been added to favourites', 'info')
     return redirect(url_for('customer.recipe_database', id=id))
@@ -622,16 +627,22 @@ def add_favourite(recipe_id, id):
 @customer_bp.route('/<string:id>/customer/remove_favourite/<recipe_id>')
 @customer_login_required
 def remove_favourite(recipe_id, id):
-    db = shelve.open('favourites.db', 'c')
-    id = str(id)
-    recipe_dict = db.get(id)
+    favourite_db = shelve.open('favourites.db', 'c')
+    recipe_db = shelve.open('recipes.db', 'c')
+    recipe_dict = recipe_db['recipes']
 
+    id = str(id)
+    user_favourite_list = favourite_db.get(id)
+
+    # Getting recipe name from recipes.db
     recipe = recipe_dict.get(recipe_id)
     name = recipe.get_name()
 
-    recipe_dict.pop(recipe_id)
-    db[id] = recipe_dict
-    db.close()
+    # Removing the recipe id from the user's favourite list
+    user_favourite_list.pop(recipe_id)
+    favourite_db[id] = user_favourite_list
+    favourite_db.close()
+    recipe_db.close()
 
     flash(f'{name} has been deleted', 'info')
 
@@ -640,13 +651,13 @@ def remove_favourite(recipe_id, id):
 @customer_bp.route('/<string:id>/customer/favourite/<recipe_id>', methods=['GET', 'POST'])
 @customer_login_required
 def view_favourite(recipe_id, id):
-    print(recipe_id)
-    db = shelve.open('favourites.db', 'c')
+    recipe_db = shelve.open('recipes.db', 'c')
+    recipe_dict = recipe_db['recipes']
     id = str(id)
-    recipe_dict = db[id]
+
     recipe = recipe_dict.get(recipe_id)
     print(recipe.get_instructions())
-    db.close()
+    recipe_db.close()
     return render_template('customer/view_favourite.html', recipe=recipe, id=id)
 
 

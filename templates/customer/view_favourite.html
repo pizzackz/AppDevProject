@@ -61,7 +61,7 @@
 
 <div style="text-align:center;">
     <a href="{{ url_for('customer.favourites', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
-    <a onclick="confirmdelete('{{ recipe.get_name() }}', '{{ recipe.get_id() }}')" class="btn btn-error mt-3 mb-4" data-bs-toggle="modal" data-bs-target="#exampleModal">Remove from Favourites</a>
+    <a onclick="confirmdelete('{{ recipe.get_name() }}', '{{ recipe.get_id() }}')" class="btn btn-danger mt-3 mb-4" data-bs-toggle="modal" data-bs-target="#exampleModal">Remove from Favourites</a>
 </div>
 </div>
 
