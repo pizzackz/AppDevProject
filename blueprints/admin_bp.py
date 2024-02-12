@@ -19,7 +19,6 @@ from article import *
 
 # Modules for Menu
 from menu import *
-from menuForm import *
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -184,10 +183,11 @@ def view_customer_feedback(id):
     cust_data = retrieve_cust_details(cust_id)
     display_name = cust_data.get("display_name")
     feedback_data = retrieve_cust_feedback_dict(cust_id)
+    feedback_list = [feedback for feedback in feedback_data.values()]
     count = 0 if not feedback_data else len(feedback_data)
 
     # Handle GET request
-    return render_template("admin/cust_db_feedback.html", id=id, cust_id=cust_id, display_name=display_name, count=count, feedback_details=feedback_data)
+    return render_template("admin/cust_db_feedback.html", id=id, cust_id=cust_id, display_name=display_name, count=count, feedback_details=feedback_list)
 
 
 # Customer Database page - Delete Account Popup (Admin)
@@ -225,7 +225,7 @@ def delete_customer_account(id):
 
 
 # Customer Database page - Delete Feedback (Admin)
-@admin_bp.route("/<string:id>/admin/customer_database/delete_feedback", methods=["POST"])
+@admin_bp.route("/<string:id>/admin/customer_database/delete_feedback", methods=["POST", "GET"])
 @admin_login_required
 def delete_customer_feedback(id):
     cust_id = request.args.get("cust_id")
@@ -1203,17 +1203,14 @@ def update_article(article_id, id):
         article_item.set_title(update_article.title.data)
         article_item.set_category(update_article.category.data)
         article_item.set_description(update_article.description.data)
-        picture = request.files.get("image")
+        picture = request.files['image']
 
         picture_filename = secure_filename(picture.filename)
         if not ("." in picture_filename and picture_filename.rsplit(".", 1)[1].lower() in ("jpg", "png", "jpeg")):
             flash("File type is not allowed. Please use jpeg, jpg or png files only!", "error")
             print("file is not allowed")
-            return render_template('admin/update_article.html', form=update_article, id=id)
-        file_path = os.path.join('static', 'images_articles', picture_filename)
-        picture.save(file_path)
+            return render_template('admin/create_article.html', form=create_article, id=id)
 
-        article_item.set_image(picture_filename)
         article_dict[article_item.get_id()] = article_item
 
         if picture.filename != '':
@@ -1222,8 +1219,9 @@ def update_article(article_id, id):
                 os.remove(old_picture_path)
 
             # Save the new image file
-            picture_path = os.path.join('static', 'images_articles', picture_filename)
-            picture.save(picture_path)
+            file_path = os.path.join('static', 'images_articles', picture_filename)
+            picture.save(file_path)
+
             article_item.set_image(picture_filename)  # Update the image attribute
 
         db['article_item'] = article_dict

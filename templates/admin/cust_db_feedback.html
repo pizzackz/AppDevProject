@@ -45,7 +45,6 @@
         </section>
 
         <section id="table-body">
-            <form method="POST" id="customerForm">
                 <table>
                     <thead>
                         <tr>
@@ -61,14 +60,14 @@
                     <tbody>
                         {% for feedback in feedback_details %}
                         <tr>
-                            <td colspan="2">{{ feedback.get_sent_date("%d/%m/%Y") }}</td>
+                            <td>{{ feedback.get_sent_date("%d/%m/%Y") }}</td>
                             <td>{{ display_name }}</td>
                             <td>{{ feedback.get_category() }}</td>
                             <td>{{ feedback.get_rating() }}</td>
                             <td>{{ feedback.get_message() }}</td>
                             <td class="text-center">
                                 <!-- Button to Open the Modal -->
-                                <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                <button type="button" class="btn btn-danger bypass-disable" data-bs-toggle="modal"
                                     data-bs-target="#myModal_{{ feedback.get_feedback_id() }}">Delete</button>
 
                                 <!-- The Modal -->
@@ -90,7 +89,7 @@
                                             <!-- Modal Footer -->
                                             <div class="modal-footer">
                                                 <form
-                                                    action="{{ url_for('admin.delete_customer_feedback', id=id, cust_id=cust_id, feedback_id=feedback_id) }}"
+                                                    action="{{ url_for('admin.delete_customer_feedback', id=id, cust_id=cust_id, feedback_id=feedback.get_feedback_data().get('feedback_id')) }}"
                                                     method="POST">
                                                     <input type="submit" value="Delete"
                                                         class="btn btn-danger bypass-disable" />
@@ -106,7 +105,6 @@
                         {% endfor %}
                     </tbody>
                 </table>
-            </form>
         </section>
     </main>
 </div>

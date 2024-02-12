@@ -467,7 +467,7 @@ def current_delivery(id):
 
 
 # Feedback page (Customer)
-@customer_bp.route("/<string:id>/feedback")
+@customer_bp.route("/<string:id>/feedback", methods=["GET", "POST"])
 @customer_login_required
 def feedback(id):
     form = CustomerFeedbackForm(request.form)
@@ -477,9 +477,9 @@ def feedback(id):
 
     # Handle POST request
     if request.method == 'POST' and form.validate():
-        feedback_id = create_new_feedback(id, cust_data.get("display_name"), form.category.data, form.rating.data, form.message.data)
+        feedback_id = create_new_feedback(id, cust_data.get("display_name"), form.category.data, form.rating.data, form.comment.data)
         flash("Your feedback has been submitted!", "success")
-        return redirect(url_for('customer.customer_home'))
+        return redirect(url_for('customer.customer_home', id=id))
 
     # Handle GET request
     return render_template("customer/customer_feedback.html", id=id, form=form)
@@ -956,6 +956,7 @@ def order_confirmation(id):
     create_new_order_history(id, cart_id)
     session.pop("cart_id")
 
+    print(id)
     # Send receipt to customer's email
     cust_data = retrieve_cust_details(id)
     recipient = cust_data.get("email")

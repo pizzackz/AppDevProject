@@ -6,7 +6,7 @@ class Feedback:
     # Constructor
     def __init__(self, cust_id, display_name, id_postfix, category, rating, message):
         self.__cust_id = cust_id
-        self.__feedback_id = hashlib.sha256(cust_id.ecode("utf-8")).hexdigest()[:3] + "2" + id_postfix
+        self.__feedback_id = str(hashlib.sha256(cust_id.encode("utf-8")).hexdigest()[:3]) + "2" + str(id_postfix)
         self.__display_name = display_name
         self.__category = category
         self.__rating = rating

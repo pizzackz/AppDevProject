@@ -11,11 +11,18 @@ def create_new_feedback(cust_id, display_name, category, rating, message):
         feedback_dict = db["Feedback"]
     else:
         db["Feedback"] = feedback_dict
-    
+
+       # feedback[cust_id] = {feedback_id:feedback_object}
+    cust_feedback = feedback_dict.get(cust_id, {})
+
     # Generate postfix from length of dict, Create new object, Save to db
     id_postfix = len(feedback_dict) + randint(0, 999)
     feedback = Feedback(cust_id, display_name, id_postfix, category, rating, message)
-    feedback[cust_id] = feedback
+    print(cust_feedback)
+    print(feedback.get_feedback_id())
+    cust_feedback[str(feedback.get_feedback_id())] = feedback
+
+    feedback_dict[cust_id] = cust_feedback
 
     db["Feedback"] = feedback_dict
     db.close()
@@ -64,12 +71,11 @@ def delete_cust_feedback(cust_id, feedback_id):
         db["Feedback"] = feedback_dict
     
     cust_feedback_dict = feedback_dict.get(cust_id)
-    deleted_feedback_object = cust_feedback_dict.pop(feedback_id)
+    print(feedback_id, ' ', cust_id, ' f')
+    cust_feedback_dict.pop(feedback_id)
 
     db["Feedback"] = feedback_dict
     db.close()
-
-    return deleted_feedback_object
 
 
 # Testing
