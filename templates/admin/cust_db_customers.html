@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% extends "admin/cust_db_base.html" %}
-{% block title %}Customer Database - List of Customers{% endblock %}
+{% block title %}tastefully | Customer Database - List of Customers{% endblock %}
 
 {% block css %}
 {{ super() }}
@@ -71,7 +71,7 @@
                                 <img src="{{ url_for('static', filename='images/default_profile_pic.png') }}" />
                                 {% else %}
                                 <img
-                                    src="{{ url_for('static', filename='uploads/customer/profile_pictures/' + customer.get_user_id()) }}" />
+                                    src="{{ url_for('static', filename='uploads/customer/profile_pictures/' + customer.get_profile_pic_name()) }}" />
                                 {% endif %}
 
                                 {{ customer.get_username() }}

@@ -1,29 +1,73 @@
-{% extends "base.html" %}
-{% block title %}Update Menu Item{% endblock %}
+<!DOCTYPE html>
+{% extends "admin/admin_menu.html" %}
+{% block title %}tastefully | Update Menu Item{% endblock %}
 
-    {% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}
+{% block css %}
+{{ super() }}
+<style>
+    #food-pic img {
+        width: 25rem;
+        height: 25rem;
+        aspect-ratio: 1/1;
+    }
+
+    textarea {
+        resize: none;
+        height: 5.5rem;
+        margin-top: 0.6rem;
+    }
+
+    #right-content .form-group,
+    #buttons,
+    #change-image {
+        margin-top: 1.2rem;
+    }
+
+    #right-content .form-group input {
+        margin-top: 0.6rem;
+    }
+
+    #change-image label {
+        display: none;
+    }
+
+    #food-pic {
+        text-align: center;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-
 {% from "includes/_formHelper.html" import render_field %}
 
-<h1 class="display-4">Update User</h1>
-<form method="POST" action="" enctype="multipart/form-data">
-<div class="form-group">
-{{ render_field(form.image, class="form-control") }}
-</div>
-<div class="form-group">
-{{ render_field(form.name, class="form-control") }}
-</div>
-<div class="form-group">
-{{ render_field(form.description, class="form-control") }}
-</div>
-<div class="form-group">
-{{ render_field(form.price, class="form-check", style="list-style-type:none") }}
-</div>
-<div id="prof">
-</div>
-<input type="submit" value="Submit" class="btn btn-primary"/>
-</form>
+<div class="container-fluid">
+    <div id="title">
+        <h1>Update Menu Item</h1>
+    </div>
+    <form method="POST" action="" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-md-4">
+                <div id="food-pic">
+                    <img class="img-fluid" src="{{ url_for('static', filename='menu_image/' + menu_item.get_product_img()) }}"
+                        alt="Menu Image">
+                    <div class="form-group" id="change-image">{{ render_field(form.image, class="form-control") }}</div>
+                </div>
+            </div>
 
+            <div class="col-md-8">
+
+                <div id="right-content">
+                    <div class="form-group">{{ render_field(form.name, class="form-control") }}</div>
+                    <div class="form-group">{{ render_field(form.description, class="form-control") }}</div>
+                    <div class="form-group">{{ render_field(form.quantity, class="form-control") }}</div>
+                    <div class="form-group">{{ render_field(form.price, class="form-check") }}</div>
+                    <div id="buttons">
+                        <input type="submit" value="Submit" class="btn btn-primary" />
+                        <input type="submit" value="Revert" class="btn btn-primary" name="revert" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
 {% endblock %}

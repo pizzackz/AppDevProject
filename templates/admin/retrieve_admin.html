@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% extends "base.html" %}
-{% block title %}List of Admins{% endblock %}
+{% block title %}tastefully | Admin Database - List of Admins{% endblock %}
 
 {% block navbar %}
 {% include "includes/_admin_navbar2.html" %}
@@ -52,7 +52,7 @@
                             {% if admin.get_profile_pic_name() == "default"%}
                             <img src="{{ url_for('static', filename='images/default_profile_pic.png') }}" />
                             {% else %}
-                            <img src="{{ url_for('static', filename='uploads/admin/profile_pictures/' + admin.get_user_id()) }}" />
+                            <img src="{{ url_for('static', filename='uploads/admin/profile_pictures/' + admin.get_profile_pic_name()) }}" />
                             {% endif %}
                             
                             {{ admin.get_username() }}

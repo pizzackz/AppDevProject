@@ -13,11 +13,6 @@ def home():
     return render_template("guest/home.html")
 
 
-# Articles page (Guest)
-@guest_bp.route("/articles")
-def articles():
-    return render_template("guest/articles.html")
-
 @guest_bp.route('/recipe_database', methods=['GET', 'POST'])
 def recipe_database():
     db = shelve.open('recipes.db', 'c')
@@ -55,6 +50,7 @@ def recipe_database():
     db.close()
     return render_template('guest/recipe_database.html', recipes=recipes)
 
+
 @guest_bp.route('/view_recipe/<recipe_id>', methods=['GET', 'POST'])
 def view_recipe(recipe_id):
     print(recipe_id)
@@ -65,31 +61,36 @@ def view_recipe(recipe_id):
     db.close()
     return render_template('guest/view_recipe.html', recipe=recipe)
 
+
 @guest_bp.route('/menu')
 def menu():
-    db = shelve.open('menu.db', 'c')
+    print("ran")
+    db = shelve.open('product.db', 'c')
     try:
-        menu_dict = db['Menu']
+        menu_dict = db['Product']
     except:
         print("Error in retrieving Menu from user.db.")
         menu_dict = {}
+    db.close()
 
     menus = []
     for menu_item in menu_dict.values():
         menus.append(menu_item)
         print("new image = "+str(menu_item.get_image()))
 
-    return render_template('guest/guest_menu.html', menus=menus)
+    return render_template('guest/retrieveProduct.html', product_list=menus, count=len(menus))
+
 
 @guest_bp.route('/view_menu/<menu_id>')
 def view_menu(menu_id):
-    db = shelve.open('menu.db', 'c')
-    menu_dict = db['Menu']
+    db = shelve.open('product.db', 'c')
+    menu_dict = db['Product']
     menu_item = menu_dict.get(menu_id)
 
     db.close()
 
     return render_template('guest/viewMenu.html', menu_item=menu_item)
+
 
 @guest_bp.route('/article')
 def article():
@@ -99,14 +100,14 @@ def article():
     except:
         print("Error in retrieving Article from article.db.")
         article_dict = {}
-    print(article_dict)
     articles = []
     for article in article_dict.values():
         articles.append(article)
-    print(articles)
     db.close()
 
     return render_template('guest/guest_articles.html', form=createArticle, articles=articles)
+
+
 @guest_bp.route('/view_article/<article_id>')
 def view_article(article_id):
     db = shelve.open('article.db', 'c')
@@ -117,3 +118,4 @@ def view_article(article_id):
     db.close()
 
     return render_template('guest/view_article.html', article_item=article_item)
+

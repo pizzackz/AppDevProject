@@ -1,0 +1,62 @@
+body{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+
+h1 {
+    font-weight: 600;
+    text-align: center;
+    display: flex;
+  }
+
+form{
+    display: flex;
+}
+
+.container {
+    width: 120vh;
+    background-color: #F5E4C9;
+    border-radius: 15px;
+    padding: 30px 25px 22px 25px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    margin-left: auto;
+    margin-right: auto;
+    min-height: 50vh;
+    display: flex;
+    flex: 1;
+  }
+
+
+.check{
+    max-width: auto;
+    height: 55px;
+    padding-right:5px ;
+    padding-bottom: 8px;
+}
+
+
+.table-left {
+    display: flex;
+    flex: 1; /* Adjust flex property */
+    padding-left: 13vh;
+}
+
+.table-right {
+    display: flex;
+    flex: 1; /* Adjust flex property */
+    padding-right: -60vh;
+}
+
+.btn1{
+    width: 7vh;
+}
+
+.right1{
+    float: right;
+}
+
+.modal-style{
+    width: 1000px
+}

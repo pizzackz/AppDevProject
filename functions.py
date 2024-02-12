@@ -2,13 +2,17 @@ import string
 import random
 import shelve
 import os
+from datetime import datetime
 from flask import current_app
 from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
 from flask_mail import Message
 
 from Customer import Customer
 from Admin import Admin
+from Product import Product
+from Cart import Cart
+from OrderHistory import OrderHistory
 
 
 # Functions

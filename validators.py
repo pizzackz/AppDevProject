@@ -1,6 +1,7 @@
 import shelve
 from werkzeug.security import generate_password_hash
 from wtforms import ValidationError
+import re
 
 
 # Custom validator functions for Forms.py
@@ -94,3 +95,43 @@ def otp_validator(form, field):
         otp = int(otp)
     except ValueError:
         raise ValidationError("Please enter only numbers")
+
+
+def six_digit_postal_code_validator(form, field):
+    if len(field.data) != 6:
+        raise ValidationError("Please enter a valid 6-digit postal code.")
+    if field.data == "000000":
+        raise ValidationError("Please enter a valid 6-digit postal code.")
+    try:
+        field.data = int(field.data)
+    except ValueError:
+        raise ValidationError("Please enter a valid 6-digit postal code.")
+
+
+def phone_number_validator(form, field):
+    pattern = r"^(8|9)\d{3} \d{4}$"
+    field_data_str = str(field.data)  # Ensure data is a string
+    if not re.match(pattern, field_data_str):
+        raise ValidationError("Please enter a valid phone number in the format 8/9XXX XXXX.")
+
+
+def card_number_validator(form, field):
+    pattern = r"^\d{4}-\d{4}-\d{4}-\d{4}$"
+    field_data_str = str(field.data)  # Ensure data is a string
+    if not re.match(pattern, field_data_str):
+        raise ValidationError("Please enter a valid card number in the format XXXX-XXXX-XXXX-XXXX.")
+
+
+def card_expiry_validator(form, field):
+    pattern = r"^\d{2}/\d{2}$"
+    field_data_str = str(field.data)  # Ensure data is a string
+    if not re.match(pattern, field_data_str):
+        raise ValidationError("Please enter a valid expiry date in the format MM/YY.")
+
+    # Extract month and year components from the expiry date
+    expiry_month, expiry_year = map(int, field_data_str.split('/'))
+
+    # Check if the expiry date is before 02/24
+    print(expiry_year, expiry_month)
+    if expiry_year < 24 or expiry_year > 31 or expiry_month == 0 or expiry_month > 13:
+        raise ValidationError("Please enter a valid expiry date after 02/24 and before 12/30.")

@@ -1,25 +1,31 @@
+<!DOCTYPE html>
 {% extends "base.html" %}
-{% block title %}Menu Database{% endblock %}
+{% block title %}tastefully | Menu Database{% endblock %}
 
-{% block content %}
-    <div id="menu_item">
-        {% for menu_item in menus %}
-        <div class="m-2">
-            <div class="card" style="width: 18rem;">
-                <img src="{{ url_for('static', filename='menu_image/' + menu_item.get_image()) }}" class="card-img-top" alt="...">
-              <div class="card-body">
-                <h5 class="card-title">{{ menu_item.get_name() }}</h5>
-                <a href="{{ url_for('view_menu', menu_id=menu_item.get_id() ) }}" class="view btn btn-success m-1">View</a>
-                  <a href="{{ url_for('update_menu', menu_id=menu_item.get_id() ) }}" class="update btn btn-primary m-1">Update</a>
-                  <a onclick="confirmdelete('{{ menu.get_name() }}', '{{ menu.get_id() }}')" class="btn btn-danger m-2" data-bs-toggle="modal" data-bs-target="#exampleModal">Delete</a>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
+{% block navbar %}
+{% include "includes/_admin_navbar.html" %}
 {% endblock %}
 
-{% block scripts %}
-    {{ super() }}
-    <script src="{{ url_for('static', filename='css/menu_delete.js') }}"></script>
+{% block content %}
+<div id="menu_item">
+    {% for product in product_list %}
+    <div class="m-2">
+        <div class="card" style="width: 18rem;">
+            <img src="{{ url_for('static', filename='menu_image/' + product.get_product_img()) }}" class="card-img-top"
+                alt="...">
+            <div class="card-body">
+                <div id="product-name">
+                    <h5>{{ product.get_name() }}</h5>
+                </div>
+                <a href="{{ url_for('admin.view_menu', id=id, product_id=product.get_product_id()) }}"
+                    class="view btn btn-success m-1">View</a>
+                <a href="{{ url_for('admin.update_menu', id=id, product_id=product.get_product_id() ) }}"
+                    class="update btn btn-primary m-1">Update</a>
+                <a href="{{ url_for('admin.delete_menu', id=id, product_id=product.get_product_id() ) }}"
+                    class="delete btn btn-danger m-1">Delete</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 {% endblock %}

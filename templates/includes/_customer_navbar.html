@@ -25,13 +25,13 @@
 
                     <ul class="dropdown-menu">
                         <li>
-                            <a class="dropdown-item" href="{{ url_for('customer.order', id=id) }}">Order</a>
+                            <a class="dropdown-item" href="{{ url_for('customer.retrieve_cart', id=id) }}">Order</a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('customer.retrieve_product', id=id) }}">Menu</a>
                         </li>
                         <li>
                             <a class="dropdown-item" href="{{ url_for('customer.order_history', id=id) }}">Order History</a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('customer.current_delivery', id=id) }}">Current Delivery</a>
                         </li>
                     </ul>
                 </li>

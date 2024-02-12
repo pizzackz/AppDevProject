@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}tastefully | Payment {% endblock %}
+
+{% block css %}
+{{ super() }}
+<link href="{{ url_for('static', filename='css/delivery-info.css') }}" rel="stylesheet">
+<link rel="stylesheet" type="text/css"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+<style>
+    #back-link a {
+        text-decoration: none;
+    }
+
+    #back-link a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+{% from "includes/_form_helper.html" import render_field %}
+
+
+<br><br>
+<div class="container container-fluid row">
+    <div id="back-link">
+        <a href="{{ url_for('customer.retrieve_cart', id=id) }}"><i class="bi bi-arrow-left-circle"></i> Back to
+            Cart</a>
+    </div>
+    <form method="POST" action="{{ url_for('customer.payment_pg', id=id) }}">
+        <div class="table-left col">
+            <div class="table-body">
+                <h2>Delivery Information</h2>
+                <div class="form-group text">
+                    {{ render_field(form.fname, class="form-control") }}
+                </div>
+                <div class="form-group text">
+                    {{ render_field(form.address, class="form-control") }}
+                </div>
+                <div class="form-group text">
+                    {{ render_field(form.postal, class="form-control") }}
+                </div>
+                <div class="form-group text">
+                    {{ render_field(form.phone, class="form-control") }}
+                </div>
+            </div>
+        </div>
+        <br>
+
+        <div class="table-right col">
+            <div class="table-body">
+                <h2>Payment Information</h2>
+                <div class="form-group text">
+                    {{ render_field(form.card_type, class="form-control") }}
+                </div>
+                <div class="form-group text">
+                    {{ render_field(form.card_name, class="form-control") }}
+                </div>
+                <div class="form-group text">
+                    {{ render_field(form.card_num, class="form-control") }}
+                </div>
+                <div class="form-group text">
+                    {{ render_field(form.card_exp, class="form-control") }}
+                </div>
+                <div class="form-group text">
+                    {{ render_field(form.card_cvc, class="form-control") }}
+                </div>
+                <br>
+                <div class="right1">
+                   <input type="submit" value="Pay" class="btn btn-primary btn1" />
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<br>
+<br>
+
+{% endblock %}

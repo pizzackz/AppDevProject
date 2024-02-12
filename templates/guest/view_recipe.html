@@ -1,17 +1,17 @@
 {% extends 'base.html' %}
-{% block title %}{{ recipe.get_name() }}{% endblock %}
+{% block title %}tastefully | {{ recipe.get_name() }}{% endblock %}
 
-  <!-- To replace nav bar with jinja later on-->
+<!-- To replace nav bar with jinja later on-->
 {% block css %}
-    {{ super() }}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/view_recipe.css') }}">
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/view_recipe.css') }}">
 {% endblock %}
 
 {% block scripts %}
-  {{ super() }}
+{{ super() }}
 {% endblock %}
 
-    {% block navbar %} {% include "includes/_customer_navbar.html" %} {% endblock %}
+{% block navbar %} {% include "includes/_navbar.html" %} {% endblock %}
 
 {% block content %}
 
@@ -20,7 +20,8 @@
   <div class="card border-light mb-3" style="margin:auto;margin-top:4rem;max-width: 1000px;">
     <div class="row g-0">
       <div class="col-6">
-        <img style="width:97%" src="{{ url_for('static', filename='images_recipe/' + recipe.get_picture()) }}" class="img-fluid rounded-start" alt="...">
+        <img style="width:97%" src="{{ url_for('static', filename='images_recipe/' + recipe.get_picture()) }}"
+          class="img-fluid rounded-start" alt="...">
       </div>
       <div class="col-6">
         <div class="card-body">
@@ -34,18 +35,16 @@
         </div>
       </div>
     </div>
-      <div class="recipe-details" style="background-color:white;margin-top:1rem;text-align:left;">
-        <h3 style="text-align:center;font-size:2rem;">Instructions</h3>
-        <p style="margin-top:2rem;text-align:left;">{{ recipe.get_instructions()|safe }}</p>
-        </div>
+    <div class="recipe-details" style="background-color:white;margin-top:1rem;text-align:left;">
+      <h3 style="text-align:center;font-size:2rem;">Instructions</h3>
+      <p style="margin-top:2rem;text-align:left;">{{ recipe.get_instructions()|safe }}</p>
+    </div>
   </div>
 
-<div style="text-align:center;">
-    <a href="{{ url_for('customer.recipe_database', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
-    <a href="{{ url_for('customer.add_favourite', recipe_id=recipe.get_id(), id=id ) }}" class="btn btn-warning mt-3 mb-4">Add to Favourites</a>
-    <a href="{{ url_for('customer.share_recipe', recipe_id=recipe.get_id(), id=id ) }}" class="btn btn-info mt-3 mb-4">Send Recipe to Email</a>
+  <div style="text-align:center;">
+    <a href="{{ url_for('guest.home') }}" class="btn btn-secondary mt-3 mb-4">Back to Home</a>
     <button class="btn btn-primary mt-3 mb-4" onclick="window.print()">Export to PDF</button>
-</div>
+  </div>
 </div>
 
 {% endblock %}

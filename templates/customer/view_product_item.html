@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+{% extends "customer/retrieveProduct.html" %}
+{% block title %}tastefully | View Product{% endblock %}
+
+{% block content %}
+<div class="container-fluid" id="container">
+    <div class="row">
+        <div id="left" class="col-md-4">
+            <div id="food-pic">
+                <img class="img-fluid" src="{{ url_for('static', filename='menu_image/' + menu_item.get_image()) }}" alt="Menu Image">
+            </div>
+        </div>
+        <div id="right" class="col-md-8">
+            <h1 class="mt-4 mb-4">{{ product_item.get_name() }}</h1>
+            <div id="description">
+                <p>{{ product_item.get_desc() }}</p>
+            </div>
+            <div id="price">
+                <h4>Price: ${{ menu_item.get_price() }}</h4>
+            </div>
+            <div id="back-button">
+                <a href="{{ url_for('customer.retrieve_product', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to Menu</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

@@ -52,7 +52,6 @@ function display_popup(message, status) {
        popup.style.backgroundColor = "rgb(255, 255, 0)";
 
     }
-
     else if (status == 'success') {
       popup.innerHTML = `
       <span class="bi bi-check-lg" id="exclamation"></span>

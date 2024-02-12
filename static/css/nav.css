@@ -1,0 +1,75 @@
+/* Navigation Bar */
+*{
+    padding: 0px;
+    margin: 0px;
+    text-decoration: none;
+    list-style: none;
+    box-sizing: border-box;
+}
+
+nav{
+    background: rgb(45,56,68);
+    height: 80px;
+    width: 100%;
+}
+nav ul{
+    float: right;
+    margin-right: 20px;
+}
+
+nav ul li{
+    display: inline-block;
+    line-height: 80px;
+    margin: 0 5px;
+}
+/* Logo */
+.logo{
+    color: white;
+    font-size: 35px;
+    line-height:80px;
+    font-family: mont;
+    font-weight: bold;
+    transition: color 0.4s linear;
+}
+
+.logo1{
+  color: white;
+  font-size: 35px;
+  line-height:80px;
+  font-family: mont;
+  padding-left: 50px;
+  font-weight: bold;
+  transition: color 0.4s linear;
+}
+.logo:hover{
+    color: rgb(62, 110, 160);
+    text-decoration: underline;
+    text-decoration-thickness: 2px ;
+}
+
+.navbut{
+    color: white;
+    font-size: 17px;
+    padding-right:15px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    font-family: mont;
+    font-weight: bold;
+    transition: color 0.4s linear;
+
+}
+.navbut:hover{
+    color: black;
+    text-decoration: underline;
+    text-decoration-thickness: 2px ;
+}   
+
+
+.company{
+    max-width: auto;
+    height: 55px;
+    padding-right:5px ;
+    padding-bottom: 8px;
+}
+
+

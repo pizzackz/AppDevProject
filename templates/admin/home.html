@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Home{% endblock %}
+{% block title %}tastefully | Home{% endblock %}
 
 {% block css %}
-  {{ super() }}
-  <link rel="stylesheet" href="../../static/css/home.css">
+{{ super() }}
+<link rel="stylesheet" href="../../static/css/home.css">
 {% endblock %}
 
 
-    {% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}
+{% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}
 
 {% block content %}
 
@@ -16,7 +16,8 @@
   <img style="height:12rem;" src="../../static/media/logo.png">
 </div>
 <hr>
-<h2 style="text-align:center;font-size:2rem;">Welcome {{ session.get("admin").get("display_name") }}, what would you like to do?</h2>
+<h2 style="text-align:center;font-size:2rem;">Welcome {{ session.get("admin").get("display_name") }}, what would you
+  like to do?</h2>
 <div style="margin:3rem;margin-left:10vw;margin-right:10vw;text-align:center;">
 
 
@@ -28,7 +29,7 @@
       </div>
     </div>
   </a>
-  <a href="{{ url_for('admin.menu_database', id=id) }}">
+  <a href="{{ url_for('admin.menu', id=id) }}">
     <div class="card" style="width: 14rem;height:14rem;padding:1rem;">
       <img style="width:8rem;margin:auto;" src="../../static/home_logo/menu.png" class="card-img-top" alt="...">
       <div class="card-body">

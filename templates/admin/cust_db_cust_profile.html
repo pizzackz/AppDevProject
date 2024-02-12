@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 {% extends "admin/cust_db_base.html" %}
-{% block title %}Customer Database - Customer Details{% endblock %}
+{% block title %}tastefully | Customer Database - Customer Details{% endblock %}
 
 {% block css %}
 {{ super() }}
@@ -36,13 +36,13 @@
         margin-right: 0.5rem;
     }
 
-    #order-history-button {
+    #order-history-button, #show-feedback-button {
         margin-top: 1.8rem;
         display: flex;
         justify-content: center;
     }
 
-    #order-history-button button {
+    #order-history-button button, #show-feedback-button button {
         width: 12rem;
         padding: 0.6rem;
     }
@@ -75,6 +75,7 @@
                     src="{{ url_for('static', filename='uploads/customer/profile_pictures/' + cust_details.get('profile_pic')) }}" />
                 {% endif %}
             </div>
+
             <div id="buttons">
                 {% if cust_details.get("is_locked") %}
                 <button type="submit" name="button" value="unlock_button" class="btn btn-warning rounded-pill bypass-disable">UNLOCK</button>
@@ -83,9 +84,14 @@
                 {% endif %}
                 <button type="submit" name="button" value="delete_button" class="btn btn-danger rounded-pill bypass-disable">DELETE</button>
             </div>
+
             <div id="order-history-button">
                 <button type="submit" name="button" value="order_history_button" class="btn btn-primary bypass-disable">ORDER HISTORY</button>
             </div>
+            <div id="show-feedback-button">
+                <button type="submit" name="button" value="show_feedback_button" class="btn btn-primary bypass-disable">SHOW FEEDBACK</button>                
+            </div>
+
             {% if cust_details.get("is_locked") and cust_details.get("has_request") %}
             <div id="requests">
                 {% if cust_details.get("has_request") %}

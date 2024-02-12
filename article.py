@@ -1,12 +1,16 @@
+from datetime import date
+
 class article_item():
     count_id = 0
-    def __init__(self, image, title, category, description):
+    def __init__(self, image, title, category, description, creator):
         article_item.count_id+=1
         self.__id=str(article_item.count_id)
         self.__title=title
         self.__category=category
         self.__image=image
         self.__description=description
+        self.__posted_date = date.today()
+        self.__creator = creator
 
     def get_title(self):
         return self.__title
@@ -34,7 +38,17 @@ class article_item():
 
     def get_id(self):
         return self.__id
+    
+    def get_posted_date(self, format=None):
+        if format:
+            return self.__posted_date.strftime(format)
+        return self.__posted_date
 
+    def set_posted_date(self, date):
+        self.__posted_date = date
+
+    def get_creator(self):
+        return self.__creator
 
 
 class comment():

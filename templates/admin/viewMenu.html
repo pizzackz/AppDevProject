@@ -1,42 +1,50 @@
-{% extends 'base.html' %}
-{% block title %}Recipe Database{% endblock %}
+{% extends 'admin/admin_menu.html' %}
+{% block title %}tastefully | View Menu Item{% endblock %}
 
-  <!-- To replace nav bar with jinja later on-->
 {% block css %}
-  {{ super() }}
-    <link rel="stylesheet" href="../../static/CSS/view_menu.css">
+{{ super() }}
+<style>
+    #food-pic img {
+        width: 25rem;
+        height: 25rem;
+    }
+
+    #container {
+        margin-top: 1.8rem;
+    }
+</style>
 {% endblock %}
 
 {% block scripts %}
-  {{ super() }}
+{{ super() }}
 {% endblock %}
 
-    {% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}
-
 {% block content %}
-
-<div class="container">
-    <h1 class="mt-4 mb-4" style="text-align:center;font-size:3rem;">{{ menu_item.get_name() }}</h1>
-    <div style="text-align:center;margin-top:4rem;">
-            <img class="img-fluid" src="{{ url_for('static', filename='menu_image/' + menu_item.get_image()) }}" alt="Menu Image" style="max-width: 100%;">
+<div class="container-fluid" id="container">
+    <div class="row">
+        <div id="left" class="col-md-4">
+            <div id="food-pic">
+                <img class="img-fluid" src="{{ url_for('static', filename='menu_image/' + menu_item.get_product_img()) }}"
+                    alt="Menu Image">
+            </div>
+        </div>
+        <div id="right" class="col-md-8">
+            <h1 class="mt-4 mb-4">{{ menu_item.get_name() }}</h1>
+            <div id="description">
+                <p>{{ menu_item.get_description() }}</p>
+            </div>
+            <div id="Quantity">
+                <p>Quantity {{ menu_item.get_description() }}</p>
+            </div>
+            <div id="price">
+                <h4>Price: ${{ menu_item.get_price() }}</h4>
+            </div>
+            <div id="back-button">
+                <a href="{{ url_for('admin.menu', id=id) }}" class="btn btn-secondary mt-3 mb-4">Back to Menu</a>
+            </div>
+        </div>
     </div>
-    <hr>
-
-    <div class="menu-details">
-        <h3 style="text-align:center;font-size:2rem;">Description</h3>
-        <p style="margin-top:2rem;">{{ menu_item.get_description() }}</p>
-    </div>
-
-    <hr>
-    <div class="menu-details">
-        <h3 style="text-align:center;font-size:2rem;">Price</h3>
-        <p style="margin-top:2rem;">{{ menu_item.get_price() }}</p>
-    </div>
-
-
-<div style="text-align:center;">
-    <a href="{{ url_for('menu') }}" class="btn btn-secondary mt-3 mb-4">Back to Menu</a>
 </div>
-</div>
+
 
 {% endblock %}

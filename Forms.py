@@ -1,6 +1,6 @@
-from wtforms import Form, StringField, PasswordField, FileField, TextAreaField
-from wtforms.validators import Email, DataRequired, Length
-from validators import unique_data, password_complexity, data_exist, otp_validator
+from wtforms import Form, StringField, PasswordField, FileField, TextAreaField, IntegerField, SelectField, DecimalField
+from wtforms.validators import Email, DataRequired, Length, NumberRange
+from validators import unique_data, password_complexity, data_exist, otp_validator, six_digit_postal_code_validator, phone_number_validator, card_number_validator, card_expiry_validator
 
 
 # Signup Form (Base stage)
@@ -110,7 +110,51 @@ class createArticle(Form):
     image = FileField('Upload Image')
     description = TextAreaField('Description', [DataRequired()])
 
+
 class comment_sec(Form):
     title = StringField('Username', [Length(min=1, max=150), DataRequired()])
     image = FileField('Profile picture')
     description = TextAreaField('Description', [DataRequired()])
+
+
+class CreateCartForm(Form):
+    name = StringField('Name', [Length(min=1, max=150), DataRequired()], render_kw={'readonly': True})
+    product_id_field = StringField('Product_id', [Length(min=1, max=150), DataRequired()], render_kw={'readonly': True})
+    qty = IntegerField('Quantity', [DataRequired(), NumberRange(1)])
+    price = StringField('Price', [Length(min=1, max=150), DataRequired()], render_kw={'readonly': True})
+
+
+class CreateDeliveryInfoForm(Form):
+    fname = StringField('Name', [Length(min=1, max=150), DataRequired()], render_kw={"placeholder": "John Doe"})
+    address = StringField('Address', [Length(min=1, max=150), DataRequired()], render_kw={"placeholder": "123 ABC Street"})
+    postal = StringField('Postal Code', [six_digit_postal_code_validator, DataRequired()], render_kw={"placeholder": "123456"})
+    phone = StringField('Phone', [phone_number_validator, DataRequired()], render_kw={"placeholder": "9123 4567"})
+    card_type = StringField('Card Type', [Length(min=1, max=150), DataRequired()], render_kw={"placeholder": "Master Card"})
+    card_name = StringField('Name on Card', [Length(min=1, max=150), DataRequired()], render_kw={"placeholder": "John Doe"})
+    card_num = StringField('Card Number', [DataRequired(), card_number_validator], render_kw={"placeholder": "1234-5678-9012-3456"})
+    card_exp = StringField('Expiration Date', [DataRequired(), card_expiry_validator], render_kw={"placeholder": "MM/YY"})
+    card_cvc = IntegerField('CVC', [NumberRange(100, 999), DataRequired()], render_kw={"placeholder": "123"})
+
+
+class CustomerFeedbackForm(Form):
+    name = StringField('Your Name', render_kw={"disabled": True})
+    category = SelectField('Category', choices=[("product", "Product"), ("website", "Website"), ("delivery", "Delivery"), ("others", "Others")])
+    rating = DecimalField('Overall Satisfaction', [NumberRange(min=1, max=5)])
+    comment = TextAreaField('Feedback', [DataRequired()])
+
+
+class createMenu(Form):
+    name = StringField('Name Of Dish', [Length(min=1, max=150), DataRequired()])
+    description = TextAreaField('Description', [DataRequired()])
+    quantity = IntegerField('Quantity', [DataRequired()])
+    price = DecimalField('Price', [DataRequired()])
+    image = FileField('Upload Image')
+
+
+class updateMenu(Form):
+    name = StringField('Name Of Dish')
+    description = TextAreaField('Description')
+    quantity = IntegerField('Quantity')
+    price = DecimalField('Price')
+    image = FileField('Change Image')
+

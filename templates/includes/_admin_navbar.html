@@ -36,10 +36,10 @@
                     <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Menus</a>
 
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ url_for('admin.menu_database', id=id) }}">Menu
+                        <li><a class="dropdown-item" href="{{ url_for('admin.menu', id=id) }}">Menu
                                 Database</a></li>
                         <!-- Replace href value with actual url path for create_menu -->
-                        <li><a class="dropdown-item" href="#">Create Menu</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin.create_menu', id=id) }}">Create Menu</a></li>
                     </ul>
                 </li>
                 <!-- Dropdown for Articles Database -->

@@ -1,42 +1,27 @@
 <!DOCTYPE html>
 {% extends "base.html" %}
 
-{% block title %}Customer Home{% endblock %}
+{% block title %}tastefully | Home{% endblock %}
 
 {% block navbar %}
 {% include "includes/_customer_navbar.html" %}
 {% endblock %}
 
 {% block css %}
-  {{ super() }}
-  <link rel="stylesheet" href="../../static/css/home.css">
+{{ super() }}
+<link rel="stylesheet" href="../../static/css/home.css">
 {% endblock %}
 
 {% block content %}
-
-<h1>Welcome {{ session.get("customer").get("display_name") }}!</h1>
-
-
-<!-- Buttons to navigate to other places -->
-<div class="buttons">
-    <a href="{{ url_for('customer.order', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Place Order</button></a>
-    <a href="{{ url_for('customer.recipe_creator', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Recipe Creator</button></a>
-    <a href="{{ url_for('customer.favourites', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Favourites</button></a>
-    <a href="{{ url_for('customer.customer_articles', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Articles</button></a>
-    <a href="{{ url_for('customer.current_delivery', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Current Delivery</button></a>
-    <a href="{{ url_for('customer.feedback', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Feedback</button></a>
-    <a href="{{ url_for('customer.order_history', id=id) }}"><button class="btn btn-lg btn-primary btn-block rounded-lg">Order History</button></a>
-</div>
-
-
 <div style="text-align:center;margin:3.5rem;">
   <img style="height:12rem;" src="../../static/media/logo.png">
 </div>
 <hr>
-<h2 style="text-align:center;font-size:2rem;">Welcome {{ session.get("customer").get("display_name") }}, what would you like to do?</h2>
+<h2 style="text-align:center;font-size:2rem;">Welcome {{ session.get("customer").get("display_name") }}, what would you
+  like to do?</h2>
 <div style="margin:3rem;margin-left:10vw;margin-right:10vw;text-align:center;">
 
-  <a href="#">
+  <a href="{{ url_for('customer.retrieve_cart', id=id) }}">
     <div class="card" style="width: 14rem;height:14rem;padding:1rem;">
       <img style="width:8rem;margin:auto;" src="../../static/home_logo/menu.png" class="card-img-top" alt="...">
       <div class="card-body">

@@ -2,10 +2,12 @@ from flask import current_app, Blueprint, render_template, request, redirect, se
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
-from Forms import AccountDetailsForm, OTPForm2, ResetPasswordForm2, CreateAdminForm, UpdateAdminForm, SearchCustomerForm, FileForm, AccountDetailsForm2, LockCustomerAccountForm, CreateRecipeForm, createArticle
+from Forms import AccountDetailsForm, OTPForm2, ResetPasswordForm2, CreateAdminForm, UpdateAdminForm, SearchCustomerForm, FileForm, AccountDetailsForm2, LockCustomerAccountForm, CreateRecipeForm, createArticle, createMenu, updateMenu
 from functions import generate_otp, send_email, is_unique_data, is_allowed_file, delete_file
 from admin_acc_functions import create_admin, retrieve_admin_details, retrieve_all_admins, update_admin_details, delete_admin
 from cust_acc_functions import retrieve_all_customers, retrieve_cust_details, update_cust_details, delete_customer
+from product_functions import create_new_product, retrieve_all_products, retrieve_product_item, update_product_item, delete_product_item
+from feedback_functions import retrieve_cust_feedback_dict, delete_cust_feedback
 import shelve
 from functools import wraps
 
@@ -21,6 +23,7 @@ from menuForm import *
 
 admin_bp = Blueprint("admin", __name__)
 
+
 # Decorator function to check admin login status
 def admin_login_required(func):
     @wraps(func)
@@ -30,6 +33,7 @@ def admin_login_required(func):
             return redirect(url_for("login"))
         return func(*args, **kwargs)
     return decorated_function
+
 
 # Home page (Admin)
 @admin_bp.route("/<string:id>/admin")
@@ -72,8 +76,7 @@ def customer_database(id):
             flash(f"No customer account with username containing '{form.username.data}'", "error")
             return render_template("admin/cust_db_base.html", id=id, form=form)
 
-        return render_template("admin/cust_db_customers.html", id=id, form=form, count=len(wanted_cust_list),
-                               cust_list=wanted_cust_list)
+        return render_template("admin/cust_db_customers.html", id=id, form=form, count=len(wanted_cust_list), cust_list=wanted_cust_list)
 
     # Handle GET request
     return render_template("admin/cust_db_base.html", id=id, form=form)
@@ -111,9 +114,13 @@ def retrieve_customer(id):
     if request.form.get("button") == "lock_button":
         return redirect(url_for("admin.lock_customer_account", id=id, cust_id=cust_id))
 
-    # edirect to delete_customer_account when clicked on 'delete' button
+    # Redirect to delete_customer_account when clicked on 'delete' button
     if request.form.get("button") == "delete_button":
         return redirect(url_for("admin.delete_customer_account", id=id, cust_id=cust_id))
+    
+    # Redirect to view_customer_feedback when clicked on 'show feedback' button
+    if request.form.get("button") == "show_feedback_button":
+        return redirect(url_for("admin.view_customer_feedback", id=id, cust_id=cust_id))
 
     # Handle getting all retrieved customer data
     form = AccountDetailsForm2(request.form)
@@ -125,7 +132,8 @@ def retrieve_customer(id):
 
     return render_template("admin/cust_db_cust_profile.html", id=id, form=form, cust_details=cust_data)
 
-# Customer Database - Lock Account Popup (Admin)
+
+# Customer Database page - Lock Account Popup (Admin)
 @admin_bp.route("/<string:id>/admin/customer_database/lock_customer", methods=["GET", "POST"])
 @admin_login_required
 def lock_customer_account(id):
@@ -163,7 +171,26 @@ def lock_customer_account(id):
     return render_template("admin/cust_db_lock_account.html", id=id, cust_id=cust_id, form=form, cust_details=cust_data)
 
 
-# Customer Database - Delete Account Popup (Admin)
+# Customer Database page - View Feedback (Admin)
+@admin_bp.route("/<string:id>/admin/customer_database/feedback", methods=["GET", "POST"])
+@admin_login_required
+def view_customer_feedback(id):
+    cust_id = request.args.get("cust_id")
+
+    # Redirect to retrieve_customer when clicked on 'back to customer details
+    if request.form.get("button") == "back":
+        return redirect(url_for("admin.retrieve_customer", id=id, cust_id=cust_id))
+
+    cust_data = retrieve_cust_details(cust_id)
+    display_name = cust_data.get("display_name")
+    feedback_data = retrieve_cust_feedback_dict(cust_id)
+    count = 0 if not feedback_data else len(feedback_data)
+
+    # Handle GET request
+    return render_template("admin/cust_db_feedback.html", id=id, cust_id=cust_id, display_name=display_name, count=count, feedback_details=feedback_data)
+
+
+# Customer Database page - Delete Account Popup (Admin)
 @admin_bp.route("/<string:id>/admin/customer_database/delete_customer", methods=["GET", "POST"])
 @admin_login_required
 def delete_customer_account(id):
@@ -197,12 +224,18 @@ def delete_customer_account(id):
     return render_template("admin/cust_db_delete_account.html", id=id, cust_id=cust_id, cust_details=cust_data)
 
 
-# Menu Database page (Admin)
-@admin_bp.route("/<string:id>/admin/menu_database")
+# Customer Database page - Delete Feedback (Admin)
+@admin_bp.route("/<string:id>/admin/customer_database/delete_feedback", methods=["POST"])
 @admin_login_required
-def menu_database(id):
-    print(f"data = {session.get('admin')}")
-    return render_template("admin/menu_database.html", id=id)
+def delete_customer_feedback(id):
+    cust_id = request.args.get("cust_id")
+    feedback_id = request.args.get("feedback_id")
+
+    # Delete customer feedback, Display deleted feedback message
+    delete_cust_feedback(cust_id, feedback_id)
+    flash(f"Feedback has been deleted!", "success")
+
+    return redirect(url_for("admin.view_customer_feedback", id=id, cust_id=cust_id))
 
 
 # Customer Feedback page (Admin)
@@ -600,7 +633,8 @@ def edit_profile_picture(id):
         form=form,
     )
 
-# Additional admin pages
+
+# Admin Database Pages
 # Create Admin page
 @admin_bp.route("/05010999", methods=["GET", "POST"])
 @admin_bp.route("/05010999/create", methods=["GET", "POST"])
@@ -978,39 +1012,30 @@ def delete_recipe(recipe_id, id):
 
     return redirect(url_for('admin.recipe_database', id=id))
 
-# Menu (Jairus)
-@admin_bp.route('/<string:id>/admin/menu')
+
+# Menu Database page (Admin)
+@admin_bp.route("/<string:id>/admin/menu_database")
+@admin_login_required
 def menu(id):
-    db = shelve.open('menu.db', 'c')
-    try:
-        menu_dict = db['Menu']
-    except:
-        print("Error in retrieving Menu from user.db.")
-        menu_dict = {}
+    product_dict = retrieve_all_products()
+    product_list = []
 
-    menus = []
-    for menu_item in menu_dict.values():
-        menus.append(menu_item)
-        print("new image = "+str(menu_item.get_image()))
+    for product in product_dict.values():
+        product_list.append(product)
 
-    return render_template('admin/admin_menu.html', menus=menus, id=id)
+    return render_template('admin/admin_menu.html', id=id, product_list=product_list)
+
 
 @admin_bp.route('/<string:id>/admin/create_menu', methods=['GET', 'POST'])
 @admin_login_required
 def create_menu(id):
     create_menu = createMenu(request.form)
     if request.method == 'POST' and create_menu.validate():
-        menu_dict = {}
-        db = shelve.open('menu.db', 'c')
-        try:
-            menu_dict = db['Menu']
-        except:
-            print("Error in retrieving Menu from user.db.")
+        menu_dict = retrieve_all_products()
 
         name_to_check = create_menu.name.data
         if any(menu_item.get_name() == name_to_check for menu_item in menu_dict.values()):
             flash('Duplicate item', 'error')
-            db.close()
             return redirect(url_for('admin.menu', id=id))
 
         picture = request.files['image']
@@ -1018,55 +1043,44 @@ def create_menu(id):
         if not ("." in picture_filename and picture_filename.rsplit(".", 1)[1].lower() in ("jpg", "png", "jpeg")):
             flash("File type is not allowed. Please use jpeg, jpg or png files only!", "error")
             print("file is not allowed")
-            return render_template('admin/createMenu.html', form=create_menu, id=id)
+            return render_template('admin/createMenu.html', form=create_menu)
         file_path = os.path.join('static', 'menu_image', picture_filename)
         picture.save(file_path)
 
-        menu = Menu_item(create_menu.name.data, create_menu.description.data, create_menu.price.data, picture_filename)
-        menu_dict[menu.get_id()] = menu
-        print("save image = " + str(picture_filename))
-
-        db['Menu'] = menu_dict
-        db.close()
+        create_new_product(create_menu.name.data, create_menu.description.data, create_menu.price.data, create_menu.quantity.data, picture_filename)
 
         return redirect(url_for('admin.menu', id=id))
-    return render_template('admin/createMenu.html', form=create_menu, id=id)
+    return render_template('admin/createMenu.html', id=id, form=create_menu)
 
-@admin_bp.route('/<string:id>/admin/delete_menu/<menu_id>')
+
+@admin_bp.route('/<string:id>/admin/view_menu')
 @admin_login_required
-def delete_menu(menu_id, id):
-    db = shelve.open('menu.db', 'c')
-    menu_dict = db['Menu']
+def view_menu(id):
+    product_id = request.args.get("menu_id")
+    menu_item = retrieve_product_item(product_id)
 
-    menu = menu_dict.get(menu_id)
-    old_picture = menu.get_image()
-    if old_picture:
-        os.remove(os.path.join('static', 'menu_image', old_picture))
-
-    menu_dict.pop(menu_id)
-    db['Menu'] = menu_dict
-    db.close()
-
-    return redirect(url_for('admin.menu', id=id))
+    return render_template('admin/viewMenu.html', menu_id=product_id, menu_item=menu_item, id=id)
 
 
-@admin_bp.route('/<string:id>/admin/update_menu/<menu_id>', methods=['GET', 'POST'])
+@admin_bp.route('/<string:id>/admin/update_menu', methods=['GET', 'POST'])
 @admin_login_required
-def update_menu(menu_id, id):
+def update_menu(id):
     update_menu = createMenu(request.form)
+    menu_id = request.args.get("menu_id")
+
     if request.method == 'POST' and update_menu.validate():
-        db = shelve.open('menu.db', 'c')
-        menu_dict = db['Menu']
-        menu_item = menu_dict.get(menu_id)
-        menu_item.set_name(update_menu.name.data)
-        menu_item.set_description(update_menu.description.data)
-        menu_item.set_price(update_menu.price.data)
+        update_product_item(
+            menu_id,
+            name=update_menu.name.data,
+            description=update_menu.description.data,
+            qty=update_menu.quantity.data,
+            set_new_qty=True
+        )
+
         picture = request.files['image']
 
-
-        # Old image retrieval works, saving new image doesn't work
         if picture.filename != '':
-            old_picture_path = os.path.join('static', 'menu_image', menu_item.get_image())
+            old_picture_path = os.path.join('static', 'menu_image', menu_item.get_product_img())
             if os.path.exists(old_picture_path):
                 # Remove the old image file only if it exists
                 os.remove(old_picture_path)
@@ -1076,40 +1090,38 @@ def update_menu(menu_id, id):
             if not ("." in picture_filename and picture_filename.rsplit(".", 1)[1].lower() in ("jpg", "png", "jpeg")):
                 flash("File type is not allowed. Please use jpeg, jpg or png files only!", "error")
                 print("file is not allowed")
-                return render_template('admin/updateMenu.html', form=update_menu, id=id)
+                return render_template('admin/updateMenu.html', menu_id=menu_id, form=update_menu, id=id)
             picture_path = os.path.join('static', 'menu_image', picture_filename)
             picture.save(picture_path)
-            menu_item.set_image(picture_filename)  # Update the image attribute
+            
+            update_product_item(menu_id, image=picture_filename)
 
-            print(menu_item.get_image())
-
-        db['Menu'] = menu_dict
-        db.close()
         return redirect(url_for('admin.menu', id=id))
-    else:
-        db = shelve.open('menu.db', 'c')
-        menu_dict = db['Menu']
-        menu_item = menu_dict.get(menu_id)
-        db.close()
 
-        update_menu.name.data = menu_item.get_name()
-        update_menu.description.data = menu_item.get_description()
-        update_menu.price.data = menu_item.get_price()
-        update_menu.image.data = menu_item.get_image()
+    menu_item = retrieve_product_item(menu_id)
 
-        return render_template('admin/updateMenu.html', form=update_menu, id=id)
+    update_menu.name.data = menu_item.get_name()
+    update_menu.description.data = menu_item.get_desc()
+    update_menu.price.data = menu_item.get_price()
+    update_menu.quantity.data = menu_item.get_qty()
+    update_menu.image.data = menu_item.get_product_img()
+
+    return render_template('admin/updateMenu.html', menu_id=menu_id, form=update_menu, id=id)
 
 
-@admin_bp.route('/<string:id>/admin/view_menu/<menu_id>')
+@admin_bp.route('/<string:id>/admin/delete_menu/')
 @admin_login_required
-def view_menu(menu_id, id):
-    db = shelve.open('menu.db', 'c')
-    menu_dict = db['Menu']
-    menu_item = menu_dict.get(menu_id)
+def delete_menu(id):
+    menu_id = request.args.get("menu_id")
+    menu = retrieve_product_item(menu_id)
 
-    db.close()
+    old_picture = menu.get_product_img()
+    if old_picture:
+        os.remove(os.path.join('static', 'menu_image', old_picture))
 
-    return render_template('admin/viewMenu.html', menu_item=menu_item, id=id)
+    delete_product_item(menu_id)
+
+    return redirect(url_for('admin.menu', id=id))
 
 
 # Articles
@@ -1117,6 +1129,7 @@ def view_menu(menu_id, id):
 @admin_login_required
 def create_article(id):
     create_article = createArticle(request.form)
+    admin_data = retrieve_admin_details(id)
     if request.method == 'POST' and create_article.validate():
         article_dict = {}
         db = shelve.open('article.db', 'c')
@@ -1131,10 +1144,11 @@ def create_article(id):
             flash("File type is not allowed. Please use jpeg, jpg or png files only!", "error")
             print("file is not allowed")
             return render_template('admin/create_article.html', form=create_article, id=id)
+
         file_path = os.path.join('static', 'images_articles', picture_filename)
         picture.save(file_path)
 
-        article = article_item(picture_filename, create_article.title.data, create_article.category.data, create_article.description.data)
+        article = article_item(picture_filename, create_article.title.data, create_article.category.data, create_article.description.data, admin_data.get("display_name"))
         print(article.get_id())
         article_dict[article.get_id()] = article
         print("save image = " + str(picture_filename))
@@ -1144,6 +1158,7 @@ def create_article(id):
 
         return redirect(url_for('admin.article', id=id))
     return render_template('admin/create_article.html', form=create_article, id=id)
+
 
 @admin_bp.route('/<string:id>/admin/view_article/<article_id>')
 @admin_login_required
@@ -1156,6 +1171,7 @@ def view_article(article_id, id):
     db.close()
 
     return render_template('admin/view_article.html', article_item=article_item, id=id)
+
 
 @admin_bp.route('/<string:id>/admin/article')
 @admin_login_required
@@ -1174,6 +1190,7 @@ def article(id):
     db.close()
 
     return render_template('admin/admin_articles.html', form=createArticle, articles=articles, id=id)
+
 
 @admin_bp.route('/<string:id>/admin/update_article/<article_id>', methods=['GET', 'POST'])
 @admin_login_required
@@ -1198,7 +1215,6 @@ def update_article(article_id, id):
 
         article_item.set_image(picture_filename)
         article_dict[article_item.get_id()] = article_item
-        print("save image = " + str(picture_filename))
 
         if picture.filename != '':
             old_picture_path = os.path.join('static', 'images_articles', article_item.get_image())
@@ -1206,45 +1222,43 @@ def update_article(article_id, id):
                 os.remove(old_picture_path)
 
             # Save the new image file
-
             picture_path = os.path.join('static', 'images_articles', picture_filename)
             picture.save(picture_path)
             article_item.set_image(picture_filename)  # Update the image attribute
 
-            print(article_item.get_image())
-
         db['article_item'] = article_dict
         db.close()
         return redirect(url_for('admin.article', id=id))
-    else:
-        db = shelve.open('article.db', 'c')
-        article_dict = db['article_item']
-        article_item = article_dict.get(article_id)
-        db.close()
+    
+    db = shelve.open('article.db', 'c')
+    article_dict = db['article_item']
+    article_item = article_dict.get(article_id)
+    db.close()
 
-        update_article.title.data = article_item.get_title()
-        update_article.category.data = article_item.get_category()
-        update_article.description.data = article_item.get_description()
-        update_article.image.data = article_item.get_image()
+    update_article.title.data = article_item.get_title()
+    update_article.category.data = article_item.get_category()
+    update_article.description.data = article_item.get_description()
+    update_article.image.data = article_item.get_image()
 
-        return render_template('admin/update_article.html', form=update_article, id=id)
+    return render_template('admin/update_article.html', form=update_article, id=id)
+
 
 @admin_bp.route('/<string:id>/admin/delete_article/<article_id>')
 @admin_login_required
 def delete_article(article_id, id):
-    db=shelve.open('article.db', 'c')
-    article_dict=db['article_item']
-    article=article_dict.get(article_id)
-    print(article)
-    old_picture=article.get_image()
+    db = shelve.open('article.db', 'c')
+    article_dict = db['article_item']
+    article = article_dict.get(article_id)
+    old_picture = article.get_image()
     if old_picture:
         os.remove(os.path.join('static', 'images_articles', old_picture))
 
     article_dict.pop(article_id)
-    db['article_item']=article_dict
+    db['article_item'] = article_dict
     db.close()
 
     return redirect(url_for('admin.article', id=id))
+
 
 @admin_bp.route('/<string:id>/admin/customer_articles')
 @admin_login_required
@@ -1263,3 +1277,5 @@ def customer_articles(id):
     db.close()
 
     return render_template('customer/guest_articles.html', articles=articles, id=id)
+
+

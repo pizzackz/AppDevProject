@@ -2,13 +2,13 @@
 #popup {
     color:rgb(255, 255, 255);
     position:fixed;
-    padding:10px;
+    padding: 10px;
     min-width: 49vh;
     min-height: 5.4vh;
-    right:0px;
-    top:40px;
+    right: 0px;
+    top: 5rem;
     border-radius: 4px;
-    z-index:9 ;
+    z-index: 9;
 }
 .show1 {
     animation: show_slide 1s ease forwards
@@ -58,6 +58,8 @@
     padding:20px 18px;
     font-size:3vmin;
 }
+
 #close-btn:hover {
     color: rgb(221, 221, 221);
+    cursor: pointer;
 }

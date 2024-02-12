@@ -39,6 +39,7 @@ def create_article(id):
         return redirect(url_for('article', id=id))
     return render_template('admin/article/create_article.html', form=create_article, id=id)
 
+
 @admin_bp.route('/view_article/<article_id>')
 def view_article(article_id, id):
     db = shelve.open('article.db', 'c')

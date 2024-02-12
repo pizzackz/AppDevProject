@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Article Database{% endblock %}
+{% block title %}tastefully | Article Database{% endblock %}
 
-    {% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}
+{% block navbar %}{% include "includes/_admin_navbar.html" %}{% endblock %}
 
 {% block content %}
 
@@ -31,15 +31,13 @@ function confirmdelete(content, id) {
             {% for article_item in articles %}
             <div class="col mb-5">
                 <div class="card h-100">
-                    <!-- Product image-->
                     <figure class="mb-4"><img class="img-fluid rounded" src="{{ url_for('static', filename='images_articles/' + article_item.get_image()) }}" class="card-img-top" alt="..."></figure>
-                    <!-- Product details-->
                     <div class="card-body p-4">
                         <div class="text-center">
-                            <!-- Product name-->
                             <h5 class="card-title">{{ article_item.get_title() }}</h5>
-                            <!-- Product price-->
                             <a href="{{ url_for('admin.view_article', article_id=article_item.get_id(), id=id ) }}" class="view btn btn-success m-1">View</a>
+                            <a href="{{ url_for('admin.update_article', article_id=article_item.get_id(), id=id ) }}" class="view btn btn-primary m-1">Edit Article</a>
+                            <a href="{{ url_for('admin.delete_article', article_id=article_item.get_id(), id=id ) }}" class="view btn btn-danger m-1">Delete</a>
                         </div>
                     </div>
                 </div>

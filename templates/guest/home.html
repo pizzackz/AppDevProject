@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 {% extends "base.html" %}
 
-{% block title %}Home{% endblock %}
+{% block title %}tastefully{% endblock %}
 
 {% block navbar %}
 {% include "includes/_navbar.html" %}
@@ -21,7 +21,7 @@
 
 <!-- Add code to flash message when redirected to login page -->
 <div style="text-align:center;">
-    <a href="{{ url_for('guest.articles') }}" class="btn btn-primary">Articles</a>
+    <a href="{{ url_for('guest.article') }}" class="btn btn-primary">Articles</a>
     <a href="{{ url_for('guest.recipe_database') }}" class="btn btn-primary">Recipes</a>
 </div>
 

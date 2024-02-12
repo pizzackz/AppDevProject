@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}tastefully | Cart Modifications {% endblock %}
+
+{% block content %}
+{% from "includes/_form_helper.html" import render_field %}
+
+<h1 class="display-4 center1">Cart Modifications</h1>
+<br>
+<form method="POST" action="{{ url_for('customer.update_cart', id=id, product_id=product_id, previous_page='retrieve_cart') }}">
+    <table class="stantable">
+
+        <tr class="tabletext">
+            <td>
+                <div class="form-group">
+                    {{ render_field(form.product_id_field, class="form-control") }}
+                </div>
+            </td>
+        </tr>
+        <tr class="tabletext">
+            <td>
+                <div class="form-group">
+                    {{ render_field(form.name, class="form-control") }}
+                </div>
+            </td>
+        </tr>
+        <tr class="tabletext">
+            <td>
+                <div class="form-group">
+                    {{ render_field(form.price, class="form-control") }}
+                </div>
+            </td>
+        </tr>
+        <tr class="tabletext">
+            <td>
+                <div class="form-group">
+                    {{ render_field(form.qty, class="form-control") }}
+                </div>
+            </td>
+        </tr>
+        <tr class="tabletext">
+            <td>
+                <input type="submit" value="Submit" class="btn btn-primary" />
+            </td>
+        </tr>
+
+    </table>
+</form>
+
+{% endblock %}

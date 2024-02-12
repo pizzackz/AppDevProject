@@ -1,0 +1,62 @@
+/* General Design*/
+table{
+    margin-right:auto;
+    margin-left:auto;
+    border-spacing: 30px;
+}
+
+body{
+    font-family: mont;
+}
+
+img {
+    vertical-align: middle;
+}
+
+.center1{
+    margin-right:auto;
+    margin-left:auto;
+    text-align: center;
+    font-weight: 750;
+} 
+
+
+#no-order-history {
+    text-align: center;
+    margin-top: 10rem;
+}
+
+#no-order-history h1{
+    margin: 0;
+}
+
+#no-order-history button {
+    margin-top: 1.2rem;
+}
+
+i{
+    font-weight: bolder;
+}
+
+
+.table1{
+    margin-right:auto;
+    margin-left:auto;
+    border-collapse: collapse;
+    border: 1px solid;
+    border-radius: 25px;
+}
+
+.row1{
+    background-color:  #ffedc5;
+}
+
+.divider{
+    border: 1px solid
+}
+
+.img1{
+    height: auto;
+    max-width: 20px;    
+}
+

@@ -1,29 +1,51 @@
-{% extends "base.html" %}
-{% block title %}Create Menu Item{% endblock %}
+{% extends "admin/admin_menu.html" %}
+{% block title %}tastefully | Create Menu Item{% endblock %}
 
-    {% block navbar %} {% include "includes/_admin_navbar.html" %} {% endblock %}
+{% block css %}
+{{ super() }}
+<style>
+    .card {
+        border: none;
+        max-width: 75%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-{% from "includes/_formHelper.html" import render_field %}
-
-
-<h1 class="display-4">Create Menu Item</h1>
-
-<form method="POST" action="" enctype="multipart/form-data">
-<div class="form-group">
-{{ render_field(form.image, class="form-control") }}
+{% from "includes/_form_helper.html" import render_field %}
+<div class="container-fluid" id="main-content">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="card-title">Create New Menu Item</h3>
+            <br>
+            <form method="POST" action="" enctype="multipart/form-data">
+                <div class="form-group">
+                    {{ render_field(form.image, class="form-control") }}
+                </div>
+                <br>
+                <div class="form-group">
+                    {{ render_field(form.name, class="form-control") }}
+                </div>
+                <br>
+                <div class="form-group">
+                    {{ render_field(form.description, class="form-control") }}
+                </div>
+                <br>
+                <div class="form-group">
+                    {{ render_field(form.quantity, class="form-control") }}
+                </div>
+                <br>
+                <div class="form-group">
+                    {{ render_field(form.price, class="form-check", style="list-style-type:none") }}
+                </div>
+                <br>
+                <div id="prof">
+                </div>
+                <input type="submit" value="Submit" class="btn btn-primary" />
+            </form>
+        </div>
+    </div>
 </div>
-<div class="form-group">
-{{ render_field(form.name, class="form-control") }}
-</div>
-<div class="form-group">
-{{ render_field(form.description, class="form-control") }}
-</div>
-<div class="form-group">
-{{ render_field(form.price, class="form-check", style="list-style-type:none") }}
-</div>
-<div id="prof">
-</div>
-<input type="submit" value="Submit" class="btn btn-primary"/>
-</form>
 {% endblock %}

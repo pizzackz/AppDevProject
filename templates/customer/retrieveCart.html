@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block css %}
+{{ super() }}
+<link href="{{ url_for('static', filename='css/retrievecart.css') }}" rel="stylesheet">
+<link rel="stylesheet" type="text/css"
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+{% endblock %}
+
+{% block navbar %}
+{% include "includes/_customer_navbar.html" %}
+{% endblock %}
+
+{% block title %}tastefully | Cart{% endblock %}
+
+{% block content %}
+{% from "includes/_form_helper.html" import render_field %}
+
+{% if count == 0 %}
+<div id="no-order-history">
+    <form method="GET" action="{{ url_for('customer.retrieve_product', id=id) }}">
+        <h1> You have no items in your cart!</h1>
+        <button class="btn btn-warning" name="button" value="view_products">View Products</button>
+    </form>
+</div>
+
+{% else %}
+<div>
+  <br>
+  <table class="table table-striped table1">
+    <thead>
+      <tr class="row1">
+        <th>Your Cart</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+      </tr>
+      <tr>
+        <th>Item Image</th>
+        <th>Item Name</th>
+        <th>Price</th>
+        <th>Total Price</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for product in product_list %}
+      <tr>
+        <td class="divider"><img src="{{ url_for('static', filename='menu_image/' + product.get_product_img()) }}" /></td>
+        <td class="divider">{{ product.get_name() }}</td>
+        <td class="divider">${{ product.get_price() }} x {{ product.get_qty() }}</td>
+        <td class="divider">${{ product.get_total_price() }}</td>
+        <td></td>
+        <td class="center1"><a
+            href="{{ url_for('customer.update_cart', id=id, product_id=product.get_product_id(), previous_page = 'retrieve_cart') }}"
+            class="btn btn-warning">Change Quantity</a></td>
+        <td class="divider center1">
+          <!-- Button to Open the Modal -->
+          <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+            data-bs-target="#deleteProduct_{{ product.get_product_id() }}">Remove</button>
+
+          <!-- Delete Product modal -->
+          <div class="modal" id="deleteProduct_{{ product.get_product_id() }}">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                  <h4 class="modal-title">Remove Confirmation</h4>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <!-- Modal body -->
+                <div class="modal-body">
+                  Are you sure you want to remove "{{product.get_desc()}}" from your cart?
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                  <form action="{{ url_for('customer.delete_cart',id=id, product_id=product.get_product_id()) }}"
+                    method="POST">
+                    <input type="submit" value="Remove" class="btn btn-danger">
+                  </form>
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+
+      {% endfor %}
+
+      <form method="POST" action="{{ url_for('customer.retrieve_cart', id=id) }}">
+        <tr>
+          <td> Default Delivery Option:</td>
+          <td>
+            <div class="drop">
+              <select name="delivery" class="form-control">
+                {% for option in delivery_options %}
+                <option value="{{ option[0] }}" {% if delivery_method[0]==option[0] %}selected{% endif %}>{{ option[1]
+                  }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>
+            <div> Total Unique Items: {{ count }} </div>
+            <span id="original-full-price" style="display:none;">{{ fullprice - delivery_method[0] }}</span>
+            <div>Total Price: $<span id="full-price">{{ fullprice }}</span></div>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td colspan="2">
+            <button type="submit" name="check_out" value="Check Out" class="btn btn-warning center1">Check Out <i class="bi bi-chevron-right"></i></button>
+          </td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </form>
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/cart.js')}}"></script>
+{% endblock %}

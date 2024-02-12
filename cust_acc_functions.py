@@ -158,7 +158,7 @@ def delete_all_customers():
 
 
 # Testing
-for i in range(7):
-    create_customer({"first_name": "Yeo", "last_name": f"Jun Qi {i+1}", "username": f"Croxvore{i+1}", "email": f"croxvore{i+1}@gmail.com"}, generate_password_hash(f"Unitysec@202{i}", salt_length=8))
+# for i in range(7):
+#     create_customer({"first_name": "Yeo", "last_name": f"Jun Qi {i+1}", "username": f"Croxvore{i+1}", "email": f"croxvore{i+1}@gmail.com"}, generate_password_hash(f"Unitysec@202{i}", salt_length=8))
 
 # delete_all_customers()

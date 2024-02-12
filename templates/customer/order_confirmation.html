@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block css %}
+{{ super() }}
+<link href="{{ url_for('static', filename='css/confirm.css') }}" rel="stylesheet">
+{% endblock %}
+
+
+{% block title %}tastefully | Order Confirmation {% endblock %}
+
+{% block content %}
+{% from "includes/_form_helper.html" import render_field %}
+
+<br><br><br><br><br>
+<div class="container">
+  <header>
+    <h2>Success &nbsp;<img class="check" src="{{ url_for('static', filename='images/check.png') }}" />
+    </h2>
+  </header>
+  <div class="text">
+
+    <p>Thank you for ordering with us!</p>
+    <p>Please await our follow-up email to receive your invoice.</p>
+    <p>Order Number: {{ cart_item.get_cart_id() }}</p>
+    <p>Checkout Time: {{ cart_item.get_checkout_time("%I:%M %p") }}</p>
+    <div id="extra-links">
+      <a href="{{ url_for('customer.customer_home', id=id) }}"> Return Home </a>
+    </div>
+    <br>
+  </div>
+</div>
+
+{% endblock %}

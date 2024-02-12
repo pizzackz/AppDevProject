@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+{% extends "base.html" %}
+{% block title %}tastefully | Retrieve Products{% endblock %}
+
+{% block css %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/menu_card.css') }}">
+{% endblock %}
+
+
+{% block navbar %}
+{% include "includes/_navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<h1 class="display-4">Retrieve Products</h1>
+<div>
+  {% if count == 0 %}
+  <div id="no-products">
+    <h1>All our products are out of stock right now, please wait while we restock our products.</h1>
+    <h6>Sorry for the inconvenience caused</h6>
+  </div>
+
+</div>
+{% else %}
+<div id="menu-item">
+  {% for product in product_list %}
+  <div class="m-2">
+    <div class="card" style="width: 18rem;">
+      <img src="{{ url_for('static', filename='menu_image/' + product.get_product_img()) }}" class="card-img-top" alt="...">
+      <div class="card-body">
+        <div id="product-name">
+          <h5>{{ product.get_name() }}</h5>
+        </div>
+        <a href="{{ url_for('guest.viewProduct.html', product_id=product.get_product_id() ) }}"
+          class="view btn btn-success m-1">View</a>
+        {% if product.get_qty() == 0 %}
+        <p>Currently out of stock</p>
+        {% else %}
+        <p>Current Quantity: {{ product.get_qty() }}</p>
+        <a href="#" class="btn btn-warning m-1">Add to Cart</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

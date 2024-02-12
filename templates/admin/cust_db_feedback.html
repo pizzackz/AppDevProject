@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+{% extends "admin/cust_db_base.html" %}
+{% block title %}tastefully | Customer Feedback{% endblock %}
+
+{% block css %}
+{{ super() }}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/account_table.css') }}" />
+<style>
+    #no-feedback {
+        text-align: center;
+        margin-top: 10rem;
+    }
+
+    #no-feedback h1{
+        margin: 0;
+    }
+    
+    #no-feedback button {
+        font-size: 1.2rem;
+        margin-top: 1.2rem;
+        padding: 0.5rem 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if count == 0 %}
+<div id="no-feedback">
+    <form method="POST" action="{{ url_for('admin.view_customer_feedback', id=id, cust_id=cust_id) }}">
+        <h1>This customer does not have any feedback</h1>
+        <button class="btn btn-primary bypass-disable" name="button" value="back">Back</button>
+    </form>
+</div>
+
+{% else %}
+<div id="back-link">
+    <a href="{{ url_for('admin.retrieve_customer', id=id) }}"><i class="bi bi-arrow-left-circle"></i> Back
+        to Customer</a>
+</div>
+<div class="container-fluid" id="content" style="margin-top: 5rem;">
+    <main id="table">
+        <section id="table-header">
+            <h3>Feedback from '{{ display_name }}'</h3>
+            <p>Total: {{ count }}</p>
+        </section>
+
+        <section id="table-body">
+            <form method="POST" id="customerForm">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Display Name</th>
+                            <th>Category</th>
+                            <th>Rating</th>
+                            <th>Message</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for feedback in feedback_details %}
+                        <tr>
+                            <td colspan="2">{{ feedback.get_sent_date("%d/%m/%Y") }}</td>
+                            <td>{{ display_name }}</td>
+                            <td>{{ feedback.get_category() }}</td>
+                            <td>{{ feedback.get_rating() }}</td>
+                            <td>{{ feedback.get_message() }}</td>
+                            <td class="text-center">
+                                <!-- Button to Open the Modal -->
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#myModal_{{ feedback.get_feedback_id() }}">Delete</button>
+
+                                <!-- The Modal -->
+                                <div class="modal" id="myModal_{{ feedback.get_feedback_id() }}">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+
+                                            <!-- Modal Header -->
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Delete Confirmation</h4>
+                                                <button type="button" class="btn-close bypass-disable"
+                                                    data-bs-dismiss="modal"></button>
+                                            </div>
+
+                                            <!-- Modal Body -->
+                                            <div class="modal-body">Are you sure you want to delete this feedback?
+                                            </div>
+
+                                            <!-- Modal Footer -->
+                                            <div class="modal-footer">
+                                                <form
+                                                    action="{{ url_for('admin.delete_customer_feedback', id=id, cust_id=cust_id, feedback_id=feedback_id) }}"
+                                                    method="POST">
+                                                    <input type="submit" value="Delete"
+                                                        class="btn btn-danger bypass-disable" />
+                                                </form>
+                                                <button type="button" class="btn btn-secondary bypass-disable"
+                                                    data-bs-dismiss="modal">Cancel</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </form>
+        </section>
+    </main>
+</div>
+{% endif %}
+
+{% endblock %}

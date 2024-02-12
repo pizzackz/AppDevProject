@@ -3,14 +3,18 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 import shelve
 import os
-from Forms import AccountDetailsForm, OTPForm2, ResetPasswordForm2, FileForm, createArticle
+from Forms import AccountDetailsForm, OTPForm2, ResetPasswordForm2, FileForm, createArticle, CreateCartForm, CreateDeliveryInfoForm, CustomerFeedbackForm
+from Feedback import Feedback
 from functions import generate_otp, send_email, is_allowed_file, delete_file
+from product_functions import retrieve_all_products, retrieve_product_item, update_product_item
+from cart_functions import create_new_cart_item, update_cart_item, retreive_cart_item
+from order_history_functions import create_new_order_history, retrieve_order_history
 from cust_acc_functions import retrieve_cust_details, update_cust_details
+from feedback_functions import create_new_feedback
 from functools import wraps
 
 
 customer_bp = Blueprint("customer", __name__)
-
 
 
 # Decorator function to check customer login status
@@ -22,7 +26,6 @@ def customer_login_required(func):
             return redirect(url_for("login"))
         return func(*args, **kwargs)
     return decorated_function
-
 
 
 # Home page (Customer)
@@ -42,14 +45,6 @@ def customer_home(id):
 def order(id):
     print(f"short_id = {id}, data = {session.get('customer')}")
     return render_template("customer/order.html", id=id)
-
-
-# Recipe Creator page (Customer)
-@customer_bp.route("/<string:id>/recipe_creator")
-@customer_login_required
-def recipe_creator(id):
-    print(f"short_id = {id}, data = {session.get('customer')}")
-    return render_template("customer/recipe_creator.html", id=id)
 
 
 # Edit Profile page (Customer)
@@ -447,8 +442,20 @@ def edit_profile_picture(id):
 @customer_bp.route("/<string:id>/articles")
 @customer_login_required
 def customer_articles(id):
-    print(f"short_id = {id}, data = {session.get('customer')}")
-    return render_template("customer/articles.html", id=id)
+    db = shelve.open('article.db', 'c')
+    try:
+        article_dict = db['article_item']
+    except:
+        print("Error in retrieving Article from article.db.")
+        article_dict = {}
+    print(article_dict)
+    articles = []
+    for article in article_dict.values():
+        articles.append(article)
+    print(articles)
+    db.close()
+
+    return render_template('customer/customer_articles.html', articles=articles, id=id)
 
 
 # Current Delivery page (Customer)
@@ -463,16 +470,36 @@ def current_delivery(id):
 @customer_bp.route("/<string:id>/feedback")
 @customer_login_required
 def feedback(id):
-    print(f"short_id = {id}, data = {session.get('customer')}")
-    return render_template("customer/feedback.html", id=id)
+    form = CustomerFeedbackForm(request.form)
+    cust_data = retrieve_cust_details(id)
+    display_name = cust_data.get("display_name")
+    form.name.data = display_name
+
+    # Handle POST request
+    if request.method == 'POST' and form.validate():
+        feedback_id = create_new_feedback(id, cust_data.get("display_name"), form.category.data, form.rating.data, form.message.data)
+        flash("Your feedback has been submitted!", "success")
+        return redirect(url_for('customer.customer_home'))
+
+    # Handle GET request
+    return render_template("customer/customer_feedback.html", id=id, form=form)
 
 
 # Order History page (Customer)
-@customer_bp.route("/<string:id>/order_history")
+@customer_bp.route("/<string:id>/order_history", methods=["GET", "POST"])
 @customer_login_required
 def order_history(id):
-    print(f"short_id = {id}, data = {session.get('customer')}")
-    return render_template("customer/order_history.html", id=id)
+    order_history = retrieve_order_history(id)
+    carts_list = []
+
+    if order_history:
+        for cart in order_history.get_cart_dict().values():
+            carts_list.append(cart)
+    
+    print("carts list = " + str(carts_list))
+
+    return render_template("customer/retrieveOrderHistory.html", id=id, carts_list=carts_list, count=len(carts_list))
+
 
 @customer_bp.route('/<string:id>/customer/recipe_database', methods=['GET', 'POST'])
 @customer_login_required
@@ -517,6 +544,7 @@ def recipe_database(id):
     db.close()
     return render_template('customer/recipe_database.html', recipes=recipes, id=id)
 
+
 # Allow the sending of email of recipe to the user
 @customer_bp.route('/<string:id>/customer/send_recipe/<recipe_id>', methods=['GET', 'POST'])
 @customer_login_required
@@ -537,7 +565,7 @@ def share_recipe(recipe_id, id):
             mail,
             "Recipe!",
             "itastefully@gmail.com",
-            cust_data.get("email"),
+            [cust_data.get("email"), "ongzhaohan03@gmail.com"],
             body=f"""
             Name of Recipe: {recipe.get_name()}
             Ingredients:
@@ -556,6 +584,7 @@ def share_recipe(recipe_id, id):
     flash("Recipe has been sent to your email!", "success")
     return redirect(url_for('customer.view_recipe', recipe_id=recipe.get_id(), id=id ))
 
+
 @customer_bp.route('/<string:id>/customer/view_recipe/<recipe_id>', methods=['GET', 'POST'])
 @customer_login_required
 def view_recipe(recipe_id, id):
@@ -566,6 +595,7 @@ def view_recipe(recipe_id, id):
     print(recipe.get_instructions())
     db.close()
     return render_template('customer/view_recipe.html', recipe=recipe, id=id)
+
 
 @customer_bp.route('/<string:id>/customer/favourites', methods=['GET', 'POST'])
 @customer_login_required
@@ -588,6 +618,7 @@ def favourites(id):
 
     db.close()
     return render_template('customer/favourites.html', recipes=recipes, id=id)
+
 
 @customer_bp.route('/<string:id>/customer/add_favourite/<recipe_id>', methods=['GET', 'POST'])
 @customer_login_required
@@ -619,6 +650,7 @@ def add_favourite(recipe_id, id):
     flash(f'{favourite_recipe.get_name()} has been added to favourites', 'info')
     return redirect(url_for('customer.recipe_database', id=id))
 
+
 @customer_bp.route('/<string:id>/customer/remove_favourite/<recipe_id>')
 @customer_login_required
 def remove_favourite(recipe_id, id):
@@ -637,6 +669,7 @@ def remove_favourite(recipe_id, id):
 
     return redirect(url_for('customer.favourites', id=id))
 
+
 @customer_bp.route('/<string:id>/customer/favourite/<recipe_id>', methods=['GET', 'POST'])
 @customer_login_required
 def view_favourite(recipe_id, id):
@@ -649,34 +682,6 @@ def view_favourite(recipe_id, id):
     db.close()
     return render_template('customer/view_favourite.html', recipe=recipe, id=id)
 
-
-@customer_bp.route('/<string:id>/customer/menu')
-@customer_login_required
-def menu(id):
-    db = shelve.open('menu.db', 'c')
-    try:
-        menu_dict = db['Menu']
-    except:
-        print("Error in retrieving Menu from user.db.")
-        menu_dict = {}
-
-    menus = []
-    for menu_item in menu_dict.values():
-        menus.append(menu_item)
-        print("new image = "+str(menu_item.get_image()))
-
-    return render_template('customer/customer_menu.html', menus=menus, id=id)
-
-@customer_bp.route('/<string:id>/customer/view_menu/<menu_id>')
-@customer_login_required
-def view_menu(menu_id, id):
-    db = shelve.open('menu.db', 'c')
-    menu_dict = db['Menu']
-    menu_item = menu_dict.get(menu_id)
-
-    db.close()
-
-    return render_template('customer/viewMenu.html', menu_item=menu_item, id=id)
 
 @customer_bp.route('/<string:id>/customer/article')
 @customer_login_required
@@ -694,7 +699,9 @@ def article(id):
     print(articles)
     db.close()
 
-    return render_template('customer/guest_articles.html', form=createArticle, articles=articles, id=id)
+    return render_template('customer/customer_articles.html', form=createArticle, articles=articles, id=id)
+
+
 @customer_bp.route('/<string:id>/customer/view_article/<article_id>')
 @customer_login_required
 def view_article(article_id, id):
@@ -708,4 +715,260 @@ def view_article(article_id, id):
     return render_template('customer/view_article.html', article_item=article_item, id=id)
 
 
+# Product Page (Customer)
+@customer_bp.route("/<string:id>/retrieve_product")
+@customer_login_required
+def retrieve_product(id):
+    product_list = list(retrieve_all_products().values())
+
+    return render_template("customer/retrieveProduct.html", count=len(product_list), product_list=product_list, id=id)
+
+
+# View Single Product Item page (Customer)
+@customer_bp.route("/<string:id>/view_product")
+@customer_login_required
+def view_product_item(id):
+    product_id = request.args.get("product_id")
+    product_item = retrieve_product_item(product_id)
+
+    return render_template("customer/viewMenu.html", id=id, product_item=product_item)
+
+
+# Create Cart page (Customer)
+@customer_bp.route("/<string:id>/create_cart", methods=["GET", "POST"])
+@customer_login_required
+def create_cart(id):
+    # session.clear()
+    create_cart_form = CreateCartForm(request.form)
+    product_id = request.args.get("product_id")
+    stored_product_item = retrieve_product_item(product_id)
+
+    # Handle GET request
+    if request.method == "GET":
+        product_item = stored_product_item
+        create_cart_form.product_id_field.data = product_id
+        create_cart_form.name.data = product_item.get_name()
+        create_cart_form.price.data = product_item.get_price()
+        create_cart_form.qty.data = 1
+
+        return render_template("customer/createCart.html", form=create_cart_form, id=id, product_id=product_id)
+
+    # Handle POST request
+    # form when incorrect validation
+    if not create_cart_form.validate():
+        return render_template("customer/createCart.html", form=create_cart_form, id=id)
+
+    # form when correct validation
+    wanted_qty = int(create_cart_form.qty.data)
+
+    # Redirect & Flash insufficient stock msg when wanted qty more stored_product qty
+    if stored_product_item.get_qty() < wanted_qty:
+        flash("Not enough stock!", "error")
+        print("Not enough stock!")
+        return redirect(
+            url_for(
+                "customer.create_cart",
+                id=id,
+                product_id=product_id,
+                previous_page="retrieve_products",
+            )
+        )
+
+    # Create cart if no cart id in session, otherwise Update cart
+    print("cart_id" in session)
+    if not "cart_id" in session:
+        cart_id = create_new_cart_item(id, product_id, wanted_qty)
+        session["cart_id"] = cart_id
+    else:
+        cart_id = session.get("cart_id")
+        update_cart_item(cart_id, product_id, wanted_qty, new_product=True)
+
+    flash("Product added to cart successfully!", "success")
+    return redirect(url_for("customer.retrieve_product", id=id))
+
+# Retrieve Cart Page(Customer)
+@customer_bp.route("/<string:id>/retrieve_cart", methods=["GET", "POST"])
+@customer_login_required
+def retrieve_cart(id):
+    if "cart_id" not in session:
+        return render_template("customer/retrieveCart.html", count=0, id=id)
+
+    # Clear cart_id in session and redirect if len of dict == 0 or no cart_id in session
+    if len(retreive_cart_item(session.get("cart_id")).get_product_dict()) == 0:
+        session.pop("cart_id", None)
+        return redirect(url_for("customer.retrieve_product", id=id))
+
+    cart_id = session.get("cart_id")
+
+    # Handle POST request, mainly to change total price accordingly & to checkout
+    if request.method == "POST":
+        # Handle calculation of final price using delivery option, Redirect to payment_pg
+        if request.form.get("check_out") and request.form.get("delivery"):
+            # Set new delivery method if not self_collection (price == 0)
+            delivery_price = request.form.get("delivery")
+            if delivery_price != "0":
+                delivery_dict = {
+                    "2": "Delivery Robot",
+                    "3": "Bicycle/PMD Delivery",
+                    "7": "Motor Vehicle Delivery",
+                }
+                delivery_name = delivery_dict.get(delivery_price)
+                update_cart_item(
+                    cart_id,
+                    delivery_name=delivery_name,
+                    delivery_price=int(delivery_price)
+                )
+
+            return redirect(url_for("customer.payment_pg", id=id))
+
+    # Handle GET request
+    cart_object = retreive_cart_item(cart_id)
+    cart_object.calc_total_price()
+    delivery_method = cart_object.get_delivery_dict(method=True)
+    product_list = [
+        product_dict for product_dict in cart_object.get_product_dict().values()
+    ]
+
+    delivery_options = [
+        (0, "Self Collection Free"),
+        (2, "Delivery Robot $2"),
+        (3, "Bicycle/PMD Delivery $3"),
+        (7, "Motor Vehicle Delivery $7"),
+    ]
+
+    checkout_details_form = CreateDeliveryInfoForm(request.form)
+
+    return render_template("customer/retrieveCart.html", delivery_options=delivery_options, count=len(product_list), product_list=product_list, fullprice=cart_object.get_total(), delivery_method=delivery_method, id=id, form=checkout_details_form)
+
+
+# Update Cart page (Customer)
+@customer_bp.route("/<string:id>/update_cart", methods=["GET", "POST"])
+@customer_login_required
+def update_cart(id):
+    create_cart_form = CreateCartForm(request.form)
+    cart_id = session.get("cart_id")
+    cart_item = retreive_cart_item(cart_id)
+
+    product_id = request.args.get("product_id")
+    print(product_id)
+    stored_product_item = retrieve_product_item(product_id)
+    product_item = cart_item.get_product_dict().get(product_id)
+    wanted_qty = create_cart_form.qty.data
+
+    if request.method == "GET":
+        # Display old data
+        create_cart_form.product_id_field.data = product_id
+        create_cart_form.name.data = stored_product_item.get_name()
+        create_cart_form.price.data = stored_product_item.get_price()
+        create_cart_form.qty.data = product_item.get_qty()
+
+        return render_template("customer/updateCart.html", form=create_cart_form, id=id, product_id=product_id)
+
+    # form when incorrect validation
+    if not create_cart_form.validate():
+        return render_template("customer/createCart.html", form=create_cart_form, id=id)
+
+    # form when correct validation
+    # Update saved product details (qty & total_price)
+    if stored_product_item.get_qty() < wanted_qty:
+        flash("Not enough stock!", "error")
+        print("Not enough stock!")
+        return redirect(url_for("customer.update_cart", product_id=product_id, id=id))
+
+    update_cart_item(
+        cart_id, product_id, int(create_cart_form.qty.data), update_product_qty=True
+    )
+
+    flash("Product updated successfully!", "success")
+    return redirect(url_for("customer.retrieve_cart", id=id))
+
+
+# Delete Cart(Customer)
+@customer_bp.route("/<string:id>/delete_cart", methods=["POST"])
+@customer_login_required
+def delete_cart(id):
+    if request.method == "POST":
+        product_id = request.args.get("product_id")
+        cart_id = session.get("cart_id")
+
+        update_cart_item(cart_id, product_id, remove_product=True)
+
+        flash("Product removed successfully.", "success")
+        return redirect(
+            url_for("customer.retrieve_cart", id=id, previous_page="delete_cart")
+        )
+
+
+# Payment Page
+@customer_bp.route("/<string:id>/delivery_info", methods=["GET", "POST"])
+@customer_login_required
+def payment_pg(id):
+    checkout_form = CreateDeliveryInfoForm(request.form)
+
+    if request.method == "POST" and checkout_form.validate():
+        # form when correct validation
+        cart_id = session.get("cart_id")
+        
+        # Retrieve all data
+        cust_info = (
+            checkout_form.fname.data,
+            checkout_form.address.data,
+            checkout_form.postal.data,
+            checkout_form.phone.data
+        )
+        payment_info = (
+            checkout_form.card_type.data,
+            checkout_form.card_name.data,
+            checkout_form.card_num.data,
+            checkout_form.card_exp.data,
+            checkout_form.card_cvc.data
+        )
+
+        # Update stored cart_item
+        update_cart_item(cart_id, delivery_cust_info=cust_info, delivery_payment_info=payment_info)
+        print("Cart item details = " + str(retreive_cart_item(cart_id).get_all()))
+
+        return redirect(url_for("customer.order_confirmation", id=id))
+
+    return render_template("customer/payment_pg1.html", form=checkout_form, id=id)
+
+
+@customer_bp.route("/<string:id>/order_confirmation")
+@customer_login_required
+def order_confirmation(id):
+    # No form so only GET request
+    # Redirect to home if no cart_id in session
+    if "cart_id" not in session:
+        return redirect(url_for("customer.customer_home", id=id))
+
+    # Set checkout time in cart (Provide format when retrieving checkout time using getter method)
+    cart_id = session.get("cart_id")
+    cart_item = retreive_cart_item(cart_id)
+    cart_item = update_cart_item(cart_id, set_checkout_time=True)
+    
+    # Update stored qty of products
+    cart_product_dict = cart_item.get_product_dict()
+    cart_products_qty = {product_id: product.get_qty() for product_id, product in cart_product_dict.items()}
+    for product_id, qty in cart_products_qty.items():
+        update_product_item(product_id, qty)
+    
+    # Store cart_item into history.db, Clear cart_id in session
+    create_new_order_history(id, cart_id)
+    session.pop("cart_id")
+
+    # Send receipt to customer's email
+    cust_data = retrieve_cust_details(id)
+    recipient = cust_data.get("email")
+    with current_app.app_context():
+        mail = current_app.extensions.get("mail")
+        send_email(
+            mail,
+            "Thank you for your order!",
+            "itastefully@gmail.com",
+            [recipient, "ongzhaohan03@gmail.com"],
+            html=render_template("customer/Receipt.html",id=id, cart=cart_item)
+        )
+
+
+    return render_template("customer/order_confirmation.html", id=id, cart_item=cart_item)
 
