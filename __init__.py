@@ -2,6 +2,7 @@ from flask import Flask, session, request, redirect, flash, url_for, render_temp
 from flask_mail import Mail
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date
+import shelve
 
 from config import Config
 from Forms import (
@@ -25,6 +26,9 @@ from functions import (
 )
 from cust_acc_functions import create_customer, update_cust_details
 from admin_acc_functions import update_admin_details
+
+# Modules for Recipe
+from recipe import *
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -378,6 +382,127 @@ def signup_set_password():
     # Handle GET request
     return render_template("signup_password.html", form=form)
 
+@app.route("/recipe_init")
+def recipe_init():
+    db = shelve.open('recipes.db', 'c')
+    recipe_dict = db.setdefault('recipes', {})  # Initialize if 'recipes' doesn't exist
+    recipe_dict = db['recipes']
+
+    recipes_init = [
+        ["Chicken Soup",
+         ["chicken", "mixed vegetables", "rice", "broth", "herbs"],
+         ("1. In a large pot, heat olive oil over medium heat.\n"
+          "2. Sauté the vegetables until they are softened.\n"
+          "3. Add the chicken meat to the pot and cook until heated through.\n"
+          "4. Pour in enough broth to cover the ingredients in the pot.\n"
+          "5. Bring the soup to a simmer and let it cook for about 15-20 minutes to allow the flavors to meld.\n"
+          "6. Add cooked rice or pasta to the soup.\n"
+          "7. Season with salt, pepper, and herbs according to taste.\n"
+          "8. Let the soup simmer for an additional 5-10 minutes.\n"
+          "9. Serve hot and enjoy your comforting chicken soup!"),
+         "chicken_soup.jpg"],
+
+        ["Roasted Vegetable Frittata",
+         ["roasted vegetables", "cooked meat", "eggs", "milk", "grated cheese", "olive oil"],
+         ("1. Preheat your oven to 375°F (190°C).\n"
+          "2. Grease a cast-iron skillet or oven-safe pan with olive oil.\n"
+          "3. Spread the roasted vegetables and cooked meat (diced evenly in the skillet.\n"
+          "4. In a mixing bowl, whisk together eggs, milk or cream, grated cheese, salt, and pepper.\n"
+          "5. Pour the egg mixture over the vegetables and meat in the skillet.\n"
+          "6. Gently stir to ensure the ingredients are evenly distributed.\n"
+          "7. Place the skillet in the preheated oven and bake for 20-25 minutes, or until the frittata is set and golden brown on top.\n"
+          "8. Once cooked, remove the frittata from the oven and let it cool slightly.\n"
+          "9. Slice the frittata into wedges and serve warm or at room temperature.\n"
+          "10. Enjoy your delicious roast vegetable frittata as a hearty meal or snack!"),
+         "roasted_vegetable_frittata.jpg"],
+
+        ["Chicken Stir Fry",
+         ["cooked chicken", "mixed vegetables", "cooked rice", "soy sauce", "garlic", "ginger", "olive oil",
+          "onions"],
+         ("1. Heat olive oil or sesame oil in a large skillet or wok over medium-high heat.\n"
+          "2. Add minced garlic and grated ginger to the skillet, sauté until fragrant.\n"
+          "3. Toss in the mixed vegetables and stir-fry until they are tender yet crisp.\n"
+          "4. Add the cooked chicken (shredded or sliced) to the skillet and stir-fry until heated through.\n"
+          "5. Add cooked rice to the skillet and stir well to combine.\n"
+          "6. Pour soy sauce over the mixture and continue to stir-fry for a few more minutes.\n"
+          "7. Season with salt and pepper according to taste.\n"
+          "8. Garnish with chopped green onions if desired.\n"
+          "9. Serve hot and enjoy your flavorful chicken stir-fry!"),
+         "chicken_stir_fry.jpg"],
+
+        ["Ham and Cheese Casserole",
+         ["cooked ham", "bread slices", "eggs", "milk", "cheddar cheese"],
+         ("1. Preheat your oven to 375°F (190°C).\n"
+          "2. Grease a baking dish with butter or cooking spray.\n"
+          "3. Spread bread cubes and diced ham evenly in the baking dish.\n"
+          "4. In a mixing bowl, whisk together eggs, milk, salt, and pepper.\n"
+          "5. Pour the egg mixture over the bread cubes and ham.\n"
+          "6. Sprinkle grated cheddar cheese over the top.\n"
+          "7. Bake in the preheated oven for 30-35 minutes or until set and golden brown.\n"
+          "8. Let it cool slightly before slicing and serving.\n"
+          "9. Enjoy your hearty ham and cheese breakfast casserole!"),
+         "ham_and_cheese_casserole.jpg"],
+
+        ["Shepherd's Pie",
+         ["cooked beef", "mixed vegetables", "mashed potatoes", "cheddar cheese", "worcestershire sauce"],
+         ("1. Preheat your oven to 375°F (190°C).\n"
+          "2. Spread cooked ground beef or lamb evenly in a baking dish.\n"
+          "3. Layer mixed vegetables over the meat.\n"
+          "4. Drizzle Worcestershire sauce over the vegetables.\n"
+          "5. Spread mashed potatoes over the top, covering the filling completely.\n"
+          "6. Sprinkle grated cheddar cheese over the mashed potatoes.\n"
+          "7. Bake in the preheated oven for 25-30 minutes or until the cheese is melted and bubbly.\n"
+          "8. Let it cool slightly before serving.\n"
+          "9. Enjoy your comforting shepherd's pie!"),
+         "shepherds_pie.jpg"],
+
+        ["Chicken Tacos",
+         ["cooked chicken", "tortilla", "onion", "tomato", "lettuce", "avocado", "cilantro", "lime wedges"],
+         ("1. Warm the cooked chicken in a skillet over medium heat.\n"
+          "2. Warm the tortillas in a separate skillet or microwave.\n"
+          "3. Assemble tacos by filling tortillas with cooked chicken, sliced red onion, diced tomato, shredded lettuce, avocado slices, and chopped cilantro.\n"
+          "4. Squeeze lime juice over the top.\n"
+          "5. Serve with sour cream or Greek yogurt and hot sauce or salsa if desired. (Optional)\n"
+          "6. Enjoy your flavorful chicken tacos!"),
+         "chicken_tacos.jpg"],
+
+        ["Vegetarian Pasta Primavera",
+         ["mixed vegetables", "pasta", "olive oil", "garlic", "parmesan cheese", "basil leaves"],
+         ("1. Cook pasta according to package instructions. Drain and set aside.\n"
+          "2. In a large skillet, heat olive oil over medium heat.\n"
+          "3. Add minced garlic and sauté until fragrant.\n"
+          "4. Add assorted vegetables to the skillet and sauté until tender.\n"
+          "5. Toss cooked pasta with the vegetables in the skillet.\n"
+          "6. Season with Italian seasoning and toss to combine.\n"
+          "7. Serve hot, garnished with grated Parmesan cheese and chopped fresh basil leaves if desired.\n"
+          "8. Enjoy your delightful vegetarian pasta primavera!"),
+         "vegetarian_pasta_primavera.jpg"],
+
+        ["Apple Crisp",
+         ["apple", "brown sugar", "all-purpose flour", "rolled oats", "ground cinnamon",
+          "ground nutmeg", "butter"],
+         ("1. Preheat your oven to 375°F (190°C).\n"
+          "2. In a large bowl, combine sliced apples with brown sugar, cinnamon, and nutmeg.\n"
+          "3. Spread the apple mixture evenly in a baking dish.\n"
+          "4. In another bowl, mix together flour, rolled oats, and a bit more cinnamon.\n"
+          "5. Cut in cold cubed butter until the mixture resembles coarse crumbs.\n"
+          "6. Sprinkle the crumb mixture evenly over the apples.\n"
+          "7. Bake in the preheated oven for about 30-35 minutes, or until the topping is golden brown and the apples are tender.\n"
+          "8. Serve warm with a scoop of vanilla ice cream or a dollop of whipped cream.\n"
+          "9. Enjoy your comforting apple crisp dessert!"),
+         "apple_crisp.jpg"]
+        ]
+
+    for i in recipes_init:
+        new_recipe = Recipe(i[0], i[1], i[2], i[3])
+        recipe_dict[new_recipe.get_id()] = new_recipe
+
+    # Create a for loop initializing the recipe object
+    db['recipes'] = recipe_dict
+
+    db.close()
+
+    return redirect(url_for('login'))
 
 # Error page (code 404)
 @app.errorhandler(404)

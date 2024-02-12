@@ -34,18 +34,28 @@ document.addEventListener("DOMContentLoaded", function() {
             display_popup('The input is empty.', 'error')
         }
         else {
-            var regex = /^[a-zA-Z ]+$/;
+            var regex = /^[a-zA-Z\s,]+$/;
+            var arr = ingredient.split(',');
+            console.log(arr)
             if (regex.test(ingredient)) {
-                if (ingredient_list.includes(ingredient)) {
-                    display_popup('Ingredient is already added.' , 'error')
-                }
-                else {
-                    ingredient_list.push(ingredient);
-                    display_ingredient();
+                for (i=0;i<arr.length;i++) {
+                    console.log(arr[i]);
+                    if (ingredient_list.includes(arr[i])) {
+                        display_popup(arr[i] + ' is already added.', 'error');
+                    }
+                    else {
+                        if ((arr[i]).trim() == '') {
+                            display_popup('The input is empty.', 'error');
+                        }
+                        else {
+                            ingredient_list.push(arr[i]);
+                            display_ingredient;
+                        }
+                    }
                 }
             }
             else {
-                display_popup('Letters and spaces are only accepted.' , 'error');
+                display_popup('Letters, spaces and commas are only accepted.', 'error');
             }
         }
         display_ingredient();
@@ -72,6 +82,8 @@ function autocompletion() {
     if (ingredient == "") {
         add_item.classList.add('disabled');
     }
+    var arr = ingredient.split(',');
+    ingredient = arr[arr.length - 1];
     // generate wordList of ingredients
     var wordList = [
         'apple', 'banana', 'chicken', 'carrot', 'tomato', 'potato', 'beef', 'pork', 'onion', 'garlic', 'pepper', 'cucumber', 'lettuce', 'spinach', 'mushroom', 'broccoli', 'peas', 'corn', 'rice', 'pasta', 'noodles', 'bread', 'flour', 'sugar', 'salt', 'pepper', 'cinnamon', 'paprika', 'cumin', 'curry', 'thyme', 'basil', 'oregano', 'parsley', 'sage', 'rosemary', 'cilantro', 'coriander', 'ginger', 'turmeric', 'saffron', 'cinnamon', 'nutmeg', 'vanilla', 'chocolate', 'cocoa', 'honey', 'maple', 'syrup', 'milk', 'cream', 'butter', 'cheese', 'yogurt', 'egg', 'mayo', 'ketchup', 'mustard', 'soy', 'sauce', 'vinegar', 'oil', 'water', 'juice', 'soda', 'beer', 'wine', 'whiskey', 'vodka', 'rum', 'tequila', 'gin', 'brandy', 'cognac', 'liqueur', 'vermouth', 'champagne', 'sparkling', 'wine', 'prosecco', 'sake', 'soju', 'baijiu', 'baiju', 'baijiu', 'baiju'];
@@ -109,7 +121,13 @@ function autocompletion() {
 
 // Allowing user to select the autocomplete function
 function select_autocomplete(word) {
-    document.getElementById('ingredient').value = word;
+    var ingredient_input = document.getElementById('ingredient');
+    var current_input = ingredient_input.value
+    var arr = current_input.split(',');
+    var allexceptLast = arr.slice(0, arr.length - 1);
+    allexceptLast.push(word);
+
+    document.getElementById('ingredient').value = allexceptLast.join(',');
     console.log('clicked selected');
     autocompletion();
 }
