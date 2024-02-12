@@ -504,9 +504,10 @@ def recipe_database(id):
             for s in range(0, len(recipes)):
                 name = (recipes[s]).get_name()
                 name = name.lower()
-                if ingredients[i] in (recipes[s]).get_ingredients() or ingredients[i] in name:
-                    if recipes[s] not in recipe2:
-                        recipe2.append(recipes[s])
+                for o in range(0, len((recipes[s]).get_ingredients())):
+                    if ingredients[i] in ((recipes[s]).get_ingredients())[o] or ingredients[i] in name:
+                        if recipes[s] not in recipe2:
+                            recipe2.append(recipes[s])
 
         # Sort the recipes by the number of ingredients the user has in descending order
         recipe2.sort(key=lambda x: len(set(x.get_ingredients()).intersection(ingredients)), reverse=True)
