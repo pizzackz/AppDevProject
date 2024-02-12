@@ -8,6 +8,7 @@ from admin_acc_functions import create_admin, retrieve_admin_details, retrieve_a
 from cust_acc_functions import retrieve_all_customers, retrieve_cust_details, update_cust_details, delete_customer
 from product_functions import create_new_product, retrieve_all_products, retrieve_product_item, update_product_item, delete_product_item
 from feedback_functions import retrieve_cust_feedback_dict, delete_cust_feedback
+from order_history_functions import retrieve_order_history
 import shelve
 from functools import wraps
 
@@ -113,6 +114,10 @@ def retrieve_customer(id):
     if request.form.get("button") == "lock_button":
         return redirect(url_for("admin.lock_customer_account", id=id, cust_id=cust_id))
 
+    # Redirect to customer order history when clicked on 'order history' button
+    if request.form.get("button") == "order_history_button":
+        return redirect(url_for("admin.cust_order_history", id=id, cust_id=cust_id))
+
     # Redirect to delete_customer_account when clicked on 'delete' button
     if request.form.get("button") == "delete_button":
         return redirect(url_for("admin.delete_customer_account", id=id, cust_id=cust_id))
@@ -130,6 +135,24 @@ def retrieve_customer(id):
     form.email.data = cust_data.get("email")
 
     return render_template("admin/cust_db_cust_profile.html", id=id, form=form, cust_details=cust_data)
+
+
+# Customer Database page - View Order History (Admin)
+@admin_bp.route("/<string:id>/admin/customer_database/order_history", methods=["GET", "POST"])
+@admin_login_required
+def cust_order_history(id):
+    cust_id = request.args.get("cust_id")
+
+    # Redirect to retrieve_customer when clicked on 'back to customer details
+    if request.form.get("button") == "back":
+        return redirect(url_for("admin.retrieve_customer", id=id, cust_id=cust_id))
+
+    # Handle getting all retrieved customer data
+    cust_data = retrieve_cust_details(cust_id)
+    order_history = retrieve_order_history(cust_id)
+
+    # Display order history
+    return render_template("admin/custdb_orderhistory.html", id=id, cust_id=cust_id, cust_details=cust_data, order_history=order_history)
 
 
 # Customer Database page - Lock Account Popup (Admin)
