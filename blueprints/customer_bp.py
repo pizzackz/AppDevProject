@@ -639,8 +639,9 @@ def remove_favourite(recipe_id, id):
     recipe = recipe_dict.get(recipe_id)
     name = recipe.get_name()
 
+    print(recipe_id)
     # Removing the recipe id from the user's favourite list
-    user_favourite_list.pop(recipe_id)
+    user_favourite_list.pop(int(recipe_id))
     favourite_db[id] = user_favourite_list
     favourite_db.close()
     recipe_db.close()
