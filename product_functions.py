@@ -66,6 +66,7 @@ def update_product_item(product_id, name=None, description=None, price=None, ima
         print(f"Product {product_id}'s name changed to {product_item.get_name()}")
 
     # Update product description
+    
     if description != None:
         product_item.set_desc(description)
         print(f"Product {product_id}'s description changed to {product_item.get_desc()}")
